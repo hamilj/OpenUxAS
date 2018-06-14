@@ -8,6 +8,7 @@
 // ===============================================================================
 
 #include "ServiceManager.h"
+#include "LmcpObjectNetworkBridge.h"
 #include "LmcpObjectNetworkBridgeManager.h"
 
 #define INCLUDE_SERVICE_HEADERS //this switches 00_ServiceList.h to load the service headers

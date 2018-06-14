@@ -10,6 +10,7 @@
 #include "afrl/cmasi/AirVehicleState.h"
 #include "afrl/impact/AreaOfInterest.h"
 
+#include "LmcpObjectNetworkBridge.h"
 #include "LmcpObjectNetworkBridgeManager.h"
 #include "LmcpObjectNetworkServer.h"
 #include "ServiceManager.h"

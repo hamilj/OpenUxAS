@@ -8,6 +8,7 @@
 // ===============================================================================
 
 #include "LmcpObjectNetworkBridgeManager.h"
+
 #include "ServiceManager.h"
 
 #include "LmcpObjectNetworkSerialBridge.h"
@@ -25,6 +26,8 @@
 
 #include "LmcpObjectNetworkSerialBridge.h"
 #include "ImpactSubscribePushBridge.h"
+
+#include "pugixml.hpp"
 
 #include <fstream>
 #include <stdexcept>
@@ -102,7 +105,7 @@ LmcpObjectNetworkBridgeManager::initialize()
         {
             for (pugi::xml_node bridgeNode = uxasEnabledBridgesXml.first_child(); bridgeNode; bridgeNode = bridgeNode.next_sibling())
             {
-                std::unique_ptr<LmcpObjectNetworkClientBase> newBridge = createBridge(bridgeNode, UINT32_MAX, UINT32_MAX);
+                std::unique_ptr<LmcpObjectNetworkBridge> newBridge = createBridge(bridgeNode, UINT32_MAX, UINT32_MAX);
                 if (newBridge)
                 {
                     addedBridgeXmlNodeCount++;
@@ -131,10 +134,10 @@ LmcpObjectNetworkBridgeManager::initialize()
     return (isSuccess);
 };
 
-std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkClientBase>>
+std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkBridge>>
 LmcpObjectNetworkBridgeManager::createTestBridges(const std::string& cfgXmlFilePath, uint32_t entityId, uint32_t firstNetworkId)
 {
-    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkClientBase>> testBridgesByNetworkIdMap;
+    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkBridge>> testBridgesByNetworkIdMap;
     UXAS_LOG_INFORM(s_typeName(), "::createTestBridges - START");
 //#ifdef GOOGLE_TEST_BRIDGES_ENABLED
     uint32_t networkId = firstNetworkId;
@@ -149,7 +152,7 @@ LmcpObjectNetworkBridgeManager::createTestBridges(const std::string& cfgXmlFileP
         {
             if (uxas::common::StringConstant::Bridge().compare(serviceOrBridgeXmlNode.name()) == 0)
             {
-                std::unique_ptr<LmcpObjectNetworkClientBase> newTestBridge = createBridge(serviceOrBridgeXmlNode, entityId, networkId);
+                std::unique_ptr<LmcpObjectNetworkBridge> newTestBridge = createBridge(serviceOrBridgeXmlNode, entityId, networkId);
                 networkId++;
                 if (newTestBridge)
                 {
@@ -173,17 +176,17 @@ LmcpObjectNetworkBridgeManager::createTestBridges(const std::string& cfgXmlFileP
     return (testBridgesByNetworkIdMap);
 };
 
-std::unique_ptr<LmcpObjectNetworkClientBase>
+std::unique_ptr<LmcpObjectNetworkBridge>
 LmcpObjectNetworkBridgeManager::createBridge(const pugi::xml_node& bridgeXmlNode, uint32_t entityId, uint32_t networkId)
 {
     // attempt instantiation of new bridge
-    std::unique_ptr<LmcpObjectNetworkClientBase> newBridgeFinal;
+    std::unique_ptr<LmcpObjectNetworkBridge> newBridgeFinal;
     if (uxas::common::StringConstant::Bridge().compare(bridgeXmlNode.name()) == 0)
     {
         std::string bridgeType = bridgeXmlNode.attribute(uxas::common::StringConstant::Type().c_str()).value();
         UXAS_LOG_INFORM(s_typeName(), "::createBridge adding ", bridgeType);
         
-        std::unique_ptr<LmcpObjectNetworkClientBase> newBridge;
+        std::unique_ptr<LmcpObjectNetworkBridge> newBridge;
         if (LmcpObjectNetworkSerialBridge::s_typeName().compare(bridgeType) == 0)
         {
             newBridge = uxas::stduxas::make_unique<LmcpObjectNetworkSerialBridge>();
@@ -231,7 +234,7 @@ LmcpObjectNetworkBridgeManager::createBridge(const pugi::xml_node& bridgeXmlNode
                     UXAS_LOG_WARN(s_typeName(), "::createBridge re-configuring ", newBridge->m_networkClientTypeName, " entity ID ", newBridge->m_entityId, " network ID ", newBridge->m_networkId);
                 }
                 UXAS_LOG_INFORM(s_typeName(), "::createBridge configured ", newBridge->m_networkClientTypeName, " entity ID ", newBridge->m_entityId, " network ID ", newBridge->m_networkId);
-                if (newBridge->initializeAndStart())
+                if (newBridge->initializeAndStart(*newBridge))
                 {
                     newBridgeFinal = std::move(newBridge);
                     UXAS_LOG_INFORM(s_typeName(), "::createBridge initialized and started ", newBridgeFinal->m_networkClientTypeName, " network ID ", newBridgeFinal->m_networkId);

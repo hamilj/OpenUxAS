@@ -10,19 +10,24 @@
 #ifndef UXAS_MESSAGE_LMCP_OBJECT_NETWORK_BRIDGE_MANAGER_H
 #define UXAS_MESSAGE_LMCP_OBJECT_NETWORK_BRIDGE_MANAGER_H
 
-#include "LmcpObjectNetworkClientBase.h"
-
-#include "LmcpObjectMessageReceiverPipe.h"
-
 #include <memory>
 #include <thread>
 #include <unordered_map>
 #include <vector>
 
+namespace pugi
+{
+
+class xml_node;
+
+} // namespace pugi
+
 namespace uxas
 {
 namespace communications
 {
+
+class LmcpObjectNetworkBridge;
 
 /** \class LmcpObjectNetworkBridgeManager
  * 
@@ -125,16 +130,16 @@ public:
     bool
     initialize();
     
-    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkClientBase>>
+    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkBridge>>
     createTestBridges(const std::string& cfgXmlFilePath, uint32_t entityId, uint32_t firstNetworkId);
     
 private:
     
-    std::unique_ptr<LmcpObjectNetworkClientBase>
+    std::unique_ptr<LmcpObjectNetworkBridge>
     createBridge(const pugi::xml_node& bridgeXmlNode, uint32_t entityId, uint32_t networkId);
 
     bool m_isInitializedBridges{false};
-    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkClientBase> > m_bridgesByNetworkId;
+    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkBridge>> m_bridgesByNetworkId;
 
 };
 

@@ -10,9 +10,10 @@
 #ifndef UXAS_MESSAGE_LMCP_OBJECT_NETWORK_ZEROMQ_PUBLISH_PULL_BRIDGE_H
 #define UXAS_MESSAGE_LMCP_OBJECT_NETWORK_ZEROMQ_PUBLISH_PULL_BRIDGE_H
 
+#include "LmcpObjectNetworkBridge.h"
+
 #include "LmcpObjectMessageReceiverPipe.h"
 #include "LmcpObjectMessageSenderPipe.h"
-#include "LmcpObjectNetworkClientBase.h"
 
 #include <atomic>
 #include <cstdint>
@@ -69,7 +70,7 @@ namespace uxas
 namespace communications
 {
 
-class LmcpObjectNetworkPublishPullBridge : public LmcpObjectNetworkClientBase
+class LmcpObjectNetworkPublishPullBridge : public LmcpObjectNetworkBridge
 {
 public:
 

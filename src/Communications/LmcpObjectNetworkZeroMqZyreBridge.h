@@ -10,14 +10,15 @@
 #ifndef UXAS_MESSAGE_LMCP_OBJECT_NETWORK_ZERO_MQ_ZYRE_BRIDGE_H
 #define    UXAS_MESSAGE_LMCP_OBJECT_NETWORK_ZERO_MQ_ZYRE_BRIDGE_H
 
-#include "LmcpObjectNetworkClientBase.h"
+#include "LmcpObjectNetworkBridge.h"
+
 #include "ZeroMqZyreBridge.h"
 
 #include "UxAS_SentinelSerialBuffer.h"
 
-#include <thread>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -182,7 +183,7 @@ DBK & RJT recognize that limited, unnecessary messaging will occur (accepted sin
  */
 
 //TODO review local service pause/resume
-class LmcpObjectNetworkZeroMqZyreBridge final : public LmcpObjectNetworkClientBase
+class LmcpObjectNetworkZeroMqZyreBridge final : public LmcpObjectNetworkBridge
 {
 
 public:

@@ -10,9 +10,10 @@
 #ifndef UXAS_MESSAGE_LMCP_OBJECT_NETWORK_ZEROMQ_SUBSCRIBE_PUSH_BRIDGE_H
 #define UXAS_MESSAGE_LMCP_OBJECT_NETWORK_ZEROMQ_SUBSCRIBE_PUSH_BRIDGE_H
 
+#include "LmcpObjectNetworkBridge.h"
+
 #include "LmcpObjectMessageReceiverPipe.h"
 #include "LmcpObjectMessageSenderPipe.h"
-#include "LmcpObjectNetworkClientBase.h"
 
 #include <atomic>
 #include <cstdint>
@@ -69,7 +70,7 @@ namespace communications
  * 
  */
 
-class LmcpObjectNetworkSubscribePushBridge : public LmcpObjectNetworkClientBase
+class LmcpObjectNetworkSubscribePushBridge : public LmcpObjectNetworkBridge
 {
 public:
 

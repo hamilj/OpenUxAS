@@ -10,9 +10,11 @@
 #ifndef UXAS_MESSAGE_IMPACT_SUBSCRIBE_PUSH_BRIDGE_H
 #define UXAS_MESSAGE_IMPACT_SUBSCRIBE_PUSH_BRIDGE_H
 
+#include "LmcpObjectNetworkBridge.h"
+
 #include "LmcpObjectMessageReceiverPipe.h"
 #include "LmcpObjectMessageSenderPipe.h"
-#include "LmcpObjectNetworkClientBase.h"
+
 #include "afrl/cmasi/AirVehicleConfiguration.h"
 
 #include <atomic>
@@ -77,7 +79,7 @@ namespace uxas
      *
      */
 
-    class ImpactSubscribePushBridge : public LmcpObjectNetworkClientBase
+    class ImpactSubscribePushBridge : public LmcpObjectNetworkBridge
     {
     public:
 

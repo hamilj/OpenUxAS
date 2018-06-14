@@ -10,7 +10,7 @@
 #ifndef UXAS_MESSAGE_LMCP_OBJECT_NETWORK_SERIAL_BRIDGE_H
 #define UXAS_MESSAGE_LMCP_OBJECT_NETWORK_SERIAL_BRIDGE_H
 
-#include "LmcpObjectNetworkClientBase.h"
+#include "LmcpObjectNetworkBridge.h"
 
 #include "UxAS_SentinelSerialBuffer.h"
 
@@ -66,7 +66,7 @@ namespace communications
  * 
  */
 
-class LmcpObjectNetworkSerialBridge : public LmcpObjectNetworkClientBase
+class LmcpObjectNetworkSerialBridge : public LmcpObjectNetworkBridge
 {
 public:
 

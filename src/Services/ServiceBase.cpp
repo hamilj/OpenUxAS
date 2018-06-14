@@ -132,7 +132,7 @@ ServiceBase::initializeAndStartService()
 
         if (isSuccess)
         {
-            isSuccess = initializeAndStart();
+            isSuccess = initializeAndStart(*this);
         }
 
         if (isSuccess)

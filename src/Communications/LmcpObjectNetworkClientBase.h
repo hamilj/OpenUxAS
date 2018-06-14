@@ -10,12 +10,12 @@
 #ifndef UXAS_MESSAGE_LMCP_OBJECT_NETWORK_CLIENT_BASE_H
 #define UXAS_MESSAGE_LMCP_OBJECT_NETWORK_CLIENT_BASE_H
 
+#include "LmcpObjectNetworkClient.h"
+
 #include "LmcpObjectMessageReceiverPipe.h"
 #include "LmcpObjectMessageSenderPipe.h"
 
 #include "avtas/lmcp/Factory.h"
-
-#include "pugixml.hpp"
 
 #include <atomic>
 #include <cstdint>
@@ -30,6 +30,9 @@ namespace uxas
 {
 namespace communications
 {
+
+class LmcpObjectMessageProcessor;
+
 /** \class LmcpObjectNetworkClientBase
  * 
  * \par Overview:     
@@ -87,25 +90,9 @@ namespace communications
  * 
  * @n
  */
-
-class LmcpObjectNetworkClientBase
+class LmcpObjectNetworkClientBase : public LmcpObjectNetworkClient
 {
 public:
-
-    /** \class ReceiveProcessingType
-     * 
-     * \par Enumeration specifying whether or not to de-serialize a received message.
-     * 
-     * \n
-     */
-    enum class ReceiveProcessingType
-    {
-        /** \brief Received <b>LMCP</b> objects are de-serialized */
-        LMCP,
-        /** \brief Received <b>LMCP</b> objects are not de-serialized */
-        SERIALIZED_LMCP
-    };
-    
     /**
      * s_entityIdPrefix string (leading characters for indicating that an entity ID follows)
      * @return 
@@ -276,7 +263,7 @@ public:
      * @return true if configuration succeeds; false if configuration fails.
      */
     bool
-    configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType, const pugi::xml_node& networkClientXmlNode);
+    configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType, const pugi::xml_node& networkClientXmlNode) override;
 
     /** \brief The <B><i>initializeAndStart</i></B> must be invoked 
      * after calling the protected <B><i>configureNetworkClient</i></B> method.  
@@ -291,7 +278,7 @@ public:
      * @return true if all initialization and startup succeeds; false if initialization or startup fails.
      */
     bool
-    initializeAndStart();
+    initializeAndStart(LmcpObjectMessageProcessor& msgProcessor) override;
 
     bool
     getIsTerminationFinished() { return(m_isBaseClassTerminationFinished && m_isSubclassTerminationFinished); }
@@ -336,29 +323,6 @@ protected:
     virtual
     bool
     terminate() { return (true); };
-
-    /** \brief The virtual <B><i>processReceivedLmcpMessage</i></B> is 
-     * repeatedly invoked by the <B><i>LmcpObjectNetworkClientBase</i></B> class in an 
-     * infinite loop until termination. 
-     * 
-     * @param receivedLmcpObject received <b>LMCP</b> object.
-     * @return true if object is to terminate; false if object is to continue processing.
-     */
-    virtual
-    bool
-    processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage) { return (false); };
-    
-    /** \brief The virtual <B><i>processReceivedSerializedLmcpMessage</i></B> is 
-     * repeatedly invoked by the <B><i>LmcpObjectNetworkClientBase</i></B> class in an 
-     * infinite loop until termination. The payload of the <B><i>AddressedAttributedMessage</i></B> 
-     * is a serialized <b>LMCP</b> object. 
-     * 
-     * @param receivedSerializedLmcpObject received AddressedAttributedMessage object with serialized <b>LMCP</b> object payload.
-     * @return true if object is to terminate; false if object is to continue processing.
-     */
-    virtual
-    bool
-    processReceivedSerializedLmcpMessage(std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> receivedSerializedLmcpMessage) { return (false); };
     
 public:
     /** \brief The <B><i>addSubscriptionAddress</i></B> can be invoked 
@@ -368,7 +332,7 @@ public:
      * @return true if address is added; false if address is not added.
      */
     bool
-    addSubscriptionAddress(const std::string& address);
+    addSubscriptionAddress(const std::string& address) override;
 
     /** \brief The <B><i>removeSubscriptionAddress</i></B> can be invoked 
      * at any time to remove specified message subscription address. 
@@ -377,7 +341,7 @@ public:
      * @return true if address is removed; false if address is not removed.
      */
     bool
-    removeSubscriptionAddress(const std::string& address);    
+    removeSubscriptionAddress(const std::string& address) override;
     
     /** \brief The <B><i>removeAllSubscriptionAddresses</i></B> can be invoked 
      * at any time to remove message subscription addresses. 
@@ -386,7 +350,7 @@ public:
      * @return true if address is removed; false if address is not removed.
      */
     bool
-    removeAllSubscriptionAddresses();
+    removeAllSubscriptionAddresses() override;
     
     /** \brief The <B><i>sendLmcpObjectLimitedCastMessage</i></B> method can be 
      * invoked to send a uni-cast or multi-cast <b>LMCP</b> object message to the <b>LMCP</b> network. 
@@ -395,7 +359,7 @@ public:
      * @param lmcpObject <b>LMCP</b> object to be uni-casted/multi-casted.
      */
     void
-    sendLmcpObjectLimitedCastMessage(const std::string& castAddress, std::unique_ptr<avtas::lmcp::Object> lmcpObject);
+    sendLmcpObjectLimitedCastMessage(const std::string& castAddress, std::unique_ptr<avtas::lmcp::Object> lmcpObject) override;
     
 protected:
     /** \brief The <B><i>sendLmcpObjectBroadcastMessage</i></B> method can be 
@@ -405,7 +369,7 @@ protected:
      * address is derived from the full <b>LMCP</b> object name.
      */
     void
-    sendLmcpObjectBroadcastMessage(std::unique_ptr<avtas::lmcp::Object> lmcpObject);
+    sendLmcpObjectBroadcastMessage(std::unique_ptr<avtas::lmcp::Object> lmcpObject) override;
 
     /** \brief The <B><i>sendSerializedLmcpObjectMessage</i></B> method can be 
      * invoked to send a <B><i>AddressedAttributedMessage</i></B> to the <b>LMCP</b> network. The 
@@ -414,7 +378,7 @@ protected:
      * @param serializedLmcpObject <b>LMCP</b> object to be sent (uni-cast/multi-cast/broadcast).
      */
     void
-    sendSerializedLmcpObjectMessage(std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> serializedLmcpObject);
+    sendSerializedLmcpObjectMessage(std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> serializedLmcpObject) override;
     
     /** \brief The <B><i>sendSharedLmcpObjectBroadcastMessage</i></B> method can be 
      * invoked to broadcast a <b>LMCP</b> object message on the <b>LMCP</b> network. 
@@ -423,7 +387,7 @@ protected:
      * address is derived from the full <b>LMCP</b> object name.
      */
     void
-    sendSharedLmcpObjectBroadcastMessage(const std::shared_ptr<avtas::lmcp::Object>& lmcpObject);
+    sendSharedLmcpObjectBroadcastMessage(const std::shared_ptr<avtas::lmcp::Object>& lmcpObject) override;
 
     /** \brief The <B><i>sendSharedLmcpObjectLimitedCastMessage</i></B> method can be 
      * invoked to send a uni-cast or multi-cast <b>LMCP</b> object message to the <b>LMCP</b> network. 
@@ -432,7 +396,7 @@ protected:
      * @param lmcpObject <b>LMCP</b> object to be uni-casted/multi-casted.
      */
     void
-    sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject);
+    sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject) override;
 
 private:
     
@@ -453,7 +417,7 @@ private:
      * not invoked.
      */
     void
-    executeNetworkClient();
+    executeNetworkClient(LmcpObjectMessageProcessor& msgProcessor);
 
     /** \brief If <B><i>m_receiveProcessingType</i></B> == 
      * <B><i>ReceiveProcessingType::SERIALIZED_LMCP</i></B>, then 
@@ -463,7 +427,7 @@ private:
      * not invoked.
      */
     void
-    executeSerializedNetworkClient();
+    executeSerializedNetworkClient(LmcpObjectMessageProcessor& msgProcessor);
 
     /** \brief The <B><i>deserializeMessage</i></B> method deserializes an LMCP 
      * string into an LMCP object.

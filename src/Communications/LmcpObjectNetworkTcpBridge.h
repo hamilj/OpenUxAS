@@ -10,7 +10,8 @@
 #ifndef UXAS_MESSAGE_LMCP_OBJECT_NETWORK_TCP_BRIDGE_H
 #define UXAS_MESSAGE_LMCP_OBJECT_NETWORK_TCP_BRIDGE_H
 
-#include "LmcpObjectNetworkClientBase.h"
+#include "LmcpObjectNetworkBridge.h"
+
 #include "LmcpObjectMessageTcpReceiverSenderPipe.h"
 
 #include <atomic>
@@ -75,7 +76,7 @@ namespace communications
  * 
  */
 
-class LmcpObjectNetworkTcpBridge : public LmcpObjectNetworkClientBase
+class LmcpObjectNetworkTcpBridge : public LmcpObjectNetworkBridge
 {
 public:
 

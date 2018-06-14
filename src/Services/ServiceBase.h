@@ -10,6 +10,7 @@
 #ifndef UXAS_SERVICE_SERVICE_BASE_H
 #define UXAS_SERVICE_SERVICE_BASE_H
 
+#include "LmcpObjectMessageProcessor.h"
 #include "LmcpObjectNetworkClientBase.h"
 
 #include "UxAS_Log.h"
@@ -27,7 +28,7 @@ namespace service
  * 
  * @n
  */
-class ServiceBase : public uxas::communications::LmcpObjectNetworkClientBase
+class ServiceBase : public uxas::communications::LmcpObjectNetworkClientBase, public uxas::communications::LmcpObjectMessageProcessor
 {
 public:
 

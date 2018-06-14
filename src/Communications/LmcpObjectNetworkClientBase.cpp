@@ -9,6 +9,8 @@
 
 #include "LmcpObjectNetworkClientBase.h"
 
+#include "LmcpObjectMessageProcessor.h"
+
 #include "avtas/lmcp/ByteBuffer.h"
 #include "avtas/lmcp/Factory.h"
 #include "uxas/messages/uxnative/KillService.h"
@@ -18,6 +20,10 @@
 #include "Constants/UxAS_String.h"
 
 #include "stdUniquePtr.h"
+
+#include "pugixml.hpp"
+
+#include <functional>
 
 namespace uxas
 {
@@ -95,7 +101,7 @@ LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassT
 };
 
 bool
-LmcpObjectNetworkClientBase::initializeAndStart()
+LmcpObjectNetworkClientBase::initializeAndStart(LmcpObjectMessageProcessor& msgProcessor)
 {
     UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::initializeAndStart method START");
 
@@ -143,11 +149,11 @@ LmcpObjectNetworkClientBase::initializeAndStart()
     switch (m_receiveProcessingType)
     {
         case ReceiveProcessingType::LMCP:
-            m_networkClientThread = uxas::stduxas::make_unique<std::thread>(&LmcpObjectNetworkClientBase::executeNetworkClient, this);
+            m_networkClientThread = uxas::stduxas::make_unique<std::thread>(&LmcpObjectNetworkClientBase::executeNetworkClient, this, std::ref(msgProcessor));
             UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart started LMCP network client processing thread [", m_networkClientThread->get_id(), "]");
             break;
         case ReceiveProcessingType::SERIALIZED_LMCP:
-            m_networkClientThread = uxas::stduxas::make_unique<std::thread>(&LmcpObjectNetworkClientBase::executeSerializedNetworkClient, this);
+            m_networkClientThread = uxas::stduxas::make_unique<std::thread>(&LmcpObjectNetworkClientBase::executeSerializedNetworkClient, this, std::ref(msgProcessor));
             UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart started LMCP network client serialized processing thread [", m_networkClientThread->get_id(), "]");
             break;
         default:
@@ -273,7 +279,7 @@ LmcpObjectNetworkClientBase::initializeNetworkClient()
 };
 
 void
-LmcpObjectNetworkClientBase::executeNetworkClient()
+LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& msgProcessor)
 {
     try
     {
@@ -303,7 +309,7 @@ LmcpObjectNetworkClientBase::executeNetworkClient()
                             && uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object)
                             //&& m_entityIdString.compare(std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getEntityID()) == 0//TODO check entityID
                             && m_networkIdString.compare(std::to_string(std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getServiceID())) == 0)
-                            || processReceivedLmcpMessage(std::move(receivedLmcpMessage)))
+                            || msgProcessor.processReceivedLmcpMessage(std::move(receivedLmcpMessage)))
                     {
                         UXAS_LOG_INFORM(m_networkClientTypeName, "::executeNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
                         m_isTerminateNetworkClient = true;
@@ -352,7 +358,7 @@ LmcpObjectNetworkClientBase::executeNetworkClient()
 };
 
 void
-LmcpObjectNetworkClientBase::executeSerializedNetworkClient()
+LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessageProcessor& msgProcessor)
 {
     try
     {
@@ -394,7 +400,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient()
                         m_isTerminateNetworkClient = true;
                     }
                 }
-                else if (processReceivedSerializedLmcpMessage(std::move(nextReceivedSerializedLmcpObject)))
+                else if (msgProcessor.processReceivedSerializedLmcpMessage(std::move(nextReceivedSerializedLmcpObject)))
                 {
                     m_isTerminateNetworkClient = true;
                 }
