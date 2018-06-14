@@ -219,7 +219,7 @@ LmcpObjectNetworkBridgeManager::createBridge(const pugi::xml_node& bridgeXmlNode
         if (newBridge)
         {
             UXAS_LOG_INFORM(s_typeName(), "::createBridge instantiated bridge ", bridgeType, " network ID ", newBridge->m_networkId);
-            if (newBridge->configureNetworkClient(bridgeType, LmcpObjectNetworkClientBase::ReceiveProcessingType::SERIALIZED_LMCP, bridgeXmlNode))
+            if (newBridge->configureNetworkClient(bridgeType, LmcpObjectNetworkClient::ReceiveProcessingType::SERIALIZED_LMCP, bridgeXmlNode))
             {
                 //TODO - consider friend of clientBase (protect m_entityId and m_entityIdString)
                 // support test bridges

@@ -109,7 +109,7 @@ protected:
     /** \brief  */
     std::string m_workDirectoryPath;
         
-    uxas::communications::LmcpObjectNetworkClientBase::ReceiveProcessingType m_receiveProcessingType{uxas::communications::LmcpObjectNetworkClientBase::ReceiveProcessingType::LMCP};
+    uxas::communications::LmcpObjectNetworkClient::ReceiveProcessingType m_receiveProcessingType{uxas::communications::LmcpObjectNetworkClient::ReceiveProcessingType::LMCP};
 
     // <editor-fold defaultstate="collapsed" desc="Static Service Registry">    
 public:

@@ -63,7 +63,7 @@ GtestuxastestserviceLmcpObjectNetworkClient::configureLmcpObjectNetworkClient()
     UXAS_LOG_DEBUG_VERBOSE_TESTFRAMEWORK(s_typeName(), "::configure method START");
     bool isSuccess{false};
     pugi::xml_node dummyXmlNode;
-    isSuccess = configureNetworkClient(s_typeName(), uxas::communications::LmcpObjectNetworkClientBase::ReceiveProcessingType::SERIALIZED_LMCP, dummyXmlNode);
+    isSuccess = configureNetworkClient(s_typeName(), uxas::communications::LmcpObjectNetworkClient::ReceiveProcessingType::SERIALIZED_LMCP, dummyXmlNode);
     return (isSuccess);
 };
 
