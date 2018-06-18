@@ -26,6 +26,7 @@
 
 #include <cstdint> // int64_t
 #include <unordered_map>
+#include <set>
 
 namespace uxas
 {
