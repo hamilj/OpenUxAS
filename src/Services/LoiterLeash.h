@@ -25,6 +25,7 @@
 #include "afrl/cmasi/EntityState.h"
 #include "afrl/cmasi/VehicleActionCommand.h"
 
+#include <deque>
 
 namespace uxas
 {
