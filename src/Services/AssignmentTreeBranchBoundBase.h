@@ -302,6 +302,12 @@ private:
 class AssignmentTreeBranchBoundBase : public ServiceBase
 {
 public:
+    static const std::string&
+    s_typeName()
+    {
+        static std::string s_string("AssignmentTreeBranchBoundBase");
+        return (s_string);
+    }
 
     AssignmentTreeBranchBoundBase(const std::string& serviceType, const std::string& workDirectoryName);
 
