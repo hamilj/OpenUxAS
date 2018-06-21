@@ -44,8 +44,10 @@ namespace task
 MustFlyTaskService::ServiceBase::CreationRegistrar<MustFlyTaskService>
 MustFlyTaskService::s_registrar(MustFlyTaskService::s_registryServiceTypeNames());
 
-MustFlyTaskService::MustFlyTaskService()
-    : TaskServiceBase(MustFlyTaskService::s_typeName(), MustFlyTaskService::s_directoryName()) {}
+MustFlyTaskService::MustFlyTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : TaskServiceBase(MustFlyTaskService::s_typeName(), MustFlyTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+{
+};
 
 MustFlyTaskService::~MustFlyTaskService() {}
 

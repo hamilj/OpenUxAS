@@ -80,11 +80,11 @@ public:
     };
 
     static ServiceBase*
-    create() {
-        return new SensorManagerService;
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new SensorManagerService(std::move(pLmcpObjectNetworkClient));
     };
 
-    SensorManagerService();
+    explicit SensorManagerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~SensorManagerService();

@@ -102,12 +102,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new TaskTrackerService;
+        return new TaskTrackerService(std::move(pLmcpObjectNetworkClient));
     };
 
-    TaskTrackerService();
+    explicit TaskTrackerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~TaskTrackerService();

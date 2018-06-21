@@ -67,8 +67,8 @@ namespace service
 WaypointPlanManagerService::ServiceBase::CreationRegistrar<WaypointPlanManagerService>
 WaypointPlanManagerService::s_registrar(WaypointPlanManagerService::s_registryServiceTypeNames());
 
-WaypointPlanManagerService::WaypointPlanManagerService()
-: ServiceBase(WaypointPlanManagerService::s_typeName(), WaypointPlanManagerService::s_directoryName()) { };
+WaypointPlanManagerService::WaypointPlanManagerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(WaypointPlanManagerService::s_typeName(), WaypointPlanManagerService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
 
 WaypointPlanManagerService::~WaypointPlanManagerService() { };
 

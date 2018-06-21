@@ -97,12 +97,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new CordonTaskService;
+        return new CordonTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    CordonTaskService();
+    explicit CordonTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~CordonTaskService();

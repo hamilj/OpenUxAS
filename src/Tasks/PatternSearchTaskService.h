@@ -106,12 +106,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new PatternSearchTaskService;
+       return new PatternSearchTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    PatternSearchTaskService();
+    explicit PatternSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~PatternSearchTaskService();

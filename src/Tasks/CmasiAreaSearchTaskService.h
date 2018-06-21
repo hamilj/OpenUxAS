@@ -98,12 +98,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new CmasiAreaSearchTaskService;
+        return new CmasiAreaSearchTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    CmasiAreaSearchTaskService();
+    explicit CmasiAreaSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~CmasiAreaSearchTaskService();

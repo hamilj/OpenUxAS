@@ -43,8 +43,8 @@ namespace task
 TaskTrackerService::ServiceBase::CreationRegistrar<TaskTrackerService>
 TaskTrackerService::s_registrar(TaskTrackerService::s_registryServiceTypeNames());
 
-TaskTrackerService::TaskTrackerService()
-: ServiceBase(TaskTrackerService::s_typeName(), TaskTrackerService::s_directoryName()) { };
+TaskTrackerService::TaskTrackerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(TaskTrackerService::s_typeName(), TaskTrackerService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
 
 TaskTrackerService::~TaskTrackerService() { };
 

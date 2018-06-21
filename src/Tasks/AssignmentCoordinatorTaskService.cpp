@@ -52,8 +52,8 @@ AssignmentCoordinatorTaskService::s_registrar(AssignmentCoordinatorTaskService::
 
 // service constructor
 
-AssignmentCoordinatorTaskService::AssignmentCoordinatorTaskService()
-: TaskServiceBase(AssignmentCoordinatorTaskService::s_typeName(), AssignmentCoordinatorTaskService::s_directoryName())
+AssignmentCoordinatorTaskService::AssignmentCoordinatorTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(AssignmentCoordinatorTaskService::s_typeName(), AssignmentCoordinatorTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 , m_sendTaskAutomationRequestTimer(uxas::common::utilities::c_CallbackTimer::tmrtypPeriodic) { };
 
 AssignmentCoordinatorTaskService::~AssignmentCoordinatorTaskService()

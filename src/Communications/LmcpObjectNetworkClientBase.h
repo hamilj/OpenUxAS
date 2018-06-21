@@ -17,7 +17,6 @@
 
 #include "avtas/lmcp/Factory.h"
 
-#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <set>
@@ -92,142 +91,10 @@ class LmcpObjectMessageProcessor;
  */
 class LmcpObjectNetworkClientBase : public LmcpObjectNetworkClient
 {
-public:
-    /**
-     * s_entityIdPrefix string (leading characters for indicating that an entity ID follows)
-     * @return 
-     */
-    static std::string&
-    s_entityIdPrefix() { static std::string s_string("eid"); return (s_string); };
-    
-    /**
-     * s_serviceIdPrefix string (leading characters for indicating that a service ID follows)
-     * @return 
-     */
-    static std::string&
-    s_serviceIdPrefix() { static std::string s_string(".sid"); return (s_string); };
-
-    /**
-     * s_serviceIdAllSuffix string (trailing characters that are appended to entity cast address
-     * to form cast-to-all services of a specific entity)
-     * @return 
-     */
-    static std::string&
-    s_serviceIdAllSuffix() { static std::string s_string(".sidall"); return (s_string); };
-
-    /** \brief Multi-cast entity-based subscription address string 
-     * 
-     * @param entityId UxAS entity ID.
-     * @return address string to used to send a message to all services hosted by  
-     * a particular UxAS entity.
-     */
-    static std::string
-    getEntityCastAddress(const uint32_t entityId)
-    {
-        return (s_entityIdPrefix() + std::to_string(entityId));
-    };
-
-    /** \brief Multi-cast subscription address string that addresses a message 
-     * to all services of a specific entity.
-     * 
-     * @param entityId UxAS entity ID.
-     * @return address string to used to send a message to all services hosted by  
-     * a particular UxAS entity.
-     */
-    static std::string
-    getEntityServicesCastAllAddress(const uint32_t entityId)
-    {
-        return (getEntityCastAddress(entityId) + s_serviceIdAllSuffix());
-    };
-
-    /** \brief Uni-cast service-based subscription address string 
-     * 
-     * @param entityId UxAS entity ID.
-     * @param networkClientId UxAS bridge or service ID.
-     * @return address string to used to send a message to a specific service 
-     * hosted by a particular UxAS entity.
-     */
-    static std::string
-    getNetworkClientUnicastAddress(const uint32_t entityId, const int64_t networkClientId)
-    {
-        return (getEntityCastAddress(entityId) + s_serviceIdPrefix() + std::to_string(networkClientId));
-    };
-    
-    /** \brief Multi-cast entity-based subscription address string 
-     * 
-     * @param entityId UxAS entity ID.
-     * @return address string to used to send a message to all services hosted by  
-     * a particular UxAS entity.
-     */
-    static std::string
-    getEntityCastAddress(const std::string entityId)
-    {
-        return (s_entityIdPrefix() + entityId);
-    };
-
-    /** \brief Uni-cast service-based subscription address string 
-     * 
-     * @param entityId UxAS entity ID.
-     * @param networkClientId UxAS bridge or service ID.
-     * @return address string to used to send a message to a specific service 
-     * hosted by a particular UxAS entity.
-     */
-    static std::string
-    getNetworkClientUnicastAddress(const uint32_t entityId, const std::string networkClientId)
-    {
-        return (getEntityCastAddress(entityId) + s_serviceIdPrefix() + networkClientId);
-    };
-
-    /** \brief Uni-cast service-based subscription address string 
-     * 
-     * @param entityId UxAS entity ID.
-     * @param networkClientId UxAS bridge or service ID.
-     * @return address string to used to send a message to a specific service 
-     * hosted by a particular UxAS entity.
-     */
-    static std::string
-    getNetworkClientUnicastAddress(const std::string& entityId, const std::string& networkClientId)
-    {
-        return (getEntityCastAddress(entityId) + s_serviceIdPrefix() + networkClientId);
-    };
-
-    static std::string
-    getNetworkClientUnicastAddress(const std::string& entityId, const int64_t& networkClientId)
-    {
-        return (getEntityCastAddress(entityId) + s_serviceIdPrefix() + std::to_string(networkClientId));
-    };
-
-    static int64_t
-    getUniqueEntitySendMessageId()
-    {
-        return (s_uniqueEntitySendMessageId++);
-    };
-
-    /**
-     * \brief The <B><i>getUniqueNetworkClientId</i></B> returns a unique service ID. 
-     * It returns the ID from a call to getUniqueNetworkClientId(), which are used as service IDs
-     * 
-     * @return unique service ID.
-     */
-    static int64_t
-    getUniqueNetworkClientId()
-    {
-        s_nextNetworkClientId++;
-        return (s_nextNetworkClientId);
-    };
-    
 protected:
-
-    /** \brief static ID of network clients, used to create unique IDs.  */
-    static uint32_t s_nextNetworkClientId;
     
     /** \brief static entity service cast address.  */
     static std::string s_entityServicesCastAllAddress;
-            
-private:
-
-    /** \brief static unique IDs.  */
-    static int64_t s_uniqueEntitySendMessageId;
             
 public:
 
@@ -263,7 +130,8 @@ public:
      * @return true if configuration succeeds; false if configuration fails.
      */
     bool
-    configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType, const pugi::xml_node& networkClientXmlNode) override;
+    configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType,
+        const pugi::xml_node& networkClientXmlNode, LmcpObjectMessageProcessor& msgProcessor) override;
 
     /** \brief The <B><i>initializeAndStart</i></B> must be invoked 
      * after calling the protected <B><i>configureNetworkClient</i></B> method.  
@@ -279,50 +147,6 @@ public:
      */
     bool
     initializeAndStart(LmcpObjectMessageProcessor& msgProcessor) override;
-
-    bool
-    getIsTerminationFinished() { return(m_isBaseClassTerminationFinished && m_isSubclassTerminationFinished); }
-
-protected:
-
-    /** \brief The virtual <B><i>configure</i></B> method is invoked by the 
-     * <B><i>LmcpObjectNetworkClientBase</i></B> class after completing its own 
-     * configuration. 
-     * 
-     * @param xmlNode XML node containing object configurations.
-     * @return true if configuration succeeds; false if configuration fails.
-     */
-    virtual
-    bool
-    configure(const pugi::xml_node& xmlNode) { return (true); };
-
-    /** \brief The virtual <B><i>initialize</i></B> method is invoked by the 
-     * <B><i>LmcpObjectNetworkClientBase</i></B> class after completing 
-     * configurations and before startup. 
-     * 
-     * @return true if initialization succeeds; false if initialization fails.
-     */
-    virtual
-    bool
-    initialize() { return (true); };
-
-    /** \brief The virtual <B><i>start</i></B> method is invoked by the 
-     * <B><i>LmcpObjectNetworkClientBase</i></B> class after initialization and
-     * before starting its own thread. 
-     * 
-     * @return true if start succeeds; false if start fails.
-     */
-    virtual
-    bool
-    start() { return (true); };
-
-    /** \brief The virtual <B><i>terminate</i></B> method can be implemented by 
-     * inheriting classes to perform inheriting class termination logic 
-     * (e.g., thread joining). 
-     */
-    virtual
-    bool
-    terminate() { return (true); };
     
 public:
     /** \brief The <B><i>addSubscriptionAddress</i></B> can be invoked 
@@ -437,43 +261,6 @@ private:
      */
     std::shared_ptr<avtas::lmcp::Object>
     deserializeMessage(const std::string& payload);
-    
-public:
-    
-    /** \brief Unique ID for UxAS entity instance; value read from configuration XML */
-    uint32_t m_entityId;
-
-    /** \brief String representation of the unique ID for UxAS entity instance; value read from configuration XML */
-    std::string m_entityIdString;
-
-    /** \brief Unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service).  */
-    int64_t m_networkId;
-
-    /** \brief String representation of the unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service).  */
-    std::string m_networkIdString;
-
-    /** \brief Unicast message address for messaging case of sending message to only this network client instance */
-    std::string m_entityIdNetworkIdUnicastString;
-
-    /** \brief Name of subclass used for logging/messaging.  */
-    std::string m_networkClientTypeName;
-
-protected:
-    
-    /** \brief Multi-cast group address that is subscribed to and included in sent messages  */
-    std::string m_messageSourceGroup;
-
-    /** \brief Type of UxAS entity instance; value read from configuration XML*/
-    std::string m_entityType;
-
-    std::atomic<bool> m_isBaseClassKillServiceProcessingPermitted{true};
-    std::atomic<bool> m_isTerminateNetworkClient{false};
-    std::atomic<bool> m_isBaseClassTerminationFinished{false};
-    std::atomic<bool> m_isSubclassTerminationFinished{false};
-    
-    uint32_t m_subclassTerminationAbortDuration_ms{10000};
-    uint32_t m_subclassTerminationWarnDuration_ms{3000};
-    uint32_t m_subclassTerminationAttemptPeriod_ms{500};
 
 private:
     

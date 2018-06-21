@@ -153,11 +153,11 @@ public:
     };
 
     static ServiceBase*
-    create() {
-        return new MultiVehicleWatchTaskService;
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new MultiVehicleWatchTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    MultiVehicleWatchTaskService();
+    explicit MultiVehicleWatchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~MultiVehicleWatchTaskService();

@@ -97,12 +97,12 @@ public:
     s_directoryName() { static std::string s_string(""); return (s_string); };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new LoiterLeash;
+        return new LoiterLeash(std::move(pLmcpObjectNetworkClient));
     };
 
-    LoiterLeash();
+    explicit LoiterLeash(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~LoiterLeash();

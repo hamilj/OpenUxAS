@@ -88,11 +88,11 @@ public:
     };
 
     static ServiceBase*
-    create() {
-        return new AutomationDiagramDataService;
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new AutomationDiagramDataService(std::move(pLmcpObjectNetworkClient));
     };
 
-    AutomationDiagramDataService();
+    explicit AutomationDiagramDataService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~AutomationDiagramDataService();

@@ -98,11 +98,11 @@ public:
     };
 
     static ServiceBase*
-    create() {
-        return new TaskManagerService;
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new TaskManagerService(std::move(pLmcpObjectNetworkClient));
     };
 
-    TaskManagerService();
+    explicit TaskManagerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~TaskManagerService();

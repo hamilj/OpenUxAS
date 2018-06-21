@@ -58,8 +58,8 @@ namespace task
 BlockadeTaskService::ServiceBase::CreationRegistrar<BlockadeTaskService>
 BlockadeTaskService::s_registrar(BlockadeTaskService::s_registryServiceTypeNames());
 
-BlockadeTaskService::BlockadeTaskService()
-: TaskServiceBase(BlockadeTaskService::s_typeName(), BlockadeTaskService::s_directoryName())
+BlockadeTaskService::BlockadeTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(BlockadeTaskService::s_typeName(), BlockadeTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
 };
 

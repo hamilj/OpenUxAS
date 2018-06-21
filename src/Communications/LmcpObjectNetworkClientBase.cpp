@@ -30,17 +30,12 @@ namespace uxas
 namespace communications
 {
 
-int64_t LmcpObjectNetworkClientBase::s_uniqueEntitySendMessageId = {1};
-
 std::string LmcpObjectNetworkClientBase::s_entityServicesCastAllAddress 
         = getEntityServicesCastAllAddress(uxas::common::ConfigurationManager::getInstance().getEntityId());
-    
-uint32_t LmcpObjectNetworkClientBase::s_nextNetworkClientId = {10};
 
 LmcpObjectNetworkClientBase::LmcpObjectNetworkClientBase()
+    : LmcpObjectNetworkClient()
 {
-    m_networkId = s_nextNetworkClientId++;
-    m_networkIdString = std::to_string(m_networkId);
     UXAS_LOG_INFORM("LmcpObjectNetworkClientBase initializing LMCP network ID ", m_networkId);
 };
 
@@ -53,7 +48,8 @@ LmcpObjectNetworkClientBase::~LmcpObjectNetworkClientBase()
 };
 
 bool
-LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType, const pugi::xml_node& networkClientXmlNode)
+LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType,
+    const pugi::xml_node& networkClientXmlNode, LmcpObjectMessageProcessor& msgProcessor)
 {
     UXAS_LOG_DEBUGGING("LmcpObjectNetworkClientBase::configureNetworkClient method START");
     m_entityId = uxas::common::ConfigurationManager::getInstance().getEntityId();
@@ -85,7 +81,7 @@ LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassT
     networkClientXmlNode.print(xmlNd);
     UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_networkClientTypeName, "::configureNetworkClient calling configure - passing XML ", xmlNd.str());
 #endif
-    m_isConfigured = configure(networkClientXmlNode);
+    m_isConfigured = msgProcessor.configure(networkClientXmlNode);
 
     if (m_isConfigured)
     {
@@ -125,7 +121,7 @@ LmcpObjectNetworkClientBase::initializeAndStart(LmcpObjectMessageProcessor& msgP
         return (false);
     }
 
-    if (initialize())
+    if (msgProcessor.initialize())
     {
         UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart initialize call succeeded");
     }
@@ -135,7 +131,7 @@ LmcpObjectNetworkClientBase::initializeAndStart(LmcpObjectMessageProcessor& msgP
         return (false);
     }
 
-    if (start())
+    if (msgProcessor.start())
     {
         UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart start call succeeded");
     }
@@ -307,7 +303,6 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("AttributesString: [", receivedLmcpMessage->m_attributes->getString(), "]");
                     if ((m_isBaseClassKillServiceProcessingPermitted
                             && uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object)
-                            //&& m_entityIdString.compare(std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getEntityID()) == 0//TODO check entityID
                             && m_networkIdString.compare(std::to_string(std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getServiceID())) == 0)
                             || msgProcessor.processReceivedLmcpMessage(std::move(receivedLmcpMessage)))
                     {
@@ -329,7 +324,7 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
         uint32_t subclassTerminateDuration_ms{0};
         while (true)
         {
-            m_isSubclassTerminationFinished = terminate();
+            m_isSubclassTerminationFinished = msgProcessor.terminate();
             if (m_isSubclassTerminationFinished)
             {
                 UXAS_LOG_INFORM(m_networkClientTypeName, "::executeNetworkClient terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
@@ -393,7 +388,6 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
                     std::shared_ptr<avtas::lmcp::Object> lmcpObject = deserializeMessage(nextReceivedSerializedLmcpObject->getPayload());
                     // check KillService serviceID == my serviceID
                     if (uxas::messages::uxnative::isKillService(lmcpObject)
-                            //&& m_entityIdString.compare(std::static_pointer_cast<uxas::messages::uxnative::KillService>(lmcpObject)->getEntityID()) == 0//TODO check entityID
                             && m_networkIdString.compare(std::to_string(std::static_pointer_cast<uxas::messages::uxnative::KillService>(lmcpObject)->getServiceID())) == 0)
                     {
                         UXAS_LOG_INFORM(m_networkClientTypeName, "::executeSerializedNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
@@ -414,7 +408,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
         uint32_t subclassTerminateDuration_ms{0};
         while (true)
         {
-            m_isSubclassTerminationFinished = terminate();
+            m_isSubclassTerminationFinished = msgProcessor.terminate();
             if (m_isSubclassTerminationFinished)
             {
                 UXAS_LOG_INFORM(m_networkClientTypeName, "::executeSerializedNetworkClient terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
@@ -471,35 +465,35 @@ LmcpObjectNetworkClientBase::deserializeMessage(const std::string& payload)
 void
 LmcpObjectNetworkClientBase::sendLmcpObjectBroadcastMessage(std::unique_ptr<avtas::lmcp::Object> lmcpObject)
 {
-    s_uniqueEntitySendMessageId++;
+    uxas::communications::getUniqueEntitySendMessageId();
     m_lmcpObjectMessageSenderPipe.sendBroadcastMessage(std::move(lmcpObject));
 };
 
 void
 LmcpObjectNetworkClientBase::sendLmcpObjectLimitedCastMessage(const std::string& castAddress, std::unique_ptr<avtas::lmcp::Object> lmcpObject)
 {
-    s_uniqueEntitySendMessageId++;
+    uxas::communications::getUniqueEntitySendMessageId();
     m_lmcpObjectMessageSenderPipe.sendLimitedCastMessage(castAddress, std::move(lmcpObject));
 };
 
 void
 LmcpObjectNetworkClientBase::sendSerializedLmcpObjectMessage(std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> serializedLmcpObject)
 {
-    s_uniqueEntitySendMessageId++;
+    uxas::communications::getUniqueEntitySendMessageId();
     m_lmcpObjectMessageSenderPipe.sendSerializedMessage(std::move(serializedLmcpObject));
 };
 
 void
 LmcpObjectNetworkClientBase::sendSharedLmcpObjectBroadcastMessage(const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)
 {
-    s_uniqueEntitySendMessageId++;
+    uxas::communications::getUniqueEntitySendMessageId();
     m_lmcpObjectMessageSenderPipe.sendSharedBroadcastMessage(lmcpObject);
 };
 
 void
 LmcpObjectNetworkClientBase::sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)
 {
-    s_uniqueEntitySendMessageId++;
+    uxas::communications::getUniqueEntitySendMessageId();
     m_lmcpObjectMessageSenderPipe.sendSharedLimitedCastMessage(castAddress, lmcpObject);
 };
 

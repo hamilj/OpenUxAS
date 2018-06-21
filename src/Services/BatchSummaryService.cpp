@@ -43,8 +43,8 @@ namespace service
 BatchSummaryService::ServiceBase::CreationRegistrar<BatchSummaryService>
     BatchSummaryService::s_registrar(BatchSummaryService::s_registryServiceTypeNames());
 
-BatchSummaryService::BatchSummaryService()
-    : ServiceBase(BatchSummaryService::s_typeName(), BatchSummaryService::s_directoryName())
+BatchSummaryService::BatchSummaryService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : ServiceBase(BatchSummaryService::s_typeName(), BatchSummaryService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
 };
 

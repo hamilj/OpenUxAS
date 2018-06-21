@@ -42,8 +42,8 @@ namespace service
 RoutePlannerService::ServiceBase::CreationRegistrar<RoutePlannerService>
 RoutePlannerService::s_registrar(RoutePlannerService::s_registryServiceTypeNames());
 
-RoutePlannerService::RoutePlannerService()
-: ServiceBase(RoutePlannerService::s_typeName(), RoutePlannerService::s_directoryName())
+RoutePlannerService::RoutePlannerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(RoutePlannerService::s_typeName(), RoutePlannerService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
 };
 

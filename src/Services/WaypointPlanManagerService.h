@@ -106,12 +106,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new WaypointPlanManagerService;
+        return new WaypointPlanManagerService(std::move(pLmcpObjectNetworkClient));
     };
 
-    WaypointPlanManagerService();
+    explicit WaypointPlanManagerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~WaypointPlanManagerService();

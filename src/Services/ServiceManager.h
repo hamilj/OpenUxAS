@@ -55,8 +55,7 @@ public:
 private:
 
     /** \brief Public, direct construction not permitted (singleton pattern) */
-    ServiceManager()
-    : ServiceBase(ServiceManager::s_typeName(), "") { };
+    ServiceManager();
 
     /** \brief Copy construction not permitted */
     ServiceManager(ServiceManager const&) = delete;

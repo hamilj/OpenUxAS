@@ -43,8 +43,8 @@ namespace service
 PlanBuilderService::ServiceBase::CreationRegistrar<PlanBuilderService>
 PlanBuilderService::s_registrar(PlanBuilderService::s_registryServiceTypeNames());
 
-PlanBuilderService::PlanBuilderService()
-: ServiceBase(PlanBuilderService::s_typeName(), PlanBuilderService::s_directoryName()) { };
+PlanBuilderService::PlanBuilderService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(PlanBuilderService::s_typeName(), PlanBuilderService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
 
 PlanBuilderService::~PlanBuilderService() { };
 

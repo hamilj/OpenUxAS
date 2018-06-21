@@ -139,59 +139,59 @@
 
 
 // examples
-{auto svc = uxas::stduxas::make_unique<uxas::service::HelloWorld>();}
+{auto svc = uxas::stduxas::make_unique<uxas::service::HelloWorld>(nullptr);}
 
 // data
-{auto svc = uxas::stduxas::make_unique<uxas::service::data::MessageLoggerDataService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::data::AutomationDiagramDataService>();}
+{auto svc = uxas::stduxas::make_unique<uxas::service::data::MessageLoggerDataService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::data::AutomationDiagramDataService>(nullptr);}
 
 // task
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::AssignmentCoordinatorTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::AngledAreaSearchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::BlockadeTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::CmasiAreaSearchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::CmasiLineSearchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::CmasiPointSearchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::CommRelayTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::CordonTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::EscortTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::ImpactLineSearchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::ImpactPointSearchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::MultiVehicleWatchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::OverwatchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::PatternSearchTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::TaskManagerService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::TaskTrackerService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::MustFlyTaskService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::LoiterTaskService>();}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::AssignmentCoordinatorTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::AngledAreaSearchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::BlockadeTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::CmasiAreaSearchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::CmasiLineSearchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::CmasiPointSearchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::CommRelayTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::CordonTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::EscortTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::ImpactLineSearchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::ImpactPointSearchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::MultiVehicleWatchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::OverwatchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::PatternSearchTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::TaskManagerService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::TaskTrackerService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::MustFlyTaskService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::LoiterTaskService>(nullptr);}
 
 // DO NOT REMOVE - USED TO AUTOMATICALLY ADD NEW TASK DUMMY INSTANCES
-{auto svc = uxas::stduxas::make_unique<uxas::service::task::RendezvousTask>();}
+{auto svc = uxas::stduxas::make_unique<uxas::service::task::RendezvousTask>(nullptr);}
 
 
 // test
-{auto svc = uxas::stduxas::make_unique<uxas::service::test::SendMessagesService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::test::SerialAutomationRequestTestService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::test::Test_SimulationTime>();}
+{auto svc = uxas::stduxas::make_unique<uxas::service::test::SendMessagesService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::test::SerialAutomationRequestTestService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::test::Test_SimulationTime>(nullptr);}
 
 // general services
-{auto svc = uxas::stduxas::make_unique<uxas::service::AssignmentTreeBranchBoundService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::AutomationRequestValidatorService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::BatchSummaryService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::OperatingRegionStateService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::OsmPlannerService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::PlanBuilderService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::RouteAggregatorService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::RoutePlannerService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::SensorManagerService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::WaypointPlanManagerService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::SimpleWaypointPlanManagerService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::RoutePlannerVisibilityService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::SteeringService>();}
+{auto svc = uxas::stduxas::make_unique<uxas::service::AssignmentTreeBranchBoundService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::AutomationRequestValidatorService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::BatchSummaryService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::OperatingRegionStateService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::OsmPlannerService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::PlanBuilderService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::RouteAggregatorService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::RoutePlannerService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::SensorManagerService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::WaypointPlanManagerService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::SimpleWaypointPlanManagerService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::RoutePlannerVisibilityService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::SteeringService>(nullptr);}
 
 // DO NOT REMOVE - USED TO AUTOMATICALLY ADD NEW SERVICE DUMMY INSTANCES
-{auto svc = uxas::stduxas::make_unique<uxas::service::StatusReportService>();}
-{auto svc = uxas::stduxas::make_unique<uxas::service::LoiterLeash>();}
+{auto svc = uxas::stduxas::make_unique<uxas::service::StatusReportService>(nullptr);}
+{auto svc = uxas::stduxas::make_unique<uxas::service::LoiterLeash>(nullptr);}
 
 
 #endif  //REGISTER_SERVICE_CODE

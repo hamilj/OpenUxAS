@@ -47,7 +47,8 @@ namespace task
 class DynamicTaskServiceBase : public TaskServiceBase
 {
 public :
-    DynamicTaskServiceBase(const std::string& typeName, const std::string& directoryName);
+    DynamicTaskServiceBase(const std::string& typeName, const std::string& directoryName,
+        std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
 
 protected :

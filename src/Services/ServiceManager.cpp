@@ -10,6 +10,7 @@
 #include "ServiceManager.h"
 #include "LmcpObjectNetworkBridge.h"
 #include "LmcpObjectNetworkBridgeManager.h"
+#include "LmcpObjectNetworkClientBase.h"
 
 #define INCLUDE_SERVICE_HEADERS //this switches 00_ServiceList.h to load the service headers
 #include "00_ServiceList.h"
@@ -50,6 +51,13 @@ namespace service
 
 std::unique_ptr<ServiceManager> ServiceManager::s_instance = nullptr;
 
+// TODO: consider refactoring singleton to allow parameterized connection
+ServiceManager::ServiceManager()
+    : ServiceBase(ServiceManager::s_typeName(), "", uxas::stduxas::make_unique<uxas::communications::LmcpObjectNetworkClientBase>())
+{
+
+}
+
 ServiceManager&
 ServiceManager::getInstance()
 {
@@ -78,10 +86,10 @@ ServiceManager::configureServiceManager()
 {
     UXAS_LOG_DEBUGGING(s_typeName(), "::configureServiceManager - START");
 
-    m_isBaseClassKillServiceProcessingPermitted = true;
+    m_pLmcpObjectNetworkClient->m_isBaseClassKillServiceProcessingPermitted = true;
     // increase service manager termination time-outs
-    m_subclassTerminationAbortDuration_ms = 600000;
-    m_subclassTerminationWarnDuration_ms = 180000;
+    m_pLmcpObjectNetworkClient->m_subclassTerminationAbortDuration_ms = 600000;
+    m_pLmcpObjectNetworkClient->m_subclassTerminationWarnDuration_ms = 180000;
 
     bool isSuccess = configureService((uxas::common::ConfigurationManager::getInstance().getRootDataWorkDirectory()),
             uxas::common::ConfigurationManager::getInstance().getEnabledServices()
@@ -158,16 +166,16 @@ ServiceManager::runUntil(uint32_t duration_s)
     UXAS_LOG_INFORM_ASSIGNMENT(s_typeName(),"****** All Services have been Terminated !!! ******");
 
     // terminate my client thread
-    m_isTerminateNetworkClient = true;
+    m_pLmcpObjectNetworkClient->m_isTerminateNetworkClient = true;
     uint32_t checkBaseTerminateCount{0};
-    while (!m_isBaseClassTerminationFinished && checkBaseTerminateCount++ < 20)
+    while (!m_pLmcpObjectNetworkClient->m_isBaseClassTerminationFinished && checkBaseTerminateCount++ < 20)
     {
         UXAS_LOG_INFORM_ASSIGNMENT(s_typeName(),"****** ServiceManager is Terminating it's Client Thread !!! ******");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     if (m_isServiceManagerTermination) // service manager termination exit
     {
-        if (m_isBaseClassTerminationFinished)
+        if (m_pLmcpObjectNetworkClient->m_isBaseClassTerminationFinished)
         {
             UXAS_LOG_INFORM(s_typeName(), "::runUntil found base class terminated after [", checkBaseTerminateCount, "] attempts (service manager termination exit)");
         }
@@ -181,7 +189,7 @@ ServiceManager::runUntil(uint32_t duration_s)
     }
     else
     {
-        if (m_isBaseClassTerminationFinished)
+        if (m_pLmcpObjectNetworkClient->m_isBaseClassTerminationFinished)
         {
             UXAS_LOG_INFORM(s_typeName(), "::runUntil found base class terminated after [", checkBaseTerminateCount, "] attempts (run duration exit)");
         }
@@ -420,8 +428,8 @@ ServiceManager::instantiateConfigureInitializeStartService(const pugi::xml_node&
         UXAS_LOG_ERROR(s_typeName(), "::createService not processing ", serviceXmlNode.name(), " XML node since node name is empty, invalid or disallowed", uxas::common::StringConstant::Type());
         return (newServiceFinal);
     }
-    
-    std::unique_ptr<ServiceBase> newService = ServiceBase::instantiateService(serviceType);
+
+    std::unique_ptr<ServiceBase> newService = ServiceBase::instantiateService(serviceType, uxas::stduxas::make_unique<uxas::communications::LmcpObjectNetworkClientBase>());
 
     if (newService)
     {
@@ -446,14 +454,16 @@ ServiceManager::instantiateConfigureInitializeStartService(const pugi::xml_node&
             
             if (isPassedInID)
             {
-                std::string originalUnicastAddress = LmcpObjectNetworkClientBase::getNetworkClientUnicastAddress(newService->m_entityId, newService->m_networkId);
+                std::string originalUnicastAddress = uxas::communications::getNetworkClientUnicastAddress(newService->m_entityId, newService->m_networkId);
                 newService->m_entityId = entityIdLocal;
                 newService->m_entityIdString = std::to_string(entityIdLocal);
                 newService->m_networkId = networkIdLocal;
                 newService->m_networkIdString = std::to_string(networkIdLocal);
+                newService->m_pLmcpObjectNetworkClient->m_networkId = newService->m_networkId;
+                newService->m_pLmcpObjectNetworkClient->m_networkIdString = newService->m_networkIdString;
                 newService->m_serviceId = networkIdLocal;
                 newService->removeSubscriptionAddress(originalUnicastAddress);
-                newService->addSubscriptionAddress(LmcpObjectNetworkClientBase::getNetworkClientUnicastAddress(newService->m_entityId, newService->m_networkId));
+                newService->addSubscriptionAddress(uxas::communications::getNetworkClientUnicastAddress(newService->m_entityId, newService->m_networkId));
                 UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService re-configuring ", newService->m_networkClientTypeName, " entity ID ", newService->m_entityId, " service ID ", newService->m_networkId);
             }
             UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully configured ", newService->m_networkClientTypeName, " entity ID ", newService->m_entityId, " service ID ", newService->m_networkId);
@@ -575,7 +585,7 @@ ServiceManager::terminateAllServices()
             std::cout << std::endl << s_typeName() << "::terminateAllServices sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->m_serviceType << " having entity ID [" << svcIt->second->m_entityId << "] and service ID [" << svcIt->second->m_serviceId << "]" << std::endl;
             auto killService = uxas::stduxas::make_unique<uxas::messages::uxnative::KillService>();
             killService->setServiceID(svcIt->second->m_networkId);
-            sendLmcpObjectLimitedCastMessage(getNetworkClientUnicastAddress(m_entityIdString, svcIt->second->m_networkId), std::move(killService));
+            sendLmcpObjectLimitedCastMessage(uxas::communications::getNetworkClientUnicastAddress(m_entityIdString, svcIt->second->m_networkId), std::move(killService));
         }
         else
         {

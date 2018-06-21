@@ -139,11 +139,11 @@ public:
     }
 
     static ServiceBase*
-    create() {
-        return new OverwatchTaskService;
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new OverwatchTaskService(std::move(pLmcpObjectNetworkClient));
     }
 
-    OverwatchTaskService();
+    explicit OverwatchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~OverwatchTaskService();

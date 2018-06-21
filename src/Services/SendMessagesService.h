@@ -66,12 +66,12 @@ public:
     s_directoryName() { static std::string s_string("SendMessagesService"); return (s_string); };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new SendMessagesService;
+        return new SendMessagesService(std::move(pLmcpObjectNetworkClient));
     };
 
-    SendMessagesService();
+    explicit SendMessagesService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~SendMessagesService();

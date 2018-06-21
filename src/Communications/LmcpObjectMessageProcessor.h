@@ -12,6 +12,11 @@
 
 #include <memory>
 
+namespace pugi
+{
+class xml_node;
+} // namespace pugi
+
 namespace uxas
 {
 namespace communications
@@ -27,6 +32,37 @@ class LmcpObjectMessageProcessor
 {
 public:
     virtual ~LmcpObjectMessageProcessor() { }
+
+    /** \brief The virtual <B><i>configure</i></B> method is invoked by the 
+     * <B><i>LmcpObjectNetworkClient</i></B> class after completing its own 
+     * configuration. 
+     * 
+     * @param xmlNode XML node containing object configurations.
+     * @return true if configuration succeeds; false if configuration fails.
+     */
+    virtual bool configure(const pugi::xml_node& xmlNode) { return true; };
+
+    /** \brief The virtual <B><i>initialize</i></B> method is invoked by the 
+     * <B><i>LmcpObjectNetworkClientBase</i></B> class after completing 
+     * configurations and before startup. 
+     * 
+     * @return true if initialization succeeds; false if initialization fails.
+     */
+    virtual bool initialize() { return true; };
+
+    /** \brief The virtual <B><i>start</i></B> method is invoked by the 
+     * <B><i>LmcpObjectNetworkClientBase</i></B> class after initialization and
+     * before starting its own thread. 
+     * 
+     * @return true if start succeeds; false if start fails.
+     */
+    virtual bool start() { return true; };
+
+    /** \brief The virtual <B><i>terminate</i></B> method can be implemented by 
+     * inheriting classes to perform inheriting class termination logic 
+     * (e.g., thread joining). 
+     */
+    virtual bool terminate() { return true; };
 
     /** \brief The virtual <B><i>processReceivedLmcpMessage</i></B> is 
      * repeatedly invoked by the <B><i>LmcpObjectNetworkClientBase</i></B> class in an 

@@ -57,8 +57,8 @@ namespace service
 AutomationRequestValidatorService::ServiceBase::CreationRegistrar<AutomationRequestValidatorService>
 AutomationRequestValidatorService::s_registrar(AutomationRequestValidatorService::s_registryServiceTypeNames());
 
-AutomationRequestValidatorService::AutomationRequestValidatorService()
-: ServiceBase(AutomationRequestValidatorService::s_typeName(), AutomationRequestValidatorService::s_directoryName())
+AutomationRequestValidatorService::AutomationRequestValidatorService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(AutomationRequestValidatorService::s_typeName(), AutomationRequestValidatorService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
     // make sure error collection is non-null
     m_errorResponse.reset(new uxas::messages::task::UniqueAutomationResponse);

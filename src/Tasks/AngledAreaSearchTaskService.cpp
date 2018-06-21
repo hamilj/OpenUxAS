@@ -50,8 +50,8 @@ namespace task
 AngledAreaSearchTaskService::ServiceBase::CreationRegistrar<AngledAreaSearchTaskService>
 AngledAreaSearchTaskService::s_registrar(AngledAreaSearchTaskService::s_registryServiceTypeNames());
 
-AngledAreaSearchTaskService::AngledAreaSearchTaskService()
-: TaskServiceBase(AngledAreaSearchTaskService::s_typeName(), AngledAreaSearchTaskService::s_directoryName()) { };
+AngledAreaSearchTaskService::AngledAreaSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(AngledAreaSearchTaskService::s_typeName(), AngledAreaSearchTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
 
 AngledAreaSearchTaskService::~AngledAreaSearchTaskService() { };
 

@@ -39,8 +39,8 @@ RendezvousTask::ServiceBase::CreationRegistrar<RendezvousTask>
 RendezvousTask::s_registrar(RendezvousTask::s_registryServiceTypeNames());
 
 // service constructor
-RendezvousTask::RendezvousTask()
-: TaskServiceBase(RendezvousTask::s_typeName(), RendezvousTask::s_directoryName())
+RendezvousTask::RendezvousTask(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(RendezvousTask::s_typeName(), RendezvousTask::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
     m_isMakeTransitionWaypointsActive = true; // to allow for speed changes
 }

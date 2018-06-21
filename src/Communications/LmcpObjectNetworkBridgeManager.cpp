@@ -63,7 +63,7 @@ LmcpObjectNetworkBridgeManager::terminateAllBridges()
             std::cout << std::endl << s_typeName() << "::terminateAllBridges sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->m_networkClientTypeName << " having entity ID [" << svcIt->second->m_entityId << "] and network ID [" << svcIt->second->m_networkId << "]" << std::endl;
             auto killService = uxas::stduxas::make_unique<uxas::messages::uxnative::KillService>();
             killService->setServiceID(svcIt->second->m_networkId);
-            uxas::service::ServiceManager::getInstance().sendLmcpObjectLimitedCastMessage(LmcpObjectNetworkClientBase::getNetworkClientUnicastAddress(svcIt->second->m_entityId, svcIt->second->m_networkId), std::move(killService));
+            uxas::service::ServiceManager::getInstance().sendLmcpObjectLimitedCastMessage(getNetworkClientUnicastAddress(svcIt->second->m_entityId, svcIt->second->m_networkId), std::move(killService));
         }
         else
         {
@@ -219,18 +219,18 @@ LmcpObjectNetworkBridgeManager::createBridge(const pugi::xml_node& bridgeXmlNode
         if (newBridge)
         {
             UXAS_LOG_INFORM(s_typeName(), "::createBridge instantiated bridge ", bridgeType, " network ID ", newBridge->m_networkId);
-            if (newBridge->configureNetworkClient(bridgeType, LmcpObjectNetworkClient::ReceiveProcessingType::SERIALIZED_LMCP, bridgeXmlNode))
+            if (newBridge->configureNetworkClient(bridgeType, LmcpObjectNetworkClient::ReceiveProcessingType::SERIALIZED_LMCP, bridgeXmlNode, *newBridge))
             {
                 //TODO - consider friend of clientBase (protect m_entityId and m_entityIdString)
                 // support test bridges
                 if (entityId < UINT32_MAX && networkId < UINT32_MAX)
                 {
-                    std::string originalUnicastAddress = LmcpObjectNetworkClientBase::getNetworkClientUnicastAddress(newBridge->m_entityId, newBridge->m_networkId);
+                    std::string originalUnicastAddress = getNetworkClientUnicastAddress(newBridge->m_entityId, newBridge->m_networkId);
                     newBridge->m_entityId = entityId;
                     newBridge->m_entityIdString = std::to_string(newBridge->m_entityId);
                     newBridge->m_networkId = networkId;
                     newBridge->removeSubscriptionAddress(originalUnicastAddress);
-                    newBridge->addSubscriptionAddress(LmcpObjectNetworkClientBase::getNetworkClientUnicastAddress(newBridge->m_entityId, newBridge->m_networkId));
+                    newBridge->addSubscriptionAddress(getNetworkClientUnicastAddress(newBridge->m_entityId, newBridge->m_networkId));
                     UXAS_LOG_WARN(s_typeName(), "::createBridge re-configuring ", newBridge->m_networkClientTypeName, " entity ID ", newBridge->m_entityId, " network ID ", newBridge->m_networkId);
                 }
                 UXAS_LOG_INFORM(s_typeName(), "::createBridge configured ", newBridge->m_networkClientTypeName, " entity ID ", newBridge->m_entityId, " network ID ", newBridge->m_networkId);

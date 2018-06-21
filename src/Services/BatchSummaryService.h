@@ -68,11 +68,11 @@ namespace uxas
             };
 
             static ServiceBase*
-                create() {
-                return new BatchSummaryService;
+            create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+                return new BatchSummaryService(std::move(pLmcpObjectNetworkClient));
             };
 
-            BatchSummaryService();
+            explicit BatchSummaryService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
             virtual
                 ~BatchSummaryService();

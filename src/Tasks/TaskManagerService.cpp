@@ -72,8 +72,8 @@ namespace task
 TaskManagerService::ServiceBase::CreationRegistrar<TaskManagerService>
 TaskManagerService::s_registrar(TaskManagerService::s_registryServiceTypeNames());
 
-TaskManagerService::TaskManagerService()
-    : ServiceBase(TaskManagerService::s_typeName(), TaskManagerService::s_directoryName())
+TaskManagerService::TaskManagerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : ServiceBase(TaskManagerService::s_typeName(), TaskManagerService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
 }
 
@@ -251,7 +251,7 @@ TaskManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicati
         }
 
         auto createNewServiceMessage = std::make_shared<uxas::messages::uxnative::CreateNewService>();
-        auto serviceId = ServiceBase::getUniqueServceId();
+        auto serviceId = uxas::service::getUniqueId();
         createNewServiceMessage->setServiceID(serviceId);
         std::string xmlConfigStr = "<Service Type=\"" + baseTask->getFullLmcpTypeName() + "\">" +
                 " <TaskRequest>" + baseTask->toXML() + "</TaskRequest>\n" + xmlTaskOptions;

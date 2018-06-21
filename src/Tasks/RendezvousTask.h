@@ -67,12 +67,12 @@ public:
     s_directoryName() { static std::string s_string(""); return (s_string); }
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new RendezvousTask;
+        return new RendezvousTask(std::move(pLmcpObjectNetworkClient));
     }
 
-    RendezvousTask();
+    explicit RendezvousTask(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~RendezvousTask();

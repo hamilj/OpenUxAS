@@ -53,8 +53,8 @@ namespace task
 CmasiPointSearchTaskService::ServiceBase::CreationRegistrar<CmasiPointSearchTaskService>
 CmasiPointSearchTaskService::s_registrar(CmasiPointSearchTaskService::s_registryServiceTypeNames());
 
-CmasiPointSearchTaskService::CmasiPointSearchTaskService()
-: TaskServiceBase(CmasiPointSearchTaskService::s_typeName(), CmasiPointSearchTaskService::s_directoryName()) {
+CmasiPointSearchTaskService::CmasiPointSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(CmasiPointSearchTaskService::s_typeName(), CmasiPointSearchTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) {
     //UXAS_LOG_INFORM_ASSIGNMENT("*** CONSTRUCTOR m_networkId[",m_networkId,"] ***");
     m_isMakeTransitionWaypointsActive = true;
 };

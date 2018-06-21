@@ -9,6 +9,8 @@
 
 #include "ServiceBase.h"
 
+#include "LmcpObjectNetworkClient.h"
+
 #include "UxAS_ConfigurationManager.h"
 #include "Constants/UxAS_String.h"
 
@@ -21,19 +23,24 @@ namespace uxas
 namespace service
 {
 
+int64_t getUniqueId()
+{
+    return uxas::communications::getUniqueId();
+}
 
-    ServiceBase::ServiceBase(const std::string& serviceType, const std::string& workDirectoryName)
-    : m_serviceType(serviceType), m_workDirectoryName(workDirectoryName)
+ServiceBase::ServiceBase(const std::string& serviceType, const std::string& workDirectoryName,
+    std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : m_serviceType(serviceType), m_networkId(0), m_workDirectoryName(workDirectoryName),m_pLmcpObjectNetworkClient(std::move(pLmcpObjectNetworkClient))
+{
+    if (m_pLmcpObjectNetworkClient)
     {
-        m_serviceId = m_networkId;
-        UXAS_LOG_INFORM(m_serviceType, "::ServiceBase set service ID to LMCP network ID value ", m_networkId);
-    };
+        m_networkId = m_pLmcpObjectNetworkClient->m_networkId;
+        m_networkIdString = m_pLmcpObjectNetworkClient->m_networkIdString;
+    }
 
-    ServiceBase::~ServiceBase()
-    {
-//        UXAS_LOG_INFORM_ASSIGNMENT(m_serviceType, "::~ServiceBase()");     
-    };
-
+    m_serviceId = m_networkId;
+    UXAS_LOG_INFORM(m_serviceType, "::ServiceBase set service ID to LMCP network ID value ", m_networkId);
+}
 
 bool
 ServiceBase::configureService(const std::string& parentOfWorkDirectory, const std::string& serviceXml)
@@ -45,7 +52,7 @@ ServiceBase::configureService(const std::string& parentOfWorkDirectory, const st
 	}
 
     return false;
-};
+}
 
 bool
 ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi::xml_node& serviceXmlNode)
@@ -65,7 +72,11 @@ ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi
         m_workDirectoryPath = "";
     }
 
-    isSuccess = configureNetworkClient(m_serviceType, m_receiveProcessingType, serviceXmlNode);
+    isSuccess = m_pLmcpObjectNetworkClient->configureNetworkClient(m_serviceType, m_receiveProcessingType, serviceXmlNode, *this);
+    m_entityId = m_pLmcpObjectNetworkClient->m_entityId;
+    m_entityIdString = m_pLmcpObjectNetworkClient->m_entityIdString;
+    m_entityType = m_pLmcpObjectNetworkClient->m_entityType;
+    m_networkClientTypeName = m_pLmcpObjectNetworkClient->m_networkClientTypeName;
 
     //
     // DESIGN 20150911 RJT message addressing - service group (multi-cast)
@@ -77,12 +88,12 @@ ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi
     if (!serviceXmlNode.attribute(uxas::common::StringConstant::MessageGroup().c_str()).empty())
     {
         // set source group value that will be assigned to source group field of sent messages
-        m_messageSourceGroup = serviceXmlNode.attribute(uxas::common::StringConstant::MessageGroup().c_str()).value();
-        UXAS_LOG_INFORM(m_serviceType, "::configureService setting m_messageSourceGroup to [", m_messageSourceGroup, "] from XML configuration");
+        m_pLmcpObjectNetworkClient->m_messageSourceGroup = serviceXmlNode.attribute(uxas::common::StringConstant::MessageGroup().c_str()).value();
+        UXAS_LOG_INFORM(m_serviceType, "::configureService setting m_messageSourceGroup to [", m_pLmcpObjectNetworkClient->m_messageSourceGroup, "] from XML configuration");
         // subscribe to messages addressed to non-empty source group value
-        if (!m_messageSourceGroup.empty())
+        if (!m_pLmcpObjectNetworkClient->m_messageSourceGroup.empty())
         {
-            addSubscriptionAddress(m_messageSourceGroup);
+            addSubscriptionAddress(m_pLmcpObjectNetworkClient->m_messageSourceGroup);
         }
     }
     else
@@ -102,7 +113,7 @@ ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi
 
     UXAS_LOG_DEBUGGING(m_serviceType, "::configureService method END");
     return (isSuccess);
-};
+}
 
 bool
 ServiceBase::initializeAndStartService()
@@ -132,7 +143,7 @@ ServiceBase::initializeAndStartService()
 
         if (isSuccess)
         {
-            isSuccess = initializeAndStart(*this);
+            isSuccess = m_pLmcpObjectNetworkClient->initializeAndStart(*this);
         }
 
         if (isSuccess)
@@ -150,7 +161,7 @@ ServiceBase::initializeAndStartService()
     }
 
     return (isSuccess);
-};
+}
 
 }; //namespace service
 }; //namespace uxas

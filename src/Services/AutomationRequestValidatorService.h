@@ -124,12 +124,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new AutomationRequestValidatorService;
+        return new AutomationRequestValidatorService(std::move(pLmcpObjectNetworkClient));
     };
 
-    AutomationRequestValidatorService();
+    explicit AutomationRequestValidatorService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~AutomationRequestValidatorService();

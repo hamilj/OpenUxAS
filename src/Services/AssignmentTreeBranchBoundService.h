@@ -96,12 +96,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new AssignmentTreeBranchBoundService;
+        return new AssignmentTreeBranchBoundService(std::move(pLmcpObjectNetworkClient));
     };
 
-    AssignmentTreeBranchBoundService();
+    explicit AssignmentTreeBranchBoundService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~AssignmentTreeBranchBoundService();

@@ -91,12 +91,12 @@ public:
     s_directoryName() { static std::string s_string(""); return (s_string); };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new ServiceTemplate;
+        return new ServiceTemplate(std::move(pLmcpObjectNetworkClient));
     };
 
-    ServiceTemplate();
+    explicit ServiceTemplate(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~ServiceTemplate();

@@ -105,11 +105,11 @@ public:
     };
 
     static ServiceBase*
-    create() {
-        return new PlanBuilderService;
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new PlanBuilderService(std::move(pLmcpObjectNetworkClient));
     };
 
-    PlanBuilderService();
+    explicit PlanBuilderService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~PlanBuilderService();

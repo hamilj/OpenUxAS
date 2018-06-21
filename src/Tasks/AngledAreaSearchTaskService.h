@@ -100,12 +100,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new AngledAreaSearchTaskService;
+        return new AngledAreaSearchTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    AngledAreaSearchTaskService();
+    explicit AngledAreaSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~AngledAreaSearchTaskService();

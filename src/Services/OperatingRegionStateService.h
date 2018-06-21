@@ -73,11 +73,11 @@ public:
     };
 
     static ServiceBase*
-    create() {
-        return new OperatingRegionStateService;
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new OperatingRegionStateService(std::move(pLmcpObjectNetworkClient));
     };
 
-    OperatingRegionStateService();
+    explicit OperatingRegionStateService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~OperatingRegionStateService();

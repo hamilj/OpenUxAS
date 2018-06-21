@@ -36,8 +36,8 @@ namespace test
 SerialAutomationRequestTestService::ServiceBase::CreationRegistrar<SerialAutomationRequestTestService>
 SerialAutomationRequestTestService::s_registrar(SerialAutomationRequestTestService::s_registryServiceTypeNames());
 
-SerialAutomationRequestTestService::SerialAutomationRequestTestService()
-: ServiceBase(SerialAutomationRequestTestService::s_typeName(), SerialAutomationRequestTestService::s_directoryName())
+SerialAutomationRequestTestService::SerialAutomationRequestTestService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(SerialAutomationRequestTestService::s_typeName(), SerialAutomationRequestTestService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
 };
 

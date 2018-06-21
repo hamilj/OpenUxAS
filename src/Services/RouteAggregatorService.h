@@ -125,11 +125,11 @@ public:
     };
 
     static ServiceBase*
-    create() {
-        return new RouteAggregatorService;
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new RouteAggregatorService(std::move(pLmcpObjectNetworkClient));
     };
 
-    RouteAggregatorService();
+    explicit RouteAggregatorService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~RouteAggregatorService();

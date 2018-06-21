@@ -158,12 +158,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new CommRelayTaskService;
+        return new CommRelayTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    CommRelayTaskService();
+    explicit CommRelayTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~CommRelayTaskService();

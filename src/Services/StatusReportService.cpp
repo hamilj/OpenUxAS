@@ -38,8 +38,8 @@ StatusReportService::ServiceBase::CreationRegistrar<StatusReportService>
 StatusReportService::s_registrar(StatusReportService::s_registryServiceTypeNames());
 
 // service constructor
-StatusReportService::StatusReportService()
-: ServiceBase(StatusReportService::s_typeName(), StatusReportService::s_directoryName())
+StatusReportService::StatusReportService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(StatusReportService::s_typeName(), StatusReportService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
     m_report.setValidState(false);
     m_report.setValidAuthorization(false);

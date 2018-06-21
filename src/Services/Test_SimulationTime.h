@@ -61,12 +61,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new Test_SimulationTime;
+        return new Test_SimulationTime(std::move(pLmcpObjectNetworkClient));
     };
 
-    Test_SimulationTime();
+    explicit Test_SimulationTime(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~Test_SimulationTime();

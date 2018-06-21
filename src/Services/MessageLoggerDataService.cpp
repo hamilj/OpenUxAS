@@ -31,8 +31,8 @@ namespace data
 MessageLoggerDataService::ServiceBase::CreationRegistrar<MessageLoggerDataService> 
         MessageLoggerDataService::s_registrar(MessageLoggerDataService::s_registryServiceTypeNames());
 
-MessageLoggerDataService::MessageLoggerDataService()
-: ServiceBase(MessageLoggerDataService::s_typeName(), MessageLoggerDataService::s_directoryName())
+MessageLoggerDataService::MessageLoggerDataService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(MessageLoggerDataService::s_typeName(), MessageLoggerDataService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
 };
 

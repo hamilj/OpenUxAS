@@ -31,8 +31,8 @@ namespace service
 OperatingRegionStateService::ServiceBase::CreationRegistrar<OperatingRegionStateService>
 OperatingRegionStateService::s_registrar(OperatingRegionStateService::s_registryServiceTypeNames());
 
-OperatingRegionStateService::OperatingRegionStateService()
-: ServiceBase(OperatingRegionStateService::s_typeName(), OperatingRegionStateService::s_directoryName())
+OperatingRegionStateService::OperatingRegionStateService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(OperatingRegionStateService::s_typeName(), OperatingRegionStateService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
 {
 };
 

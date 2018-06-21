@@ -23,8 +23,9 @@ namespace service
 {
 namespace task
 {
-DynamicTaskServiceBase::DynamicTaskServiceBase(const std::string& typeName, const std::string& directoryName)
-    : TaskServiceBase(typeName, directoryName)
+DynamicTaskServiceBase::DynamicTaskServiceBase(const std::string& typeName, const std::string& directoryName,
+    std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : TaskServiceBase(typeName, directoryName, std::move(pLmcpObjectNetworkClient))
 {
     m_isMakeTransitionWaypointsActive = true;
 }

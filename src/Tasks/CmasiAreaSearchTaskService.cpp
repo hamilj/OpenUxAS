@@ -56,8 +56,8 @@ namespace task
 CmasiAreaSearchTaskService::ServiceBase::CreationRegistrar<CmasiAreaSearchTaskService>
 CmasiAreaSearchTaskService::s_registrar(CmasiAreaSearchTaskService::s_registryServiceTypeNames());
 
-CmasiAreaSearchTaskService::CmasiAreaSearchTaskService()
-: TaskServiceBase(CmasiAreaSearchTaskService::s_typeName(), CmasiAreaSearchTaskService::s_directoryName()) { };
+CmasiAreaSearchTaskService::CmasiAreaSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(CmasiAreaSearchTaskService::s_typeName(), CmasiAreaSearchTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
 
 CmasiAreaSearchTaskService::~CmasiAreaSearchTaskService() { };
 

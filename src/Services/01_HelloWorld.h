@@ -74,12 +74,12 @@ public:
     s_directoryName() { static std::string s_string(""); return (s_string); };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new HelloWorld;
+        return new HelloWorld(std::move(pLmcpObjectNetworkClient));
     };
 
-    HelloWorld();
+    explicit HelloWorld(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~HelloWorld();

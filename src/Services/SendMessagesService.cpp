@@ -45,8 +45,8 @@ namespace test
 {
 SendMessagesService::ServiceBase::CreationRegistrar<SendMessagesService> SendMessagesService::s_registrar(SendMessagesService::s_registryServiceTypeNames());
 
-SendMessagesService::SendMessagesService()
-:ServiceBase(SendMessagesService::s_typeName(), ""),
+SendMessagesService::SendMessagesService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+:ServiceBase(SendMessagesService::s_typeName(), "", std::move(pLmcpObjectNetworkClient)),
 m_messageZeroTime_ms(true)
 {
     m_messageZeroTime_ms = uxas::common::utilities::c_TimeUtilities::dGetTimeNow_s(false);

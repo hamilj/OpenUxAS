@@ -140,12 +140,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new BlockadeTaskService;
+        return new BlockadeTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    BlockadeTaskService();
+    explicit BlockadeTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~BlockadeTaskService();

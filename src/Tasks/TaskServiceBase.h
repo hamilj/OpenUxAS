@@ -242,7 +242,9 @@ namespace task
          * @param serviceName is the type of service. This is passed to the
          * <B><i>c_Component_Base</i></B> constructor
          */
-        TaskServiceBase(const std::string& typeName,const std::string& directoryName);
+        TaskServiceBase(const std::string& typeName,const std::string& directoryName,
+            std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+
         virtual ~TaskServiceBase();
         
 

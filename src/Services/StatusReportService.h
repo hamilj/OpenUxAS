@@ -74,12 +74,12 @@ public:
     s_directoryName() { static std::string s_string(""); return (s_string); };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new StatusReportService;
+        return new StatusReportService(std::move(pLmcpObjectNetworkClient));
     };
 
-    StatusReportService();
+    explicit StatusReportService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~StatusReportService();

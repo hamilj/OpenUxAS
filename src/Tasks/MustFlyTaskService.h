@@ -58,12 +58,14 @@ public:
 		return (s_string);
 	};
 
-	static ServiceBase* create()
+	static ServiceBase*
+	create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
 	{
-		return new MustFlyTaskService;
+		return new MustFlyTaskService(std::move(pLmcpObjectNetworkClient));
 	};
 
-	MustFlyTaskService();
+	explicit MustFlyTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+
 	virtual ~MustFlyTaskService();
 
 	virtual void buildTaskPlanOptions() override;

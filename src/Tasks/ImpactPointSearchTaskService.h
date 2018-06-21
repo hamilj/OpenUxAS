@@ -143,12 +143,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new ImpactPointSearchTaskService;
+        return new ImpactPointSearchTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    ImpactPointSearchTaskService();
+    explicit ImpactPointSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~ImpactPointSearchTaskService();

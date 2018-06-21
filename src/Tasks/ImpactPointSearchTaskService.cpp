@@ -50,8 +50,8 @@ namespace task
 ImpactPointSearchTaskService::ServiceBase::CreationRegistrar<ImpactPointSearchTaskService>
 ImpactPointSearchTaskService::s_registrar(ImpactPointSearchTaskService::s_registryServiceTypeNames());
 
-ImpactPointSearchTaskService::ImpactPointSearchTaskService()
-: TaskServiceBase(ImpactPointSearchTaskService::s_typeName(), ImpactPointSearchTaskService::s_directoryName()) { };
+ImpactPointSearchTaskService::ImpactPointSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(ImpactPointSearchTaskService::s_typeName(), ImpactPointSearchTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
 
 ImpactPointSearchTaskService::~ImpactPointSearchTaskService() { };
 

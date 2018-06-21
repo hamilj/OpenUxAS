@@ -146,12 +146,12 @@ public:
     };
 
     static ServiceBase*
-    create()
+    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new EscortTaskService;
+        return new EscortTaskService(std::move(pLmcpObjectNetworkClient));
     };
 
-    EscortTaskService();
+    explicit EscortTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~EscortTaskService();

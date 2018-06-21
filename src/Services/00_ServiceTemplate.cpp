@@ -40,8 +40,8 @@ ServiceTemplate::ServiceBase::CreationRegistrar<ServiceTemplate>
 ServiceTemplate::s_registrar(ServiceTemplate::s_registryServiceTypeNames());
 
 // service constructor
-ServiceTemplate::ServiceTemplate()
-: ServiceBase(ServiceTemplate::s_typeName(), ServiceTemplate::s_directoryName()) { };
+ServiceTemplate::ServiceTemplate(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(ServiceTemplate::s_typeName(), ServiceTemplate::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
 
 // service destructor
 ServiceTemplate::~ServiceTemplate() { };

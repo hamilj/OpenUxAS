@@ -63,8 +63,9 @@ bool c_Node_Base::m_isFinalAssignmentCalculated = false;
 uxas::project::pisr::AssignmentType::AssignmentType c_Node_Base::m_assignmentType{uxas::project::pisr::AssignmentType::MinMaxTime};
 #endif
 
-AssignmentTreeBranchBoundBase::AssignmentTreeBranchBoundBase(const std::string& serviceType, const std::string& workDirectoryName)
-: ServiceBase(serviceType, workDirectoryName) { };
+AssignmentTreeBranchBoundBase::AssignmentTreeBranchBoundBase(const std::string& serviceType, const std::string& workDirectoryName,
+    std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : ServiceBase(serviceType, workDirectoryName, std::move(pLmcpObjectNetworkClient)) { };
 
 AssignmentTreeBranchBoundBase::~AssignmentTreeBranchBoundBase() { };
 
