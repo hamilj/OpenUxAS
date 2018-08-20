@@ -37,8 +37,8 @@ namespace service
 RouteAggregatorService::ServiceBase::CreationRegistrar<RouteAggregatorService>
 RouteAggregatorService::s_registrar(RouteAggregatorService::s_registryServiceTypeNames());
 
-RouteAggregatorService::RouteAggregatorService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: ServiceBase(RouteAggregatorService::s_typeName(), RouteAggregatorService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+RouteAggregatorService::RouteAggregatorService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(RouteAggregatorService::s_typeName(), RouteAggregatorService::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 RouteAggregatorService::~RouteAggregatorService() { };
 

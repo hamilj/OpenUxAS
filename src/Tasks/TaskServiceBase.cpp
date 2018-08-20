@@ -71,8 +71,8 @@ TaskOptionClass::TaskOptionClass(std::shared_ptr<uxas::messages::task::TaskOptio
 };
 
 TaskServiceBase::TaskServiceBase(const std::string& typeName, const std::string& directoryName,
-    std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-    : ServiceBase(typeName, directoryName, std::move(pLmcpObjectNetworkClient))
+    std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : ServiceBase(typeName, directoryName, pLmcpObjectNetworkClient)
 {
     //    COUT_INFO_MSG("Task Type[" << typeName << "] m_serviceId[" << m_serviceId << "] CREATED")
 }

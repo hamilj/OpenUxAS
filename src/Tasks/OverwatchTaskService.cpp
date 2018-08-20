@@ -41,8 +41,8 @@ namespace task
 OverwatchTaskService::ServiceBase::CreationRegistrar<OverwatchTaskService>
 OverwatchTaskService::s_registrar(OverwatchTaskService::s_registryServiceTypeNames());
 
-OverwatchTaskService::OverwatchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: DynamicTaskServiceBase(OverwatchTaskService::s_typeName(), OverwatchTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+OverwatchTaskService::OverwatchTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: DynamicTaskServiceBase(OverwatchTaskService::s_typeName(), OverwatchTaskService::s_directoryName(), pLmcpObjectNetworkClient)
 {
     m_isMakeTransitionWaypointsActive = true;
 }

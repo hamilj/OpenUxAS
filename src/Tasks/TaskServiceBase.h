@@ -243,7 +243,7 @@ namespace task
          * <B><i>c_Component_Base</i></B> constructor
          */
         TaskServiceBase(const std::string& typeName,const std::string& directoryName,
-            std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+            std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
         virtual ~TaskServiceBase();
         

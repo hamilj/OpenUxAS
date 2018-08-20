@@ -56,8 +56,8 @@ namespace service
 SensorManagerService::ServiceBase::CreationRegistrar<SensorManagerService>
 SensorManagerService::s_registrar(SensorManagerService::s_registryServiceTypeNames());
 
-SensorManagerService::SensorManagerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: ServiceBase(SensorManagerService::s_typeName(), SensorManagerService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+SensorManagerService::SensorManagerService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(SensorManagerService::s_typeName(), SensorManagerService::s_directoryName(), pLmcpObjectNetworkClient)
 {
 };
 

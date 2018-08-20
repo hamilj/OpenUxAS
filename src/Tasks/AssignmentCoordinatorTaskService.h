@@ -88,12 +88,12 @@ public:
     s_directoryName() { static std::string s_string(""); return (s_string); };
 
     static ServiceBase*
-    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new AssignmentCoordinatorTaskService(std::move(pLmcpObjectNetworkClient));
+        return new AssignmentCoordinatorTaskService(pLmcpObjectNetworkClient);
     };
 
-    explicit AssignmentCoordinatorTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+    explicit AssignmentCoordinatorTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~AssignmentCoordinatorTaskService();

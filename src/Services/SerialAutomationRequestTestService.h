@@ -70,9 +70,9 @@ public:
     s_directoryName() { static std::string s_string(""); return (s_string); };
 
     static ServiceBase*
-    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) { return new SerialAutomationRequestTestService(std::move(pLmcpObjectNetworkClient)); };
+    create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) { return new SerialAutomationRequestTestService(pLmcpObjectNetworkClient); };
 
-    explicit SerialAutomationRequestTestService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+    explicit SerialAutomationRequestTestService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~SerialAutomationRequestTestService();

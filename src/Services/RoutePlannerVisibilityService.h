@@ -105,11 +105,11 @@ public:
     };
 
     static ServiceBase*
-    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
-        return new RoutePlannerVisibilityService(std::move(pLmcpObjectNetworkClient));
+    create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
+        return new RoutePlannerVisibilityService(pLmcpObjectNetworkClient);
     };
 
-    explicit RoutePlannerVisibilityService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+    explicit RoutePlannerVisibilityService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~RoutePlannerVisibilityService();

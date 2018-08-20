@@ -70,9 +70,9 @@ public:
     s_directoryName() { static std::string s_string("SavedMessages"); return (s_string); };
 
     static ServiceBase*
-    create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) { return new MessageLoggerDataService(std::move(pLmcpObjectNetworkClient)); };
+    create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) { return new MessageLoggerDataService(pLmcpObjectNetworkClient); };
 
-    explicit MessageLoggerDataService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+    explicit MessageLoggerDataService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~MessageLoggerDataService();

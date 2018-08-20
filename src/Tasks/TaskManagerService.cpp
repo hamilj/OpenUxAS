@@ -72,8 +72,8 @@ namespace task
 TaskManagerService::ServiceBase::CreationRegistrar<TaskManagerService>
 TaskManagerService::s_registrar(TaskManagerService::s_registryServiceTypeNames());
 
-TaskManagerService::TaskManagerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-    : ServiceBase(TaskManagerService::s_typeName(), TaskManagerService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+TaskManagerService::TaskManagerService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : ServiceBase(TaskManagerService::s_typeName(), TaskManagerService::s_directoryName(), pLmcpObjectNetworkClient)
 {
 }
 

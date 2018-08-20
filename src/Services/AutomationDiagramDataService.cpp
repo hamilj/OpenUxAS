@@ -72,8 +72,8 @@ namespace data
 AutomationDiagramDataService::ServiceBase::CreationRegistrar<AutomationDiagramDataService>
 AutomationDiagramDataService::s_registrar(AutomationDiagramDataService::s_registryServiceTypeNames());
 
-AutomationDiagramDataService::AutomationDiagramDataService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: ServiceBase(AutomationDiagramDataService::s_typeName(), AutomationDiagramDataService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+AutomationDiagramDataService::AutomationDiagramDataService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(AutomationDiagramDataService::s_typeName(), AutomationDiagramDataService::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 AutomationDiagramDataService::~AutomationDiagramDataService() { };
 

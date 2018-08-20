@@ -46,7 +46,7 @@ class ServiceBase : public uxas::communications::LmcpObjectMessageProcessor
 {
 public:
     ServiceBase(const std::string& serviceType, const std::string& workDirectoryName,
-        std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+        std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual ~ServiceBase() { }
 
@@ -130,7 +130,7 @@ public:
     /** \brief  */
     std::string m_workDirectoryName;
 
-    std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> m_pLmcpObjectNetworkClient;
+    std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> m_pLmcpObjectNetworkClient;
 
     /** \brief Unique ID for UxAS entity instance; value read from configuration XML */
     uint32_t m_entityId;
@@ -203,17 +203,17 @@ public:
      */
     static
     std::unique_ptr<ServiceBase>
-    instantiateService(const std::string& serviceType, std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    instantiateService(const std::string& serviceType, std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
         auto it = createFunctionByServiceType().find(serviceType);
-        ServiceBase * newService(it == createFunctionByServiceType().end() ? nullptr : (it->second)(std::move(pLmcpObjectNetworkClient)));
+        ServiceBase * newService(it == createFunctionByServiceType().end() ? nullptr : (it->second)(pLmcpObjectNetworkClient));
         std::unique_ptr<ServiceBase> service(newService);
         return (service);
     }
 
 protected:
     /** \brief type representing a pointer to a service creation function.  */
-    using serviceCreationFunctionPointer = ServiceBase* (*)(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient>);
+    using serviceCreationFunctionPointer = ServiceBase* (*)(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient>);
 
     /** \brief static service creation function implemented that is implemented by subclasses.  */
     static

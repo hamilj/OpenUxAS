@@ -57,8 +57,8 @@ namespace task
 MultiVehicleWatchTaskService::ServiceBase::CreationRegistrar<MultiVehicleWatchTaskService>
 MultiVehicleWatchTaskService::s_registrar(MultiVehicleWatchTaskService::s_registryServiceTypeNames());
 
-MultiVehicleWatchTaskService::MultiVehicleWatchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: TaskServiceBase(MultiVehicleWatchTaskService::s_typeName(), MultiVehicleWatchTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+MultiVehicleWatchTaskService::MultiVehicleWatchTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(MultiVehicleWatchTaskService::s_typeName(), MultiVehicleWatchTaskService::s_directoryName(), pLmcpObjectNetworkClient)
 {
 };
 

@@ -40,8 +40,8 @@ namespace task {
 LoiterTaskService::ServiceBase::CreationRegistrar<LoiterTaskService>
 LoiterTaskService::s_registrar(LoiterTaskService::s_registryServiceTypeNames());
 
-LoiterTaskService::LoiterTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: TaskServiceBase(LoiterTaskService::s_typeName(), LoiterTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) {
+LoiterTaskService::LoiterTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(LoiterTaskService::s_typeName(), LoiterTaskService::s_directoryName(), pLmcpObjectNetworkClient) {
 };
 
 LoiterTaskService::~LoiterTaskService() {

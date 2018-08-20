@@ -310,7 +310,7 @@ public:
     }
 
     AssignmentTreeBranchBoundBase(const std::string& serviceType, const std::string& workDirectoryName,
-        std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+        std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual
     ~AssignmentTreeBranchBoundBase();

@@ -73,8 +73,8 @@ namespace service
 RoutePlannerVisibilityService::ServiceBase::CreationRegistrar<RoutePlannerVisibilityService>
 RoutePlannerVisibilityService::s_registrar(RoutePlannerVisibilityService::s_registryServiceTypeNames());
 
-RoutePlannerVisibilityService::RoutePlannerVisibilityService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: ServiceBase(RoutePlannerVisibilityService::s_typeName(), RoutePlannerVisibilityService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+RoutePlannerVisibilityService::RoutePlannerVisibilityService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(RoutePlannerVisibilityService::s_typeName(), RoutePlannerVisibilityService::s_directoryName(), pLmcpObjectNetworkClient)
 {
 };
 

@@ -53,8 +53,8 @@ namespace task
 EscortTaskService::ServiceBase::CreationRegistrar<EscortTaskService>
 EscortTaskService::s_registrar(EscortTaskService::s_registryServiceTypeNames());
 
-EscortTaskService::EscortTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: DynamicTaskServiceBase(EscortTaskService::s_typeName(), EscortTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+EscortTaskService::EscortTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: DynamicTaskServiceBase(EscortTaskService::s_typeName(), EscortTaskService::s_directoryName(), pLmcpObjectNetworkClient)
 {
 };
 

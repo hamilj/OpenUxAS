@@ -44,8 +44,8 @@ HelloWorld::ServiceBase::CreationRegistrar<HelloWorld>
 HelloWorld::s_registrar(HelloWorld::s_registryServiceTypeNames());
 
 // service constructor
-HelloWorld::HelloWorld(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: ServiceBase(HelloWorld::s_typeName(), HelloWorld::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+HelloWorld::HelloWorld(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(HelloWorld::s_typeName(), HelloWorld::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 // service destructor
 HelloWorld::~HelloWorld() { };

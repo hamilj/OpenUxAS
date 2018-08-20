@@ -125,8 +125,8 @@ namespace task
 CordonTaskService::ServiceBase::CreationRegistrar<CordonTaskService>
 CordonTaskService::s_registrar(CordonTaskService::s_registryServiceTypeNames());
 
-CordonTaskService::CordonTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: TaskServiceBase(CordonTaskService::s_typeName(), CordonTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+CordonTaskService::CordonTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(CordonTaskService::s_typeName(), CordonTaskService::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 CordonTaskService::~CordonTaskService() { };
 

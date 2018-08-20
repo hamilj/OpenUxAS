@@ -33,8 +33,8 @@ namespace service
 SimpleWaypointPlanManagerService::ServiceBase::CreationRegistrar<SimpleWaypointPlanManagerService>
 SimpleWaypointPlanManagerService::s_registrar(SimpleWaypointPlanManagerService::s_registryServiceTypeNames());
 
-SimpleWaypointPlanManagerService::SimpleWaypointPlanManagerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: ServiceBase(SimpleWaypointPlanManagerService::s_typeName(), SimpleWaypointPlanManagerService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+SimpleWaypointPlanManagerService::SimpleWaypointPlanManagerService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(SimpleWaypointPlanManagerService::s_typeName(), SimpleWaypointPlanManagerService::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 SimpleWaypointPlanManagerService::~SimpleWaypointPlanManagerService() { };
 

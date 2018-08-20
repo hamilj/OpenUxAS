@@ -29,8 +29,8 @@ namespace test
 {
 Test_SimulationTime::ServiceBase::CreationRegistrar<Test_SimulationTime> Test_SimulationTime::s_registrar(Test_SimulationTime::s_registryServiceTypeNames());
 
-Test_SimulationTime::Test_SimulationTime(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) :
-ServiceBase(Test_SimulationTime::s_typeName(), "", std::move(pLmcpObjectNetworkClient))
+Test_SimulationTime::Test_SimulationTime(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) :
+ServiceBase(Test_SimulationTime::s_typeName(), "", pLmcpObjectNetworkClient)
 {
 };
 

@@ -61,8 +61,8 @@ namespace task
 PatternSearchTaskService::ServiceBase::CreationRegistrar<PatternSearchTaskService>
 PatternSearchTaskService::s_registrar(PatternSearchTaskService::s_registryServiceTypeNames());
 
-PatternSearchTaskService::PatternSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: TaskServiceBase(PatternSearchTaskService::s_typeName(), PatternSearchTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+PatternSearchTaskService::PatternSearchTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(PatternSearchTaskService::s_typeName(), PatternSearchTaskService::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 PatternSearchTaskService::~PatternSearchTaskService()
 {

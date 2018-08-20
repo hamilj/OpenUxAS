@@ -33,8 +33,8 @@ namespace service
 AssignmentTreeBranchBoundService::ServiceBase::CreationRegistrar<AssignmentTreeBranchBoundService>
 AssignmentTreeBranchBoundService::s_registrar(AssignmentTreeBranchBoundService::s_registryServiceTypeNames());
 
-AssignmentTreeBranchBoundService::AssignmentTreeBranchBoundService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: AssignmentTreeBranchBoundBase(AssignmentTreeBranchBoundService::s_typeName(), AssignmentTreeBranchBoundService::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+AssignmentTreeBranchBoundService::AssignmentTreeBranchBoundService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: AssignmentTreeBranchBoundBase(AssignmentTreeBranchBoundService::s_typeName(), AssignmentTreeBranchBoundService::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 AssignmentTreeBranchBoundService::~AssignmentTreeBranchBoundService() { };
 

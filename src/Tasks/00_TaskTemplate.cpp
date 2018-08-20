@@ -42,8 +42,8 @@ TaskTemplate::ServiceBase::CreationRegistrar<TaskTemplate>
 TaskTemplate::s_registrar(TaskTemplate::s_registryServiceTypeNames());
 
 // service constructor
-TaskTemplate::TaskTemplate(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: TaskServiceBase(TaskTemplate::s_typeName(), TaskTemplate::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+TaskTemplate::TaskTemplate(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(TaskTemplate::s_typeName(), TaskTemplate::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 TaskTemplate::~TaskTemplate()
 {

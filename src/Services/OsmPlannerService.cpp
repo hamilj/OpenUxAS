@@ -56,8 +56,8 @@ namespace service
 OsmPlannerService::ServiceBase::CreationRegistrar<OsmPlannerService>
 OsmPlannerService::s_registrar(OsmPlannerService::s_registryServiceTypeNames());
 
-OsmPlannerService::OsmPlannerService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: ServiceBase(OsmPlannerService::s_typeName(), OsmPlannerService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+OsmPlannerService::OsmPlannerService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(OsmPlannerService::s_typeName(), OsmPlannerService::s_directoryName(), pLmcpObjectNetworkClient)
 {
     m_strSavePath = "OsmPlannerService";
 };

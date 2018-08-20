@@ -53,8 +53,8 @@ namespace task
 ImpactLineSearchTaskService::ServiceBase::CreationRegistrar<ImpactLineSearchTaskService>
 ImpactLineSearchTaskService::s_registrar(ImpactLineSearchTaskService::s_registryServiceTypeNames());
 
-ImpactLineSearchTaskService::ImpactLineSearchTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: TaskServiceBase(ImpactLineSearchTaskService::s_typeName(), ImpactLineSearchTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+ImpactLineSearchTaskService::ImpactLineSearchTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: TaskServiceBase(ImpactLineSearchTaskService::s_typeName(), ImpactLineSearchTaskService::s_directoryName(), pLmcpObjectNetworkClient)
 {
 };
 

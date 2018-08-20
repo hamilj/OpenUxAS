@@ -52,8 +52,8 @@ namespace task
 CommRelayTaskService::ServiceBase::CreationRegistrar<CommRelayTaskService>
 CommRelayTaskService::s_registrar(CommRelayTaskService::s_registryServiceTypeNames());
 
-CommRelayTaskService::CommRelayTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: DynamicTaskServiceBase(CommRelayTaskService::s_typeName(), CommRelayTaskService::s_directoryName(), std::move(pLmcpObjectNetworkClient))
+CommRelayTaskService::CommRelayTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: DynamicTaskServiceBase(CommRelayTaskService::s_typeName(), CommRelayTaskService::s_directoryName(), pLmcpObjectNetworkClient)
 {
 };
 

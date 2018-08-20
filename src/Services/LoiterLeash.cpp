@@ -40,8 +40,8 @@ LoiterLeash::s_registrar(LoiterLeash::s_registryServiceTypeNames());
 
 // service constructor
 
-LoiterLeash::LoiterLeash(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-: ServiceBase(LoiterLeash::s_typeName(), LoiterLeash::s_directoryName(), std::move(pLmcpObjectNetworkClient)) { };
+LoiterLeash::LoiterLeash(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+: ServiceBase(LoiterLeash::s_typeName(), LoiterLeash::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 // service destructor
 

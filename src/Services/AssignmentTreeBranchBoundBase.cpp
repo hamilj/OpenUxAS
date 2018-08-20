@@ -64,8 +64,8 @@ uxas::project::pisr::AssignmentType::AssignmentType c_Node_Base::m_assignmentTyp
 #endif
 
 AssignmentTreeBranchBoundBase::AssignmentTreeBranchBoundBase(const std::string& serviceType, const std::string& workDirectoryName,
-    std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-    : ServiceBase(serviceType, workDirectoryName, std::move(pLmcpObjectNetworkClient)) { };
+    std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : ServiceBase(serviceType, workDirectoryName, pLmcpObjectNetworkClient) { };
 
 AssignmentTreeBranchBoundBase::~AssignmentTreeBranchBoundBase() { };
 

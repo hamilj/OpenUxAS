@@ -64,12 +64,12 @@ public:
 	};
 
 	static ServiceBase*
-		create(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+		create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
 	{
-		return new LoiterTaskService(std::move(pLmcpObjectNetworkClient));
+		return new LoiterTaskService(pLmcpObjectNetworkClient);
 	};
 
-	explicit LoiterTaskService(std::unique_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+	explicit LoiterTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
 	virtual
 		~LoiterTaskService();
