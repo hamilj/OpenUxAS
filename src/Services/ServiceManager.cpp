@@ -351,7 +351,7 @@ ServiceManager::createService(const pugi::xml_node& serviceXmlNode, int64_t newS
         UXAS_LOG_INFORM(s_typeName(), "::createService received ", serviceXmlNode.name(), " XML node - expecting ", uxas::common::StringConstant::Service(), " XML node");
     }
 
-    std::unique_ptr<ServiceBase> newService = instantiateConfigureInitializeStartService(serviceXmlNode, 0, newServiceId);
+    std::unique_ptr<ServiceBase> newService = instantiateConfigureInitializeStartService(serviceXmlNode, newServiceId);
     if (newService)
     {
         UXAS_LOG_INFORM(s_typeName(), "::createService successfully created ", newService->m_networkClientTypeName, " service ID ", newService->m_networkId);
@@ -365,51 +365,8 @@ ServiceManager::createService(const pugi::xml_node& serviceXmlNode, int64_t newS
     }
 };
 
-std::unordered_map<uint32_t, std::unique_ptr<ServiceBase>>
-ServiceManager::createTestServices(const std::string& cfgXmlFilePath, uint32_t entityId, int64_t firstNetworkId)
-{
-    std::unordered_map<uint32_t, std::unique_ptr<ServiceBase>> testServicesByNetworkIdMap;
-    UXAS_LOG_INFORM(s_typeName(), "::createTestServices - START");
-//#ifdef GOOGLE_TEST_BRIDGES_ENABLED
-
-    int64_t networkId = firstNetworkId;
-    std::ifstream cfgXmlInputStream(cfgXmlFilePath);
-    pugi::xml_document xmlDoc;
-    pugi::xml_parse_result xmlParseSuccess = xmlDoc.load(cfgXmlInputStream);
-
-    if (xmlParseSuccess)
-    {
-        for (pugi::xml_node serviceOrBridgeXmlNode = xmlDoc.child(uxas::common::StringConstant::UxAS().c_str()).first_child();
-                serviceOrBridgeXmlNode; serviceOrBridgeXmlNode = serviceOrBridgeXmlNode.next_sibling())
-        {
-            if (uxas::common::StringConstant::Service().compare(serviceOrBridgeXmlNode.name()) == 0)
-            {
-                std::unique_ptr<ServiceBase> newTestService = instantiateConfigureInitializeStartService(serviceOrBridgeXmlNode, entityId, networkId);
-                networkId++;
-                if (newTestService)
-                {
-                    UXAS_LOG_INFORM(s_typeName(), "::createTestServices added ", newTestService->m_networkClientTypeName, " service with entity ID ", newTestService->m_entityId," and service ID ", newTestService->m_networkId, " from XML configuration ", cfgXmlFilePath);
-                    testServicesByNetworkIdMap.emplace(newTestService->m_networkId, std::move(newTestService));
-                }
-                else
-                {
-                    UXAS_LOG_ERROR(s_typeName(), "::createTestServices failed to add a service from XML configuration ", cfgXmlFilePath);
-                }
-            }
-        }
-    }
-    else
-    {
-        UXAS_LOG_ERROR(s_typeName(), "::createTestServices failed to load configuration XML from location ", cfgXmlFilePath);
-    }
-    UXAS_LOG_INFORM(s_typeName(), "::createTestServices - END");
-
-//#endif // GOOGLE_TEST_BRIDGES_ENABLED
-    return (testServicesByNetworkIdMap);
-};
-
 std::unique_ptr<ServiceBase>
-ServiceManager::instantiateConfigureInitializeStartService(const pugi::xml_node& serviceXmlNode, uint32_t entityId, int64_t networkId)
+ServiceManager::instantiateConfigureInitializeStartService(const pugi::xml_node& serviceXmlNode, int64_t networkId)
 {
     UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService - START");
     std::unique_ptr<ServiceBase> newServiceFinal;
@@ -436,27 +393,18 @@ ServiceManager::instantiateConfigureInitializeStartService(const pugi::xml_node&
         UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully instantiated ", newService->m_serviceType, " service ID ", newService->m_networkId, " and work directory name [", newService->m_workDirectoryName, "]");
         if (newService->configureService(uxas::common::ConfigurationManager::getInstance().getRootDataWorkDirectory(), serviceXmlNode))
         {
-            //TODO - consider friend of clientBase (protect m_entityId and m_entityIdString)
             // support test bridges
             int64_t networkIdLocal{newService->m_networkId};
-            uint32_t entityIdLocal{newService->m_entityId};
             bool isPassedInID{false};
             if(networkId > 0)
             {
                 networkIdLocal = networkId;
                 isPassedInID = true;
             }
-            if(entityId > 0)
-            {
-                entityIdLocal = entityId;
-                isPassedInID = true;
-            }
             
             if (isPassedInID)
             {
                 std::string originalUnicastAddress = uxas::communications::getNetworkClientUnicastAddress(newService->m_entityId, newService->m_networkId);
-                newService->m_entityId = entityIdLocal;
-                newService->m_entityIdString = std::to_string(entityIdLocal);
                 newService->m_networkId = networkIdLocal;
                 newService->m_networkIdString = std::to_string(networkIdLocal);
                 newService->m_pLmcpObjectNetworkClient->m_networkId = newService->m_networkId;

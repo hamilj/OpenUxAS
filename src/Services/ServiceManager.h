@@ -140,30 +140,13 @@ private:
     createService(const pugi::xml_node& serviceXmlNode, int64_t newServiceId);
 
 public:
-    
-    /**
-     * \brief The <B><i>createService</i></B> method creates an instance of a UxAS service.
-     * 
-     * @param xmlNode XML node containing the service type and service 
-     * configurations for service creation.
-     * @return true if service was created; false if service creation failed.
-     */
-    std::unordered_map<uint32_t, std::unique_ptr<ServiceBase>>
-    createTestServices(const std::string& cfgXmlFilePath, uint32_t entityId, int64_t firstNetworkId);
 
     std::unordered_map<std::uint32_t, std::unique_ptr<uxas::service::ServiceBase>>& getServicesById(){return(m_servicesById);};
 
 private:
 
-    /**
-     * \brief The <B><i>createService</i></B> method creates an instance of a UxAS service.
-     * 
-     * @param xmlNode XML node containing the service type and service 
-     * configurations for service creation.
-     * @return true if service was created; false if service creation failed.
-     */
     std::unique_ptr<ServiceBase>
-    instantiateConfigureInitializeStartService(const pugi::xml_node& serviceXmlNode, uint32_t entityId, int64_t networkId);
+    instantiateConfigureInitializeStartService(const pugi::xml_node& serviceXmlNode, int64_t networkId);
 
     /** \brief The <B><i>processReceivedLmcpMessage</i></B> method overrides a virtual method 
      * in base class <B><i>LmcpObjectNetworkClientBase</i></B> to process <b>LMCP</b> 
