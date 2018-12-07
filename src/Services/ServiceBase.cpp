@@ -30,7 +30,7 @@ int64_t getUniqueId()
 
 ServiceBase::ServiceBase(const std::string& serviceType, const std::string& workDirectoryName,
     std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-    : m_serviceType(serviceType), m_networkId(0), m_workDirectoryName(workDirectoryName),m_pLmcpObjectNetworkClient(pLmcpObjectNetworkClient)
+    : m_serviceType(serviceType), m_networkId(0), m_workDirectoryName(workDirectoryName), m_pLmcpObjectNetworkClient(pLmcpObjectNetworkClient)
 {
     if (m_pLmcpObjectNetworkClient)
     {
