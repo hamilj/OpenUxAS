@@ -67,7 +67,6 @@ OsmPlannerService::~OsmPlannerService() { };
 bool
 OsmPlannerService::configure(const pugi::xml_node& ndComponent)
 {
-    uint32_t ui32EntityID = m_entityId;
     uint32_t ui32LmcpMessageSize_max = 100000;
     std::stringstream sstrErrors;
 
