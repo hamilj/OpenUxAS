@@ -118,8 +118,6 @@ protected:
 
     std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> m_pLmcpObjectNetworkClient;
 
-    uxas::communications::LmcpObjectNetworkClient::ReceiveProcessingType m_receiveProcessingType{uxas::communications::LmcpObjectNetworkClient::ReceiveProcessingType::LMCP};
-
 private:
     /** \brief Copy construction not permitted */
     ServiceBase(ServiceBase const&) = delete;

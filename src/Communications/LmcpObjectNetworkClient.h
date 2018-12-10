@@ -94,26 +94,12 @@ class LmcpObjectMessageProcessor;
 class LmcpObjectNetworkClient
 {
 public:
-    /** \class ReceiveProcessingType
-     * 
-     * \par Enumeration specifying whether or not to de-serialize a received message.
-     * 
-     * \n
-     */
-    enum class ReceiveProcessingType
-    {
-        /** \brief Received <b>LMCP</b> objects are de-serialized */
-        LMCP,
-        /** \brief Received <b>LMCP</b> objects are not de-serialized */
-        SERIALIZED_LMCP
-    };
-
     LmcpObjectNetworkClient();
 
     virtual ~LmcpObjectNetworkClient() { }
 
-    virtual bool configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType,
-        const pugi::xml_node& networkClientXmlNode, LmcpObjectMessageProcessor& msgProcessor) = 0;
+    virtual bool configureNetworkClient(const std::string& subclassTypeName, const pugi::xml_node& networkClientXmlNode,
+        LmcpObjectMessageProcessor& msgProcessor) = 0;
 
     virtual bool initializeAndStart(LmcpObjectMessageProcessor& msgProcessor) = 0;
 
@@ -155,6 +141,23 @@ public:
 
     /** \brief Name of subclass used for logging/messaging. */
     std::string m_networkClientTypeName;
+
+    /** \class ReceiveProcessingType
+     *
+     * \par Enumeration specifying whether or not to de-serialize a received message.
+     *
+     * \n
+     */
+    enum class ReceiveProcessingType
+    {
+        /** \brief Received <b>LMCP</b> objects are de-serialized */
+        LMCP,
+        /** \brief Received <b>LMCP</b> objects are not de-serialized */
+        SERIALIZED_LMCP
+    };
+
+    /** \brief  this is the unique ID for the entity represented by this instance of the UxAS software, configured in component manager XML*/
+    ReceiveProcessingType m_receiveProcessingType;
 
     /** \brief Unicast message address for messaging case of sending message to only this network client instance */
     std::string m_entityIdNetworkIdUnicastString;

@@ -58,7 +58,7 @@ ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi
         m_workDirectoryPath = "";
     }
 
-    isSuccess = m_pLmcpObjectNetworkClient->configureNetworkClient(m_serviceType, m_receiveProcessingType, serviceXmlNode, *this);
+    isSuccess = m_pLmcpObjectNetworkClient->configureNetworkClient(m_serviceType, serviceXmlNode, *this);
 
     //
     // DESIGN 20150911 RJT message addressing - service group (multi-cast)

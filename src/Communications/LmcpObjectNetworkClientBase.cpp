@@ -48,15 +48,14 @@ LmcpObjectNetworkClientBase::~LmcpObjectNetworkClientBase()
 };
 
 bool
-LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType,
-    const pugi::xml_node& networkClientXmlNode, LmcpObjectMessageProcessor& msgProcessor)
+LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassTypeName, const pugi::xml_node& networkClientXmlNode,
+    LmcpObjectMessageProcessor& msgProcessor)
 {
     UXAS_LOG_DEBUGGING("LmcpObjectNetworkClientBase::configureNetworkClient method START");
     m_entityId = uxas::common::ConfigurationManager::getInstance().getEntityId();
     m_entityIdString = std::to_string(m_entityId);
     m_entityType = uxas::common::ConfigurationManager::getInstance().getEntityType();
     m_networkClientTypeName = subclassTypeName;
-    m_receiveProcessingType = receiveProcessingType;
 
     //
     // DESIGN 20150911 RJT message addressing - entity ID + service ID (uni-cast)

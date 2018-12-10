@@ -38,8 +38,8 @@ class TestLmcpObjectNetworkClient : public uxas::communications::LmcpObjectNetwo
 public:
     TestLmcpObjectNetworkClient(uint32_t entityId, const std::string& entityType, int64_t networkId);
 
-    bool configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType,
-        const pugi::xml_node& networkClientXmlNode, uxas::communications::LmcpObjectMessageProcessor& msgProcessor) override;
+    bool configureNetworkClient(const std::string& subclassTypeName, const pugi::xml_node& networkClientXmlNode,
+        uxas::communications::LmcpObjectMessageProcessor& msgProcessor) override;
 
     bool initializeAndStart(uxas::communications::LmcpObjectMessageProcessor& msgProcessor) override;
 

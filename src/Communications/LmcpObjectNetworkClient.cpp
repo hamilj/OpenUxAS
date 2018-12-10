@@ -76,7 +76,7 @@ std::string getNetworkClientUnicastAddress(const std::string& entityId, const in
 }
 
 LmcpObjectNetworkClient::LmcpObjectNetworkClient()
-    : m_networkId(getUniqueId()), m_networkIdString(std::to_string(m_networkId)),
+    : m_networkId(getUniqueId()), m_networkIdString(std::to_string(m_networkId)), m_receiveProcessingType(ReceiveProcessingType::LMCP),
     m_isBaseClassKillServiceProcessingPermitted(true), m_isTerminateNetworkClient(false), m_isBaseClassTerminationFinished(false), m_isSubclassTerminationFinished(false),
     m_subclassTerminationAbortDuration_ms(10000), m_subclassTerminationWarnDuration_ms(3000), m_subclassTerminationAttemptPeriod_ms(500)
 {

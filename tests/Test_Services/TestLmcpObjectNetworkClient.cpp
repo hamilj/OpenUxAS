@@ -17,8 +17,8 @@ TestLmcpObjectNetworkClient::TestLmcpObjectNetworkClient(uint32_t entityId, cons
     m_networkIdString = std::to_string(m_networkId);
 }
 
-bool TestLmcpObjectNetworkClient::configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType,
-    const pugi::xml_node& networkClientXmlNode, uxas::communications::LmcpObjectMessageProcessor& msgProcessor)
+bool TestLmcpObjectNetworkClient::configureNetworkClient(const std::string& subclassTypeName, const pugi::xml_node& networkClientXmlNode,
+    uxas::communications::LmcpObjectMessageProcessor& msgProcessor)
 {
     m_networkClientTypeName = subclassTypeName;
     return msgProcessor.configure(networkClientXmlNode);

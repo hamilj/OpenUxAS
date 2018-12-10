@@ -125,13 +125,12 @@ public:
      * and invokes the <B><i>configure</i></B> virtual method. 
      * 
      * @param subclassTypeName type name of the inheriting class.
-     * @param receiveProcessingType enumeration determining whether or not received <b>LMCP</b> message will be de-serialized.
      * @param networkXmlNode XML node containing object configurations.
      * @return true if configuration succeeds; false if configuration fails.
      */
     bool
-    configureNetworkClient(const std::string& subclassTypeName, ReceiveProcessingType receiveProcessingType,
-        const pugi::xml_node& networkClientXmlNode, LmcpObjectMessageProcessor& msgProcessor) override;
+    configureNetworkClient(const std::string& subclassTypeName, const pugi::xml_node& networkClientXmlNode,
+        LmcpObjectMessageProcessor& msgProcessor) override;
 
     /** \brief The <B><i>initializeAndStart</i></B> must be invoked 
      * after calling the protected <B><i>configureNetworkClient</i></B> method.  
@@ -269,9 +268,6 @@ private:
 
     /** \brief  */
     bool m_isThreadStarted{false};
-
-    /** \brief  this is the unique ID for the entity represented by this instance of the UxAS software, configured in component manager XML*/
-    ReceiveProcessingType m_receiveProcessingType;
 
     /** \brief Pointer to the component's thread.  */
     std::unique_ptr<std::thread> m_networkClientThread;
