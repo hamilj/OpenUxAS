@@ -153,13 +153,11 @@ public:
     }
 
 protected:
+    // Children must implement a create function returning a new object of the subclass via
+    //    static ServiceBase* create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+
     /** \brief type representing a pointer to a service creation function.  */
     using serviceCreationFunctionPointer = ServiceBase* (*)(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient>);
-
-    /** \brief static service creation function implemented that is implemented by subclasses.  */
-    static
-    ServiceBase*
-    create() { return nullptr; }
 
     /** \brief registers service type name, alias type names and it's create() function for a subclass.  */
     static
