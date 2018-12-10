@@ -27,13 +27,6 @@ namespace uxas
 namespace service
 {
 
-/**
- * \brief The <B><i>getUniqueId</i></B> returns a unique service ID.
- * 
- * @return unique service ID.
- */
-int64_t getUniqueId();
-
 /** \class ServiceBase
  * 
  * \par The <B><i>ServiceBase</i></B> is the base class for all UxAS service classes. 

@@ -23,11 +23,6 @@ namespace uxas
 namespace service
 {
 
-int64_t getUniqueId()
-{
-    return uxas::communications::getUniqueId();
-}
-
 ServiceBase::ServiceBase(const std::string& serviceType, const std::string& workDirectoryName,
     std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     : m_serviceType(serviceType), m_workDirectoryName(workDirectoryName), m_pLmcpObjectNetworkClient(pLmcpObjectNetworkClient)

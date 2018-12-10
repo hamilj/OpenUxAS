@@ -251,7 +251,7 @@ TaskManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicati
         }
 
         auto createNewServiceMessage = std::make_shared<uxas::messages::uxnative::CreateNewService>();
-        auto serviceId = uxas::service::getUniqueId();
+        auto serviceId = uxas::communications::getUniqueId();
         createNewServiceMessage->setServiceID(serviceId);
         std::string xmlConfigStr = "<Service Type=\"" + baseTask->getFullLmcpTypeName() + "\">" +
                 " <TaskRequest>" + baseTask->toXML() + "</TaskRequest>\n" + xmlTaskOptions;
