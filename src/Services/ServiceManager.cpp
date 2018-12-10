@@ -520,7 +520,7 @@ void
 ServiceManager::terminateAllServices()
 {
     // Kill all bridges first
-    uxas::communications::LmcpObjectNetworkBridgeManager::getInstance().terminateAllBridges();
+    uxas::communications::LmcpObjectNetworkBridgeManager::getInstance().terminateAllBridges(m_pLmcpObjectNetworkClient);
     
     // send KillService message to any non-terminated services
     std::lock_guard<std::mutex> lock(m_servicesByIdMutex);

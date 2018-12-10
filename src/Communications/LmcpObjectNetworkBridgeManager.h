@@ -10,6 +10,8 @@
 #ifndef UXAS_MESSAGE_LMCP_OBJECT_NETWORK_BRIDGE_MANAGER_H
 #define UXAS_MESSAGE_LMCP_OBJECT_NETWORK_BRIDGE_MANAGER_H
 
+#include "LmcpObjectNetworkClient.h"
+
 #include <memory>
 #include <thread>
 #include <unordered_map>
@@ -107,7 +109,7 @@ public:
     static LmcpObjectNetworkBridgeManager&
     getInstance();
 
-    void terminateAllBridges();
+    void terminateAllBridges(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
     void removeTerminatedBridges(uint32_t &runningSvcCnt, uint32_t &terminatedSvcCnt);
     
     ~LmcpObjectNetworkBridgeManager() { };

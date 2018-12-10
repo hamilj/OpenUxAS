@@ -9,8 +9,6 @@
 
 #include "LmcpObjectNetworkBridgeManager.h"
 
-#include "ServiceManager.h"
-
 #include "LmcpObjectNetworkSerialBridge.h"
 #include "LmcpObjectNetworkTcpBridge.h"
 #include "LmcpObjectNetworkSubscribePushBridge.h"
@@ -52,7 +50,7 @@ LmcpObjectNetworkBridgeManager::getInstance()
 };
 
 void
-LmcpObjectNetworkBridgeManager::terminateAllBridges()
+LmcpObjectNetworkBridgeManager::terminateAllBridges(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
 {
     for (auto svcIt = m_bridgesByNetworkId.cbegin(), serviceItEnd = m_bridgesByNetworkId.cend(); svcIt != serviceItEnd; svcIt++)
     {
@@ -63,7 +61,7 @@ LmcpObjectNetworkBridgeManager::terminateAllBridges()
             std::cout << std::endl << s_typeName() << "::terminateAllBridges sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->m_networkClientTypeName << " having entity ID [" << svcIt->second->m_entityId << "] and network ID [" << svcIt->second->m_networkId << "]" << std::endl;
             auto killService = uxas::stduxas::make_unique<uxas::messages::uxnative::KillService>();
             killService->setServiceID(svcIt->second->m_networkId);
-            uxas::service::ServiceManager::getInstance().sendLmcpObjectLimitedCastMessage(getNetworkClientUnicastAddress(svcIt->second->m_entityId, svcIt->second->m_networkId), std::move(killService));
+            pLmcpObjectNetworkClient->sendLmcpObjectLimitedCastMessage(getNetworkClientUnicastAddress(svcIt->second->m_entityId, svcIt->second->m_networkId), std::move(killService));
         }
         else
         {
