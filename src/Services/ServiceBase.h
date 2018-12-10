@@ -81,34 +81,11 @@ public:
     bool
     initializeAndStartService();
 
+    void updateNetworkId(int64_t networkId);
+
     inline bool addSubscriptionAddress(const std::string& address)
     {
         return m_pLmcpObjectNetworkClient->addSubscriptionAddress(address);
-    }
-
-    inline bool removeSubscriptionAddress(const std::string& address)
-    {
-        return m_pLmcpObjectNetworkClient->removeSubscriptionAddress(address);
-    }
-
-    inline bool removeAllSubscriptionAddresses()
-    {
-        return m_pLmcpObjectNetworkClient->removeAllSubscriptionAddresses();
-    }
-
-    inline void sendLmcpObjectLimitedCastMessage(const std::string& castAddress, std::unique_ptr<avtas::lmcp::Object> lmcpObject)
-    {
-        m_pLmcpObjectNetworkClient->sendLmcpObjectLimitedCastMessage(castAddress, std::move(lmcpObject));
-    }
-
-    inline void sendLmcpObjectBroadcastMessage(std::unique_ptr<avtas::lmcp::Object> lmcpObject)
-    {
-        m_pLmcpObjectNetworkClient->sendLmcpObjectBroadcastMessage(std::move(lmcpObject));
-    }
-
-    inline void sendSerializedLmcpObjectMessage(std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> serializedLmcpObject)
-    {
-        m_pLmcpObjectNetworkClient->sendSerializedLmcpObjectMessage(std::move(serializedLmcpObject));
     }
 
     inline void sendSharedLmcpObjectBroadcastMessage(const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)
@@ -121,61 +98,25 @@ public:
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(castAddress, lmcpObject);
     }
 
-    /** \brief unique ID of the component.  */
-    std::uint32_t m_serviceId;
+    inline bool getIsTerminationFinished()
+    {
+        return m_pLmcpObjectNetworkClient->getIsTerminationFinished();
+    }
+
+    // TODO: factor out entity state to base/interface and remove wrapper (part of configuration?)
+    inline uint32_t getEntityId() const { return m_pLmcpObjectNetworkClient->m_entityId; }
+
+    inline std::string getEntityIdString() const { return m_pLmcpObjectNetworkClient->m_entityIdString; }
+
+    inline uint32_t getServiceId() const { return m_pLmcpObjectNetworkClient->m_networkId; }
 
     /** \brief  */
     std::string m_serviceType;
 
     /** \brief  */
-    std::string m_workDirectoryName;
+    const std::string m_workDirectoryName;
 
     std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> m_pLmcpObjectNetworkClient;
-
-    /** \brief Unique ID for UxAS entity instance; value read from configuration XML */
-    uint32_t m_entityId;
-
-    /** \brief String representation of the unique ID for UxAS entity instance; value read from configuration XML */
-    std::string m_entityIdString;
-
-    /** \brief Type of UxAS entity instance; value read from configuration XML */
-    std::string m_entityType;
-
-    /** \brief Unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
-    int64_t m_networkId;
-
-    /** \brief String representation of the unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
-    std::string m_networkIdString;
-
-    /** \brief Name of subclass used for logging/messaging. */
-    std::string m_networkClientTypeName;
-
-    inline int64_t getUniqueEntitySendMessageId() { return uxas::communications::getUniqueEntitySendMessageId(); }
-
-    inline std::string getEntityServicesCastAllAddress(const uint32_t entityId)
-    {
-        return uxas::communications::getEntityServicesCastAllAddress(entityId);
-    }
-
-    inline std::string getNetworkClientUnicastAddress(const uint32_t entityId, const int64_t networkClientId)
-    {
-        return uxas::communications::getNetworkClientUnicastAddress(entityId, networkClientId);
-    }
-
-    inline std::string getNetworkClientUnicastAddress(const uint32_t entityId, const std::string networkClientId)
-    {
-        return uxas::communications::getNetworkClientUnicastAddress(entityId, networkClientId);
-    }
-
-    inline std::string getNetworkClientUnicastAddress(const std::string& entityId, const std::string& networkClientId)
-    {
-        return uxas::communications::getNetworkClientUnicastAddress(entityId, networkClientId);
-    }
-
-    inline bool getIsTerminationFinished()
-    {
-        return m_pLmcpObjectNetworkClient->getIsTerminationFinished();
-    }
 
 protected:
     /** \brief  */

@@ -81,7 +81,7 @@ WaypointPlanManagerService::configure(const pugi::xml_node& ndComponent)
 
     bool bSucceeded(true);
 
-    m_vehicleID = m_entityId; // can be overridden below
+    m_vehicleID = getEntityId(); // can be overridden below
 
     std::string strComponentType = ndComponent.attribute(STRING_XML_TYPE).value();
     //assert(strComponentType==STRING_XML_COMPONENT_TYPE)
@@ -297,11 +297,11 @@ bool WaypointPlanManagerService::isInitializePlan(std::shared_ptr<afrl::cmasi::M
             missionCommandTemp->setFirstWaypoint(-1); // uninitialized
 
             std::shared_ptr<afrl::cmasi::MissionCommand> missionSegment_01(missionCommandTemp->clone());
-            missionSegment_01->setCommandID(getUniqueEntitySendMessageId());
+            missionSegment_01->setCommandID(uxas::communications::getUniqueEntitySendMessageId());
             //COUT_INFO("missionSegment_01->getCommandID[" << missionSegment_01->getCommandID() << "]")
 
             std::shared_ptr<afrl::cmasi::MissionCommand> missionSegment_02(missionCommandTemp->clone());
-            missionSegment_02->setCommandID(getUniqueEntitySendMessageId());
+            missionSegment_02->setCommandID(uxas::communications::getUniqueEntitySendMessageId());
             //COUT_INFO("missionSegment_02->getCommandID[" << missionSegment_01->getCommandID() << "]")
 
             auto itWaypoint = ptr_MissionCommand->getWaypointList().begin();
@@ -351,7 +351,7 @@ bool WaypointPlanManagerService::isInitializePlan(std::shared_ptr<afrl::cmasi::M
                         m_missionSegments.push_back(missionSegment_01);
                         missionSegment_01 = missionSegment_02;
                         missionSegment_02.reset(missionCommandTemp->clone());
-                        missionSegment_02->setCommandID(getUniqueEntitySendMessageId());
+                        missionSegment_02->setCommandID(uxas::communications::getUniqueEntitySendMessageId());
                         //COUT_INFO("missionSegment_02->getCommandID[" << missionSegment_01->getCommandID() << "]")
                     }
                     else

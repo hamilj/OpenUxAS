@@ -237,7 +237,7 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
 void AutomationRequestValidatorService::HandleAutomationRequest(std::shared_ptr<avtas::lmcp::Object>& autoRequest)
 {
     auto uniqueAutomationRequest = std::shared_ptr<uxas::messages::task::UniqueAutomationRequest> (new uxas::messages::task::UniqueAutomationRequest);
-    uniqueAutomationRequest->setRequestID(getUniqueEntitySendMessageId());
+    uniqueAutomationRequest->setRequestID(uxas::communications::getUniqueEntitySendMessageId());
 
     if (afrl::impact::isImpactAutomationRequest(autoRequest))
     {

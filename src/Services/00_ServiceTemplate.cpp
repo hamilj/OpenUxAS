@@ -70,7 +70,7 @@ bool ServiceTemplate::configure(const pugi::xml_node& ndComponent)
 bool ServiceTemplate::initialize()
 {
     // perform any required initialization before the service is started
-    std::cout << "*** INITIALIZING:: Service[" << s_typeName() << "] Service Id[" << m_serviceId << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
+    std::cout << "*** INITIALIZING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
     
     return (true);
 }
@@ -78,7 +78,7 @@ bool ServiceTemplate::initialize()
 bool ServiceTemplate::start()
 {
     // perform any actions required at the time the service starts
-    std::cout << "*** STARTING:: Service[" << s_typeName() << "] Service Id[" << m_serviceId << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
+    std::cout << "*** STARTING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
     
     return (true);
 };
@@ -86,7 +86,7 @@ bool ServiceTemplate::start()
 bool ServiceTemplate::terminate()
 {
     // perform any action required during service termination, before destructor is called.
-    std::cout << "*** TERMINATING:: Service[" << s_typeName() << "] Service Id[" << m_serviceId << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
+    std::cout << "*** TERMINATING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
     
     return (true);
 }
@@ -102,7 +102,7 @@ bool ServiceTemplate::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
         // send out response
         auto keyValuePairOut = std::make_shared<afrl::cmasi::KeyValuePair>();
         keyValuePairOut->setKey(s_typeName());
-        keyValuePairOut->setValue(std::to_string(m_serviceId));
+        keyValuePairOut->setValue(std::to_string(getServiceId()));
         sendSharedLmcpObjectBroadcastMessage(keyValuePairOut);
         
     }

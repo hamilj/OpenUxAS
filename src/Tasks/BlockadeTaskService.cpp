@@ -253,7 +253,7 @@ void BlockadeTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::E
 
         // build mini-mission of two waypoint with hover action at end
         auto missionCommand = new afrl::cmasi::MissionCommand;
-        missionCommand->setCommandID(getUniqueEntitySendMessageId());
+        missionCommand->setCommandID(uxas::communications::getUniqueEntitySendMessageId());
         missionCommand->setFirstWaypoint(1);
         missionCommand->setVehicleID(entityState->getID());
         auto wp = new afrl::cmasi::Waypoint;

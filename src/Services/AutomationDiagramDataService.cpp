@@ -246,7 +246,7 @@ void AutomationDiagramDataService::ProcessUniqueAutomationResponse(std::shared_p
         std::stringstream sstrErrors;
         std::string savePath;
         std::stringstream sstrNewDirectoryPrefix;
-        sstrNewDirectoryPrefix << STRING_COMPONENT_NAME << "_ID" << std::setfill('0') << std::setw(4) << m_entityId;
+        sstrNewDirectoryPrefix << STRING_COMPONENT_NAME << "_ID" << std::setfill('0') << std::setw(4) << getEntityId();
         std::string strComponentPath = m_basePath + "/";
         bool isSucceeded = uxas::common::utilities::c_FileSystemUtilities::bCreateUniqueDirectory(strComponentPath, sstrNewDirectoryPrefix.str(), savePath, sstrErrors);
         if (isSucceeded)

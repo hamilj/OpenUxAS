@@ -127,7 +127,7 @@ bool DynamicTaskServiceBase::processReceivedLmcpMessageTask(std::shared_ptr<avta
     if (messages::route::isRoutePlanResponse(receivedLmcpObject))
     {
         auto response = std::dynamic_pointer_cast<messages::route::RoutePlanResponse>(receivedLmcpObject);
-        if (response->getResponseID() == m_serviceId &&
+        if (response->getResponseID() == getServiceId() &&
             !response->getRouteResponses().empty() &&
             response->getRouteResponses().front()->getRouteID() == TaskOptionClass::m_routeIdFromLastTask &&
             !response->getRouteResponses().front()->getWaypoints().empty())
@@ -298,7 +298,7 @@ void DynamicTaskServiceBase::activeEntityState(const std::shared_ptr<afrl::cmasi
         auto request = std::make_shared<messages::route::RoutePlanRequest>();
         request->setVehicleID(entityState->getID());
         request->setAssociatedTaskID(0); //go behind TaskServiceBases' back. The routePlanner should do a direct reply ensuring this is the only instance that gets the response
-        request->setRequestID(this->m_serviceId);
+        request->setRequestID(getServiceId());
         request->setIsCostOnlyRequest(false);
         auto constraint = new messages::route::RouteConstraints;
 

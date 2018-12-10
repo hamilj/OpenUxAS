@@ -76,7 +76,7 @@ StatusReportService::~StatusReportService()
 bool StatusReportService::configure(const pugi::xml_node& ndComponent)
 {
     // default to entity identified in top-level configuration
-    m_vehicleId = ndComponent.attribute("VehicleID").as_int64(m_entityId);
+    m_vehicleId = ndComponent.attribute("VehicleID").as_int64(getEntityId());
     m_report.setVehicleID(m_vehicleId);
     
     // make sure report period is something sane (e.g. at most 10Hz)

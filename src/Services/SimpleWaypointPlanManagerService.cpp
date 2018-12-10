@@ -41,7 +41,7 @@ SimpleWaypointPlanManagerService::~SimpleWaypointPlanManagerService() { };
 bool
 SimpleWaypointPlanManagerService::configure(const pugi::xml_node& ndComponent)
 {
-    m_vehicleID = m_entityId;
+    m_vehicleID = getEntityId();
     if (!ndComponent.attribute(STRING_XML_VEHICLE_ID).empty())
     {
         m_vehicleID = ndComponent.attribute(STRING_XML_VEHICLE_ID).as_uint();

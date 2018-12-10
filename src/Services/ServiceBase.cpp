@@ -30,17 +30,8 @@ int64_t getUniqueId()
 
 ServiceBase::ServiceBase(const std::string& serviceType, const std::string& workDirectoryName,
     std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
-    : m_serviceType(serviceType), m_networkId(0), m_workDirectoryName(workDirectoryName), m_pLmcpObjectNetworkClient(pLmcpObjectNetworkClient)
-{
-    if (m_pLmcpObjectNetworkClient)
-    {
-        m_networkId = m_pLmcpObjectNetworkClient->m_networkId;
-        m_networkIdString = m_pLmcpObjectNetworkClient->m_networkIdString;
-    }
-
-    m_serviceId = m_networkId;
-    UXAS_LOG_INFORM(m_serviceType, "::ServiceBase set service ID to LMCP network ID value ", m_networkId);
-}
+    : m_serviceType(serviceType), m_workDirectoryName(workDirectoryName), m_pLmcpObjectNetworkClient(pLmcpObjectNetworkClient)
+{ }
 
 bool
 ServiceBase::configureService(const std::string& parentOfWorkDirectory, const std::string& serviceXml)
@@ -73,10 +64,6 @@ ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi
     }
 
     isSuccess = m_pLmcpObjectNetworkClient->configureNetworkClient(m_serviceType, m_receiveProcessingType, serviceXmlNode, *this);
-    m_entityId = m_pLmcpObjectNetworkClient->m_entityId;
-    m_entityIdString = m_pLmcpObjectNetworkClient->m_entityIdString;
-    m_entityType = m_pLmcpObjectNetworkClient->m_entityType;
-    m_networkClientTypeName = m_pLmcpObjectNetworkClient->m_networkClientTypeName;
 
     //
     // DESIGN 20150911 RJT message addressing - service group (multi-cast)
@@ -104,11 +91,11 @@ ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi
     if (isSuccess)
     {
         m_isConfigured = true;
-        UXAS_LOG_INFORM(m_serviceType, "::configureService succeeded - service ID ", m_serviceId);
+        UXAS_LOG_INFORM(m_serviceType, "::configureService succeeded - service ID ", getServiceId());
     }
     else
     {
-        UXAS_LOG_ERROR(m_serviceType, "::configureService failed - service ID ", m_serviceId);
+        UXAS_LOG_ERROR(m_serviceType, "::configureService failed - service ID ", getServiceId());
     }
 
     UXAS_LOG_DEBUGGING(m_serviceType, "::configureService method END");
@@ -128,17 +115,17 @@ ServiceBase::initializeAndStartService()
             isSuccess = uxas::common::utilities::c_FileSystemUtilities::bCreateDirectory(m_workDirectoryPath, errors);
             if (isSuccess)
             {
-                UXAS_LOG_INFORM(m_serviceType, "::initializeAndStartService created work directory ", m_workDirectoryPath, " - service ID ", m_serviceId);
+                UXAS_LOG_INFORM(m_serviceType, "::initializeAndStartService created work directory ", m_workDirectoryPath, " - service ID ", getServiceId());
             }
             else
             {
-                UXAS_LOG_ERROR(m_serviceType, "::initializeAndStartService failed to create work directory ", m_workDirectoryPath, " - service ID ", m_serviceId);
+                UXAS_LOG_ERROR(m_serviceType, "::initializeAndStartService failed to create work directory ", m_workDirectoryPath, " - service ID ", getServiceId());
             }
         }
         else
         {
             isSuccess = true;
-            UXAS_LOG_INFORM(m_serviceType, "::initializeAndStartService skipping work directory creation - service ID ", m_serviceId);
+            UXAS_LOG_INFORM(m_serviceType, "::initializeAndStartService skipping work directory creation - service ID ", getServiceId());
         }
 
         if (isSuccess)
@@ -148,11 +135,11 @@ ServiceBase::initializeAndStartService()
 
         if (isSuccess)
         {
-            UXAS_LOG_INFORM(m_serviceType, "::initializeAndStartService succeeded - service ID ", m_serviceId);
+            UXAS_LOG_INFORM(m_serviceType, "::initializeAndStartService succeeded - service ID ", getServiceId());
         }
         else
         {
-            UXAS_LOG_ERROR(m_serviceType, "::initializeAndStartService failed - service ID ", m_serviceId);
+            UXAS_LOG_ERROR(m_serviceType, "::initializeAndStartService failed - service ID ", getServiceId());
         }
     }
     else
@@ -161,6 +148,14 @@ ServiceBase::initializeAndStartService()
     }
 
     return (isSuccess);
+}
+
+void ServiceBase::updateNetworkId(int64_t networkId)
+{
+    m_pLmcpObjectNetworkClient->removeSubscriptionAddress(uxas::communications::getNetworkClientUnicastAddress(getEntityId(), m_pLmcpObjectNetworkClient->m_networkId));
+    m_pLmcpObjectNetworkClient->m_networkId = networkId;
+    m_pLmcpObjectNetworkClient->m_networkIdString = std::to_string(networkId);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::communications::getNetworkClientUnicastAddress(getEntityId(), m_pLmcpObjectNetworkClient->m_networkId));
 }
 
 }; //namespace service

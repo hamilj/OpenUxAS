@@ -615,7 +615,7 @@ void RendezvousTask::activeEntityState(const std::shared_ptr<afrl::cmasi::Entity
         rtime = (std::max)(mintime, (std::min)(maxtime, rtime));
     }
     
-    if(entityState->getID() == m_entityId)
+    if(entityState->getID() == getEntityId())
     {
         for(auto dst : desiredTimes)
             std::cout << "      ntime: " << dst << std::endl;
@@ -623,7 +623,7 @@ void RendezvousTask::activeEntityState(const std::shared_ptr<afrl::cmasi::Entity
         std::cout << "    maxtime: " << maxtime << std::endl;
         std::cout << "    destime: " << midtime << std::endl;
         std::cout << "      rtime: " << rtime << std::endl;
-        std::cout << "Entity [" << m_entityId << "] has rtime: " << rtime << " and rdist: " << remainingDist << std::endl;
+        std::cout << "Entity [" << getEntityId() << "] has rtime: " << rtime << " and rdist: " << remainingDist << std::endl;
     }
 
     double desired_speed = speedNom_mps;
@@ -638,8 +638,8 @@ void RendezvousTask::activeEntityState(const std::shared_ptr<afrl::cmasi::Entity
     desired_speed += 2.0*(desired_speed - speedNom_mps);
     desired_speed = (std::max)(speedInterval.first, (std::min)(speedInterval.second, desired_speed));
     
-    if(entityState->getID() == m_entityId)
-        std::cout << "Commanding [" << m_entityId << "] to speed: " << desired_speed << " with current speed: " << entityState->getGroundspeed() << std::endl;
+    if(entityState->getID() == getEntityId())
+        std::cout << "Commanding [" << getEntityId() << "] to speed: " << desired_speed << " with current speed: " << entityState->getGroundspeed() << std::endl;
     
     auto vehicleActionCommand = std::make_shared<afrl::cmasi::VehicleActionCommand>();
     vehicleActionCommand->setVehicleID(entityState->getID());

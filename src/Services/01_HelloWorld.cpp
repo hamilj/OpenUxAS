@@ -105,7 +105,7 @@ bool HelloWorld::processReceivedLmcpMessage(std::unique_ptr<uxas::communications
     {
         //receive message
         auto keyValuePairIn = std::static_pointer_cast<afrl::cmasi::KeyValuePair> (receivedLmcpMessage->m_object);
-        std::cout << "*** RECEIVED:: Received Id[" << m_serviceId << "] Sent Id[" << keyValuePairIn->getKey() << "] Message[" << keyValuePairIn->getValue() << "] *** " << std::endl;
+        std::cout << "*** RECEIVED:: Received Id[" << getServiceId() << "] Sent Id[" << keyValuePairIn->getKey() << "] Message[" << keyValuePairIn->getValue() << "] *** " << std::endl;
     }
     return false;
 }
@@ -114,10 +114,10 @@ void HelloWorld::OnSendMessage()
 {
     // send out the message
     auto keyValuePairOut = std::make_shared<afrl::cmasi::KeyValuePair>();
-    keyValuePairOut->setKey(std::to_string(m_serviceId));
+    keyValuePairOut->setKey(std::to_string(getServiceId()));
     keyValuePairOut->setValue(m_stringToSend);
     sendSharedLmcpObjectBroadcastMessage(keyValuePairOut);
-    //std::cout << "*** SENT:: Service Id[" << m_serviceId << "] Sent a KeyValuePair with the Key[" << keyValuePairOut->getKey() << "] and Value[" << keyValuePairOut->getValue() << "] *** " << std::endl;
+    //std::cout << "*** SENT:: Service Id[" << getServiceId() << "] Sent a KeyValuePair with the Key[" << keyValuePairOut->getKey() << "] and Value[" << keyValuePairOut->getValue() << "] *** " << std::endl;
     
     // reset the timer
 }

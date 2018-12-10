@@ -249,7 +249,7 @@ ServiceManager::initialize()
                 UXAS_LOG_WARN(s_typeName(), "::initialize unexpectedly initialized and started zero services");
             }
             std::unique_ptr<uxas::messages::uxnative::StartupComplete> startupComplete = uxas::stduxas::make_unique<uxas::messages::uxnative::StartupComplete>();
-            sendLmcpObjectBroadcastMessage(std::move(startupComplete));
+            m_pLmcpObjectNetworkClient->sendLmcpObjectBroadcastMessage(std::move(startupComplete));
         }
         else if (uxasEnabledSvcsXml.empty())
         {
@@ -278,13 +278,13 @@ ServiceManager::removeTerminatedServices() // lock m_servicesByIdMutex before in
     {
         if (svcIt->second->getIsTerminationFinished())
         {
-            UXAS_LOG_INFORM(s_typeName(), "::removeTerminatedServices removing reference to terminated ", svcIt->second->m_networkClientTypeName, " ID ", svcIt->second->m_networkId);
+            UXAS_LOG_INFORM(s_typeName(), "::removeTerminatedServices removing reference to terminated ", svcIt->second->m_serviceType, " ID ", svcIt->second->getServiceId());
             terminatedSvcCnt++;
             svcIt = m_servicesById.erase(svcIt); // remove finished service (enables destruction)
         }
         else
         {
-            UXAS_LOG_DEBUGGING(s_typeName(), "::removeTerminatedServices retaining reference to non-terminated ", svcIt->second->m_networkClientTypeName, " ID ", svcIt->second->m_networkId);
+            UXAS_LOG_DEBUGGING(s_typeName(), "::removeTerminatedServices retaining reference to non-terminated ", svcIt->second->m_serviceType, " ID ", svcIt->second->getServiceId());
             runningSvcCnt++;
             svcIt++;
         }
@@ -354,8 +354,8 @@ ServiceManager::createService(const pugi::xml_node& serviceXmlNode, int64_t newS
     std::unique_ptr<ServiceBase> newService = instantiateConfigureInitializeStartService(serviceXmlNode, newServiceId);
     if (newService)
     {
-        UXAS_LOG_INFORM(s_typeName(), "::createService successfully created ", newService->m_networkClientTypeName, " service ID ", newService->m_networkId);
-        m_servicesById.emplace(newService->m_networkId, std::move(newService));
+        UXAS_LOG_INFORM(s_typeName(), "::createService successfully created ", newService->m_serviceType, " service ID ", newService->getServiceId());
+        m_servicesById.emplace(newService->getServiceId(), std::move(newService));
         return (true);
     }
     else
@@ -386,48 +386,33 @@ ServiceManager::instantiateConfigureInitializeStartService(const pugi::xml_node&
         return (newServiceFinal);
     }
 
-    std::unique_ptr<ServiceBase> newService = ServiceBase::instantiateService(serviceType, uxas::stduxas::make_unique<uxas::communications::LmcpObjectNetworkClientBase>());
+    auto lmcpClient = std::make_shared<uxas::communications::LmcpObjectNetworkClientBase>();
+    std::unique_ptr<ServiceBase> newService = ServiceBase::instantiateService(serviceType, lmcpClient);
 
     if (newService)
     {
-        UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully instantiated ", newService->m_serviceType, " service ID ", newService->m_networkId, " and work directory name [", newService->m_workDirectoryName, "]");
+        UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully instantiated ", newService->m_serviceType, " service ID ", newService->getServiceId(), " and work directory name [", newService->m_workDirectoryName, "]");
         if (newService->configureService(uxas::common::ConfigurationManager::getInstance().getRootDataWorkDirectory(), serviceXmlNode))
         {
-            // support test bridges
-            int64_t networkIdLocal{newService->m_networkId};
-            bool isPassedInID{false};
-            if(networkId > 0)
+            if (networkId > 0)
             {
-                networkIdLocal = networkId;
-                isPassedInID = true;
+                newService->updateNetworkId(networkId);
+                UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService re-configuring ", lmcpClient->m_networkClientTypeName, " entity ID ", newService->getEntityId(), " service ID ", newService->getServiceId());
             }
-            
-            if (isPassedInID)
-            {
-                std::string originalUnicastAddress = uxas::communications::getNetworkClientUnicastAddress(newService->m_entityId, newService->m_networkId);
-                newService->m_networkId = networkIdLocal;
-                newService->m_networkIdString = std::to_string(networkIdLocal);
-                newService->m_pLmcpObjectNetworkClient->m_networkId = newService->m_networkId;
-                newService->m_pLmcpObjectNetworkClient->m_networkIdString = newService->m_networkIdString;
-                newService->m_serviceId = networkIdLocal;
-                newService->removeSubscriptionAddress(originalUnicastAddress);
-                newService->addSubscriptionAddress(uxas::communications::getNetworkClientUnicastAddress(newService->m_entityId, newService->m_networkId));
-                UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService re-configuring ", newService->m_networkClientTypeName, " entity ID ", newService->m_entityId, " service ID ", newService->m_networkId);
-            }
-            UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully configured ", newService->m_networkClientTypeName, " entity ID ", newService->m_entityId, " service ID ", newService->m_networkId);
+            UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully configured ", lmcpClient->m_networkClientTypeName, " entity ID ", newService->getEntityId(), " service ID ", newService->getServiceId());
             if (newService->initializeAndStartService())
             {
                 newServiceFinal = std::move(newService);
-                UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully initialized and started ", newServiceFinal->m_networkClientTypeName, " service ID ", newServiceFinal->m_networkId);
+                UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully initialized and started ", lmcpClient->m_networkClientTypeName, " service ID ", newServiceFinal->getServiceId());
             }
             else
             {
-                UXAS_LOG_ERROR(s_typeName(), "::instantiateConfigureInitializeStartService failed to initialize and start ", newService->m_networkClientTypeName, " service ID ", newService->m_networkId);
+                UXAS_LOG_ERROR(s_typeName(), "::instantiateConfigureInitializeStartService failed to initialize and start ", lmcpClient->m_networkClientTypeName, " service ID ", newService->getServiceId());
             }
         }
         else
         {
-            UXAS_LOG_ERROR(s_typeName(), "::instantiateConfigureInitializeStartService failed to configure ", newService->m_networkClientTypeName, " service ID ", newService->m_networkId);
+            UXAS_LOG_ERROR(s_typeName(), "::instantiateConfigureInitializeStartService failed to configure ", lmcpClient->m_networkClientTypeName, " service ID ", newService->getServiceId());
         }
     }
     else
@@ -498,9 +483,8 @@ ServiceManager::processReceivedLmcpMessage(std::unique_ptr<uxas::communications:
     else if (uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object.get()))
     {
         auto killService = std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object);
-//        std::cout << std::endl << "******ServiceManager::processReceivedLmcpMessage::m_networkId[" 
-//                << m_networkId << "]  killService->getServiceID[" << killService->getServiceID() << "] !! ******" << std::endl << std::endl;
-        if (killService->getServiceID() == m_networkId)
+
+        if (killService->getServiceID() == getServiceId())
         {
             terminateAllServices();
         }
@@ -528,12 +512,12 @@ ServiceManager::terminateAllServices()
     {
         if (svcIt->second && !svcIt->second->getIsTerminationFinished())
         {
-            UXAS_LOG_INFORM(s_typeName(), "::terminateAllServices sending [", uxas::messages::uxnative::KillService::TypeName, "] message to ", svcIt->second->m_serviceType, " having entity ID [", svcIt->second->m_entityId, "] and service ID [", svcIt->second->m_serviceId, "]");
+            UXAS_LOG_INFORM(s_typeName(), "::terminateAllServices sending [", uxas::messages::uxnative::KillService::TypeName, "] message to ", svcIt->second->m_serviceType, " having entity ID [", svcIt->second->getEntityId(), "] and service ID [", svcIt->second->getServiceId(), "]");
 
-            std::cout << std::endl << s_typeName() << "::terminateAllServices sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->m_serviceType << " having entity ID [" << svcIt->second->m_entityId << "] and service ID [" << svcIt->second->m_serviceId << "]" << std::endl;
+            std::cout << std::endl << s_typeName() << "::terminateAllServices sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->m_serviceType << " having entity ID [" << svcIt->second->getEntityId() << "] and service ID [" << svcIt->second->getServiceId() << "]" << std::endl;
             auto killService = uxas::stduxas::make_unique<uxas::messages::uxnative::KillService>();
-            killService->setServiceID(svcIt->second->m_networkId);
-            sendLmcpObjectLimitedCastMessage(uxas::communications::getNetworkClientUnicastAddress(m_entityIdString, svcIt->second->m_networkId), std::move(killService));
+            killService->setServiceID(svcIt->second->getServiceId());
+            m_pLmcpObjectNetworkClient->sendLmcpObjectLimitedCastMessage(uxas::communications::getNetworkClientUnicastAddress(getEntityIdString(), svcIt->second->getServiceId()), std::move(killService));
         }
         else
         {

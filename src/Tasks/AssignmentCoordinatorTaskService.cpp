@@ -101,7 +101,7 @@ AssignmentCoordinatorTaskService::configureTask(const pugi::xml_node& ndComponen
 bool AssignmentCoordinatorTaskService::initializeTask()
 {
     // perform any required initialization before the service is started
-    //std::cout << "*** INITIALIZING:: Service[" << s_typeName() << "] Service Id[" << m_serviceId << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
+    //std::cout << "*** INITIALIZING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
 
     return (true);
 }
@@ -109,7 +109,7 @@ bool AssignmentCoordinatorTaskService::initializeTask()
 bool AssignmentCoordinatorTaskService::startTask()
 {
     // perform any actions required at the time the service starts
-    std::cout << "*** STARTING:: Service[" << s_typeName() << "] Service Id[" << m_serviceId << "] with Entity ID [" << m_entityId << "] *** " << std::endl;
+    std::cout << "*** STARTING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with Entity ID [" << getEntityId() << "] *** " << std::endl;
 
     m_sendTaskAutomationRequestTimer.StartCallbackTimer(CHECK_TO_SEND_REQUEST_PERIOD_MS, std::bind(&AssignmentCoordinatorTaskService::CallbackSendAutomationRequest, this, std::placeholders::_1));
 
@@ -119,7 +119,7 @@ bool AssignmentCoordinatorTaskService::startTask()
 bool AssignmentCoordinatorTaskService::terminateTask()
 {
     // perform any action required during service termination, before destructor is called.
-    std::cout << "*** TERMINATING:: Service[" << s_typeName() << "] Service Id[" << m_serviceId << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
+    std::cout << "*** TERMINATING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
     m_sendTaskAutomationRequestTimer.KillTimer();
 
     return (true);
@@ -130,7 +130,7 @@ bool AssignmentCoordinatorTaskService::processReceivedLmcpMessageTask(std::share
     if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpObject))
     {
         auto airVehicleState = std::static_pointer_cast<afrl::cmasi::AirVehicleState> (receivedLmcpObject);
-        if(airVehicleState->getID() == m_entityId)
+        if(airVehicleState->getID() == getEntityId())
         {
             m_lastLocalEntityState.reset(airVehicleState->clone());
         }
@@ -169,7 +169,7 @@ bool AssignmentCoordinatorTaskService::processReceivedLmcpMessageTask(std::share
         if (m_lastLocalEntityState)
         {
             auto localPlanningState = std::make_shared<uxas::messages::task::PlanningState>();
-            localPlanningState->setEntityID(m_entityId);
+            localPlanningState->setEntityID(getEntityId());
             localPlanningState->setPlanningHeading(m_lastLocalEntityState->getHeading());
             localPlanningState->setPlanningPosition(m_lastLocalEntityState->getLocation()->clone());
 
@@ -180,7 +180,7 @@ bool AssignmentCoordinatorTaskService::processReceivedLmcpMessageTask(std::share
             sendSharedLmcpObjectBroadcastMessage(assignmentCoordination);
 
             // add planning state to m_requestIdVsCoordinationElements
-            m_requestIdVsCoordinationElements[coordinatedAutomationRequest->getRequestID()]->entityIdVsPlanningState.insert(std::make_pair(m_entityId, localPlanningState));
+            m_requestIdVsCoordinationElements[coordinatedAutomationRequest->getRequestID()]->entityIdVsPlanningState.insert(std::make_pair(getEntityId(), localPlanningState));
 //            COUT_FILE_LINE_MSG("")
         }
         else

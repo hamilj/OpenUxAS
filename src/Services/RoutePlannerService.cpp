@@ -99,7 +99,7 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
             std::shared_ptr<avtas::lmcp::Object> pResponse = std::static_pointer_cast<avtas::lmcp::Object>(response);
             // always limited-cast route plan responses
             sendSharedLmcpObjectLimitedCastMessage(
-                    getNetworkClientUnicastAddress(
+                    uxas::communications::getNetworkClientUnicastAddress(
                         receivedLmcpMessage->m_attributes->getSourceEntityId(),
                         receivedLmcpMessage->m_attributes->getSourceServiceId()
                     ),
