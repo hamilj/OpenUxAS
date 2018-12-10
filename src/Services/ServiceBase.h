@@ -104,7 +104,7 @@ public:
     inline uint32_t getServiceId() const { return m_pLmcpObjectNetworkClient->m_networkId; }
 
     /** \brief  */
-    std::string m_serviceType;
+    const std::string m_serviceType;
 
     /** \brief  */
     const std::string m_workDirectoryName;
