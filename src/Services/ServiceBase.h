@@ -116,14 +116,14 @@ public:
     /** \brief  */
     const std::string m_workDirectoryName;
 
-    std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> m_pLmcpObjectNetworkClient;
-
 protected:
     /** \brief  */
     bool m_isConfigured{false};
 
     /** \brief  */
     std::string m_workDirectoryPath;
+
+    std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> m_pLmcpObjectNetworkClient;
 
     uxas::communications::LmcpObjectNetworkClient::ReceiveProcessingType m_receiveProcessingType{uxas::communications::LmcpObjectNetworkClient::ReceiveProcessingType::LMCP};
 
