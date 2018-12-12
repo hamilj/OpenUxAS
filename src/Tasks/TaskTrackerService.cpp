@@ -164,7 +164,7 @@ void TaskTrackerService::HandleVehicleState(std::shared_ptr<afrl::cmasi::EntityS
                 pTaskComplete->getEntitiesInvolved().push_back(state->getID());
                 pTaskComplete->setTaskID(m_override[state->getID()].first);
                 std::shared_ptr<avtas::lmcp::Object> ptr_objObject(pTaskComplete);
-                sendSharedLmcpObjectBroadcastMessage(ptr_objObject);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(ptr_objObject);
 
             }
 
@@ -264,7 +264,7 @@ void TaskTrackerService::HandleVehicleState(std::shared_ptr<afrl::cmasi::EntityS
                     pTaskComplete->getEntitiesInvolved().push_back(state->getID());
                     pTaskComplete->setTaskID(taskId);
                     std::shared_ptr<avtas::lmcp::Object> ptr_objObject(pTaskComplete);
-                    sendSharedLmcpObjectBroadcastMessage(ptr_objObject);
+                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(ptr_objObject);
 
                 }
 

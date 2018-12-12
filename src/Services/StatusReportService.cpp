@@ -186,7 +186,7 @@ void StatusReportService::OnReportTimeout()
     std::shared_ptr<uxas::messages::uxnative::OnboardStatusReport>
         sendReport(m_report.clone());
     lock.unlock();
-    sendSharedLmcpObjectBroadcastMessage(sendReport);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(sendReport);
 }
 
 void StatusReportService::OnKeepAliveTimeout()

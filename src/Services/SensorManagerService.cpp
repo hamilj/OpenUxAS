@@ -202,7 +202,7 @@ void SensorManagerService::ProcessSensorFootprintRequests(const std::shared_ptr<
         } //if(m_idVsEntityConfiguration.find(request->getVehicleID()) != m_idVsEntityConfiguration.end())
     } //for (auto& request : sensorFootprintRequests->getFootprints())
     auto response = std::static_pointer_cast<avtas::lmcp::Object>(sensorFootprintResponse);
-    sendSharedLmcpObjectBroadcastMessage(response);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(response);
 };
 
 void SensorManagerService::FindSensorFootPrint(const std::shared_ptr<afrl::cmasi::EntityConfiguration>& entityConfiguration,

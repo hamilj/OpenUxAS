@@ -130,7 +130,7 @@ void MustFlyTaskService::buildTaskPlanOptions()
     m_taskPlanOptions->setComposition(compositionString);
 
     auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-    sendSharedLmcpObjectBroadcastMessage(newResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
 }
 
 bool MustFlyTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse,
@@ -213,7 +213,7 @@ bool MustFlyTaskService::isBuildAndSendImplementationRouteRequest(const int64_t&
     routePlanRequest->getRouteRequests().push_back(routeConstraints);
 
     m_routeIdVsTaskImplementationRequest[routePlanRequest->getRequestID()] = taskImplementationRequest;
-    sendSharedLmcpObjectBroadcastMessage(routePlanRequest);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(routePlanRequest);
 
     return true;
 }

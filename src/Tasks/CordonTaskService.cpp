@@ -240,7 +240,7 @@ CordonTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::O
                 std::string compositionString = calculateCompositionString(locationIds, currentAutomationRequest->getOriginalRequest()->getEntityList());
                 m_taskPlanOptions->setComposition(compositionString);
                 std::shared_ptr<avtas::lmcp::Object> pOptions = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-                sendSharedLmcpObjectBroadcastMessage(pOptions);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pOptions);
             }
         }
     }
@@ -277,7 +277,7 @@ void CordonTaskService::buildTaskPlanOptions()
     egressRequest->setStartLocation(m_cordonTask->getCordonLocation()->clone());
     egressRequest->setRadius(m_cordonTask->getStandoffDistance());
     std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(egressRequest);
-    sendSharedLmcpObjectBroadcastMessage(pRequest);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pRequest);
 };
 
 void CordonTaskService::calculateOption(const std::vector<int64_t>& eligibleEntities,

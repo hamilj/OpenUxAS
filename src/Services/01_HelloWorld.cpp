@@ -116,7 +116,7 @@ void HelloWorld::OnSendMessage()
     auto keyValuePairOut = std::make_shared<afrl::cmasi::KeyValuePair>();
     keyValuePairOut->setKey(std::to_string(getServiceId()));
     keyValuePairOut->setValue(m_stringToSend);
-    sendSharedLmcpObjectBroadcastMessage(keyValuePairOut);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(keyValuePairOut);
     //std::cout << "*** SENT:: Service Id[" << getServiceId() << "] Sent a KeyValuePair with the Key[" << keyValuePairOut->getKey() << "] and Value[" << keyValuePairOut->getValue() << "] *** " << std::endl;
     
     // reset the timer

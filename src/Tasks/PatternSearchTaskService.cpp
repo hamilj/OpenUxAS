@@ -229,7 +229,7 @@ PatternSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::
                                 {
                                     m_pendingOptionRouteRequests.insert(routePlanRequest->getRequestID());
                                     auto objectRouteRequest = std::static_pointer_cast<avtas::lmcp::Object>(routePlanRequest);
-                                    sendSharedLmcpObjectBroadcastMessage(objectRouteRequest);
+                                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectRouteRequest);
 
                                     isReadyToSendOptions = false; //need to wait to get routeresponse
                                     itTaskOptionClass->second->m_taskOption->setStartHeading(routePlanRequest->getRouteRequests().front()->getStartHeading());
@@ -265,7 +265,7 @@ PatternSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::
                     {
                         // once all options are complete, send out the message
                         auto objectTaskPlanOptions = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-                        sendSharedLmcpObjectBroadcastMessage(objectTaskPlanOptions);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectTaskPlanOptions);
                     }
                     else
                     {
@@ -325,7 +325,7 @@ void PatternSearchTaskService::buildTaskPlanOptions()
         footprintRequest = nullptr;
     }
     auto objectFootprintRequests = std::static_pointer_cast<avtas::lmcp::Object>(sensorFootprintRequests);
-    sendSharedLmcpObjectBroadcastMessage(objectFootprintRequests);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectFootprintRequests);
 };
 
 bool PatternSearchTaskService::isCalculateOption(const std::vector<int64_t>& eligibleEntities,
@@ -773,7 +773,7 @@ void PatternSearchTaskService::activeEntityState(const std::shared_ptr<afrl::cma
                                     videoStreamAction->setVideoStreamID(0); // 0 is default value
                                     videoStreamAction->setActiveSensor(cameraConfiguration->getPayloadID()); // find the camera id
                                     // TODO - store current cameraid ...
-                                    sendSharedLmcpObjectBroadcastMessage(videoStreamAction);
+                                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(videoStreamAction);
                                     //COUT_FILE_LINE_MSG("POINT:: Latitude[" << avstate->getLocation()->getLatitude() << "] Longitude[" << avstate->getLocation()->getLongitude() << "]")
                                     //COUT_FILE_LINE_MSG("Sending VehicleStreamAction") // DWCTest
                                     break;
@@ -827,19 +827,19 @@ void PatternSearchTaskService::activeEntityState(const std::shared_ptr<afrl::cma
 
             // send out the response
             auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-            sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
 
             //send the record video command to the axis box
             auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
             VideoRecord->setRecord(true);
             auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
-            sendSharedLmcpObjectBroadcastMessage(VideoRecord);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
         }
         else    //if(itOptionWaypointId != m_optionWaypointIdVsFinalWaypointId.end())
         {
             UXAS_LOG_ERROR("PatternSearchTaskService::activeEntityState::", " Can not point sensor. Option waypoint ID for waypoint number [" , entityState->getCurrentWaypoint() , "] not found.");
         }
-        }
+    }
     else //if(m_isUseDpss)
         {
         /////////////////////////////////////////////////////////////////////////
@@ -887,13 +887,13 @@ void PatternSearchTaskService::activeEntityState(const std::shared_ptr<afrl::cma
 
         // send out the response
         auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-        sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
 
         //send the record video command to the axis box
         auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
         VideoRecord->setRecord(true);
         auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
-        sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
     } ////if(m_isUseDpss)
 }
 }; //namespace task

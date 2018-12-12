@@ -135,7 +135,7 @@ bool TaskTemplate::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::O
 //        auto keyValuePairOut = std::make_shared<afrl::cmasi::KeyValuePair>();
 //        keyValuePairOut->setKey(s_typeName());
 //        keyValuePairOut->setValue(std::to_string(getServiceId()));
-//        sendSharedLmcpObjectBroadcastMessage(keyValuePairOut);
+//        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(keyValuePairOut);
 //        
 //    }
     return false;

@@ -153,7 +153,7 @@ void CmasiPointSearchTaskService::buildTaskPlanOptions()
     if (isSuccessful)
     {
         auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
     }
 };
 
@@ -289,7 +289,7 @@ void CmasiPointSearchTaskService::activeEntityState(const std::shared_ptr<afrl::
     gimbalStareAction = nullptr; //gave up ownership
     // send out the response
     auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-    sendSharedLmcpObjectBroadcastMessage(newMessage);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
 }
 
 bool CmasiPointSearchTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse,

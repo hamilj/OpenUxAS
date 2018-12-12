@@ -192,7 +192,7 @@ TaskManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicati
             auto killServiceMessage = std::make_shared<uxas::messages::uxnative::KillService>();
             killServiceMessage->setServiceID(itServiceId->second);
             auto message = std::static_pointer_cast<avtas::lmcp::Object>(killServiceMessage);
-            sendSharedLmcpObjectBroadcastMessage(message);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(message);
             m_TaskIdVsServiceId.erase(itServiceId);
             UXAS_LOG_WARN("taskID ", taskId, " already exists. Killing previous task");
         }
@@ -369,7 +369,7 @@ TaskManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicati
         {
             m_TaskIdVsServiceId[taskId] = serviceId;
             auto newServiceMessage = std::static_pointer_cast<avtas::lmcp::Object>(createNewServiceMessage);
-            sendSharedLmcpObjectBroadcastMessage(newServiceMessage);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newServiceMessage);
             //CERR_FILE_LINE_MSG("Added Task[" << taskId << "]")
         }
     }
@@ -404,7 +404,7 @@ TaskManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicati
         uniqueAutomationRequest->setRequestID(m_automationRequestId);
         m_automationRequestId++;
         auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(uniqueAutomationRequest);
-        sendSharedLmcpObjectBroadcastMessage(newMessage);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
     }
     else if (afrl::cmasi::isAutomationResponse(messageObject.get()))
     {
@@ -457,7 +457,7 @@ TaskManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicati
                     auto killServiceMessage = std::make_shared<uxas::messages::uxnative::KillService>();
                     killServiceMessage->setServiceID(itServiceId->second);
                     auto message = std::static_pointer_cast<avtas::lmcp::Object>(killServiceMessage);
-                    sendSharedLmcpObjectBroadcastMessage(message);
+                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(message);
                     m_TaskIdVsServiceId.erase(itServiceId);
                     UXAS_LOG_INFORM("Removed Task[", *itTaskId, "]");
                 }

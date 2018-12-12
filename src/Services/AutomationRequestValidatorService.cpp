@@ -298,7 +298,7 @@ void AutomationRequestValidatorService::SendResponse(std::shared_ptr<uxas::messa
     {
         // can't find a corresponding type, so just send out a normal one
         auto cleanResponse = std::shared_ptr<afrl::cmasi::AutomationResponse>(resp->getOriginalResponse()->clone());
-        sendSharedLmcpObjectBroadcastMessage(cleanResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(cleanResponse);
         return;
     }
     
@@ -311,12 +311,12 @@ void AutomationRequestValidatorService::SendResponse(std::shared_ptr<uxas::messa
         // add FinalStates to task responses
         for(auto st : resp->getFinalStates())
             taskResponse->getFinalStates().push_back(st->clone());
-        sendSharedLmcpObjectBroadcastMessage(taskResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskResponse);
     }
     else if (m_sandboxMap[resp->getResponseID()].requestType == AUTOMATION_REQUEST)
     {
         auto cleanResponse = std::shared_ptr<afrl::cmasi::AutomationResponse>(resp->getOriginalResponse()->clone());
-        sendSharedLmcpObjectBroadcastMessage(cleanResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(cleanResponse);
     }
     else
     {
@@ -326,7 +326,7 @@ void AutomationRequestValidatorService::SendResponse(std::shared_ptr<uxas::messa
         sandResponse->setSolutionID(m_sandboxMap[resp->getResponseID()].solnId);
         sandResponse->setTrialResponse(resp->getOriginalResponse()->clone());
         sandResponse->setSandbox(true);
-        sendSharedLmcpObjectBroadcastMessage(sandResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(sandResponse);
     }
 }
 
@@ -389,7 +389,7 @@ void AutomationRequestValidatorService::sendNextRequest()
     m_errorResponse->setResponseID(uniqueAutomationRequest->getRequestID());
     
     // send next request
-    sendSharedLmcpObjectBroadcastMessage(uniqueAutomationRequest);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(uniqueAutomationRequest);
 
     // report start of assignment pipeline
     auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
@@ -399,7 +399,7 @@ void AutomationRequestValidatorService::sendNextRequest()
     keyValuePair->setKey(message);
     serviceStatus->getInfo().push_back(keyValuePair);
     keyValuePair = nullptr;
-    sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
     
     // reset the timer
     uxas::common::TimerManager::getInstance().startSingleShotTimer(m_responseTimerId, m_maxResponseTime_ms);

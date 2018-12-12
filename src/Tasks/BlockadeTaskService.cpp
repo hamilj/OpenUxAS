@@ -172,7 +172,7 @@ void BlockadeTaskService::buildTaskPlanOptions()
     if (isSuccessful)
     {
         auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
     }
 };
 
@@ -280,7 +280,7 @@ void BlockadeTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::E
 
         //auto pResponse = std::static_pointer_cast<avtas::lmcp::Object>(actionCommand);
         auto pResponse = std::shared_ptr<avtas::lmcp::Object>(missionCommand);
-        sendSharedLmcpObjectBroadcastMessage(pResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pResponse);
     }
     else
     {

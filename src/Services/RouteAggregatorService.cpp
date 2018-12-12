@@ -526,7 +526,7 @@ void RouteAggregatorService::SendRouteResponse(int64_t routeKey)
 
     // send the results of the query
     std::shared_ptr<avtas::lmcp::Object> pResponse = std::static_pointer_cast<avtas::lmcp::Object>(response);
-    sendSharedLmcpObjectBroadcastMessage(pResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pResponse);
 }
 
 void RouteAggregatorService::SendMatrix(int64_t autoKey)
@@ -570,7 +570,7 @@ void RouteAggregatorService::SendMatrix(int64_t autoKey)
 
     // send the total cost matrix
     std::shared_ptr<avtas::lmcp::Object> pResponse = std::static_pointer_cast<avtas::lmcp::Object>(matrix);
-    sendSharedLmcpObjectBroadcastMessage(pResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pResponse);
 
     // clear out old options
     m_taskOptions.clear();
@@ -584,7 +584,7 @@ void RouteAggregatorService::SendMatrix(int64_t autoKey)
         keyValuePair->setValue(routesNotFound.str());
         serviceStatus->getInfo().push_back(keyValuePair);
         keyValuePair = nullptr;
-        sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
         std::cout << "RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId) :: " << std::endl << routesNotFound.str() << std::endl << std::endl;
     }
     else
@@ -595,7 +595,7 @@ void RouteAggregatorService::SendMatrix(int64_t autoKey)
         keyValuePair->setKey(std::string("AssignmentMatrix - full"));
         serviceStatus->getInfo().push_back(keyValuePair);
         keyValuePair = nullptr;
-        sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
     }
 
 

@@ -80,7 +80,7 @@ OperatingRegionStateService::processReceivedLmcpMessage(std::unique_ptr<uxas::co
             if(m_additionalPadding > 1e-4)
             {
                 kzone->setPadding( kzone->getPadding() + m_additionalPadding );
-                sendSharedLmcpObjectBroadcastMessage(kzone);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(kzone);
             }
             m_region->getKeepInAreas().push_back(kzone->getZoneID());
             IMPACT_INFORM("Added Keep In Zone ", kzone->getZoneID(), " ", kzone->getLabel());
@@ -116,7 +116,7 @@ OperatingRegionStateService::processReceivedLmcpMessage(std::unique_ptr<uxas::co
             if(m_additionalPadding > 1e-4)
             {
                 kzone->setPadding( kzone->getPadding() + m_additionalPadding );
-                sendSharedLmcpObjectBroadcastMessage(kzone);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(kzone);
             }
             m_region->getKeepOutAreas().push_back(kzone->getZoneID());
             IMPACT_INFORM("Added Keep Out Zone ", kzone->getZoneID(), " ", kzone->getLabel());
@@ -164,7 +164,7 @@ OperatingRegionStateService::processReceivedLmcpMessage(std::unique_ptr<uxas::co
 
     if (addZone || removeZone) {
         auto sendMsg = std::static_pointer_cast<avtas::lmcp::Object>(m_region);
-        sendSharedLmcpObjectBroadcastMessage(sendMsg);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(sendMsg);
         IMPACT_INFORM("Working Operating Region KIZs ", m_region->getKeepInAreas().size(), " KOZs ", m_region->getKeepOutAreas().size());
     }
 

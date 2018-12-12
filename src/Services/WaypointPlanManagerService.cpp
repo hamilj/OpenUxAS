@@ -244,7 +244,7 @@ WaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::com
                 }
             }
         }
-        //sendSharedLmcpObjectBroadcastMessage(ptr_odstObjectDestination->ptrGetObject());
+        //m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(ptr_odstObjectDestination->ptrGetObject());
     }
     else if (receivedLmcpMessage->m_object->getLmcpTypeName() == "VehicleActionCommand")
     {
@@ -269,7 +269,7 @@ WaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::com
     }
     if (pMissionCommand_Out)
     {
-        sendSharedLmcpObjectBroadcastMessage(pMissionCommand_Out);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pMissionCommand_Out);
     }
     return (false); // always false implies never terminating service from here
 };
@@ -531,7 +531,7 @@ void WaypointPlanManagerService::OnSendNewMissionTimer()
 {
     if (_nextMissionCommandToSend)
     {
-        sendSharedLmcpObjectBroadcastMessage(_nextMissionCommandToSend);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(_nextMissionCommandToSend);
 
         _nextMissionCommandToSend.reset();
     }

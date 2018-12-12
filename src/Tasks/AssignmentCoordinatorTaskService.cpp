@@ -177,7 +177,7 @@ bool AssignmentCoordinatorTaskService::processReceivedLmcpMessageTask(std::share
             auto assignmentCoordination = std::make_shared<uxas::messages::task::AssignmentCoordination>();
             assignmentCoordination->setCoordinatedAutomationRequestID(coordinatedAutomationRequest->getRequestID());
             assignmentCoordination->setPlanningState(localPlanningState->clone());
-            sendSharedLmcpObjectBroadcastMessage(assignmentCoordination);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(assignmentCoordination);
 
             // add planning state to m_requestIdVsCoordinationElements
             m_requestIdVsCoordinationElements[coordinatedAutomationRequest->getRequestID()]->entityIdVsPlanningState.insert(std::make_pair(getEntityId(), localPlanningState));
@@ -196,7 +196,7 @@ bool AssignmentCoordinatorTaskService::processReceivedLmcpMessageTask(std::share
         auto taskAutomationResponse = std::static_pointer_cast<uxas::messages::task::TaskAutomationResponse> (receivedLmcpObject);
         // send out an AutomationResponse (for the waypoint manager)
         auto response = std::shared_ptr<afrl::cmasi::AutomationResponse>(taskAutomationResponse->getOriginalResponse()->clone());
-        sendSharedLmcpObjectBroadcastMessage(response);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(response);
         
         std::lock_guard<std::mutex> lock(m_timerThreadLock);
         if (m_requestIdVsCoordinationElements.find(taskAutomationResponse->getResponseID()) != m_requestIdVsCoordinationElements.end())
@@ -246,7 +246,7 @@ void AssignmentCoordinatorTaskService::CheckAssignmentReady(const int64_t& reque
             {
                 taskAutomationRequest->getPlanningStates().push_back(itPlanningState.second->clone());
             }
-            sendSharedLmcpObjectBroadcastMessage(taskAutomationRequest);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskAutomationRequest);
             m_requestIdVsCoordinationElements.erase(requestId);
         }
     }
@@ -293,7 +293,7 @@ void AssignmentCoordinatorTaskService::CheckForAssignmentTimeMax()
                 taskAutomationRequest->getOriginalRequest()->getEntityList().push_back(itPlanningState.second->getEntityID());
                 taskAutomationRequest->getPlanningStates().push_back(itPlanningState.second->clone());
             }
-            sendSharedLmcpObjectBroadcastMessage(taskAutomationRequest);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskAutomationRequest);
         }
     }
     if ((idToErase) && (m_maxTimeVsCoordinatedAutomationRequestId.begin() != itCoordinatedAutomationRequestIdMax))

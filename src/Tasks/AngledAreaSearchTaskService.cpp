@@ -216,7 +216,7 @@ AngledAreaSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avta
                                 itTaskOptionClass->second->m_routePlanRequest = routePlanRequest;
                                 m_pendingOptionRouteRequests.insert(routePlanRequest->getRequestID());
                                 auto objectRouteRequest = std::static_pointer_cast<avtas::lmcp::Object>(routePlanRequest);
-                                sendSharedLmcpObjectBroadcastMessage(objectRouteRequest);
+                                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectRouteRequest);
 
                                 if (!routePlanRequest->getRouteRequests().empty())
                                 {
@@ -238,7 +238,7 @@ AngledAreaSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avta
                                 keyValuePair->setKey(std::string("No UniqueAutomationResponse"));
                                 keyValuePair->setValue("AngledAreaSearch: Lane Spacing is Zero");
                                 serviceStatus->getInfo().push_back(keyValuePair);
-                                sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+                                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
                             }
                         }
                         else
@@ -303,7 +303,7 @@ void AngledAreaSearchTaskService::buildTaskPlanOptions()
 } //for(auto itEligibleEntities=m_speedAltitudeVsEligibleEntitesRequested.begin();itEl ... 
 
 auto objectFootprintRequests = std::static_pointer_cast<avtas::lmcp::Object>(sensorFootprintRequests);
-sendSharedLmcpObjectBroadcastMessage(objectFootprintRequests);
+m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectFootprintRequests);
 
 compositionString += ")";
 
@@ -756,13 +756,13 @@ void AngledAreaSearchTaskService::activeEntityState(const std::shared_ptr<afrl::
 
         // send out the response
         auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-        sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
 
         //send the record video command to the axis box
         auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
         VideoRecord->setRecord(true);
         auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
-        sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
     }
     else
     {

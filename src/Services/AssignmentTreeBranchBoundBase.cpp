@@ -271,7 +271,7 @@ void AssignmentTreeBranchBoundBase::sendErrorMsg(std::string& errStr)
     keyValuePair->setKey(std::string("No UniqueAutomationResponse"));
     keyValuePair->setValue("AssignmentTree: " + errStr);
     serviceStatus->getInfo().push_back(keyValuePair);
-    sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
 }
 
 bool AssignmentTreeBranchBoundBase::isInitializeAlgebra(const std::shared_ptr<AssigmentPrerequisites>& assigmentPrerequisites)
@@ -580,7 +580,7 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
             keyValuePair->setValue(std::string("Assignment not found: ") + nodeAssignment->m_staticAssignmentParameters->m_reasonsForNoAssignment.str());
             serviceStatus->getInfo().push_back(keyValuePair);
             keyValuePair = nullptr;
-            sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
             std::cout << "RoutesNotFound:: " << std::endl << nodeAssignment->m_staticAssignmentParameters->m_reasonsForNoAssignment.str() << std::endl << std::endl;
         }
         else
@@ -591,7 +591,7 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
             keyValuePair->setKey(std::string("AssignmentComplete"));
             serviceStatus->getInfo().push_back(keyValuePair);
             keyValuePair = nullptr;
-            sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
         }
 
 
@@ -617,7 +617,7 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
                 }
             }
             auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(taskAssignmentSummary);
-            sendSharedLmcpObjectBroadcastMessage(newMessage);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
             UXAS_LOG_INFORM("ASSIGNMENT COMPLETE!");
         }
         else

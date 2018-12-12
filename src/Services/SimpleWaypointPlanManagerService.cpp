@@ -102,7 +102,7 @@ SimpleWaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxa
                 {
                     handleSingleWaypointPlan(mish);
                 }
-                sendSharedLmcpObjectBroadcastMessage(mish);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(mish);
                 break;
             }
         }

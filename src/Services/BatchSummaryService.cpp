@@ -199,7 +199,7 @@ bool BatchSummaryService::FinalizeBatchRequest(int64_t responseId)
     auto resp = m_workingResponse[responseId];
 
     // Finally re-constructed a full batch response, send along to global
-    sendSharedLmcpObjectBroadcastMessage(resp);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(resp);
     IMPACT_INFORM("sent batch summary id ", resp->getResponseID());
 
     // clear out this working response from the map
@@ -327,7 +327,7 @@ void BatchSummaryService::HandleBatchSummaryRequest(std::shared_ptr<afrl::impact
         std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(taskAutomationRequest);
         m_pendingTaskAutomationRequests[taskAutomationRequest->getRequestID()] = taskAutomationRequest;
         m_batchSummaryRequestVsTaskAutomation[responseId].push_back(taskAutomationRequest->getRequestID());
-        sendSharedLmcpObjectBroadcastMessage(pRequest);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pRequest);
     }
     IMPACT_INFORM("received batch request ", request->getRequestID(), ". split into ", requests.size(), " internal task Automation Requests");
     if (requests.empty())

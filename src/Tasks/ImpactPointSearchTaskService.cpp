@@ -201,7 +201,7 @@ void ImpactPointSearchTaskService::buildTaskPlanOptions()
     if (isSuccessful)
     {
         auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
     }
 };
 

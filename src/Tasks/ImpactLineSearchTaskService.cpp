@@ -247,7 +247,7 @@ void ImpactLineSearchTaskService::buildTaskPlanOptions()
     if (isSuccessful)
     {
         auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
     }
 };
 
@@ -599,13 +599,13 @@ void ImpactLineSearchTaskService::activeEntityState(const std::shared_ptr<afrl::
 
         // send out the response
         auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-        sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
 
         //send the record video command to the axis box
         auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
         VideoRecord->setRecord(true);
         auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
-        sendSharedLmcpObjectBroadcastMessage(VideoRecord);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(VideoRecord);
     }
     else
     {

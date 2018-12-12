@@ -235,7 +235,7 @@ bool TaskServiceBase::start()
     {
         auto taskStarted = std::make_shared<uxas::messages::task::TaskInitialized>();
         taskStarted->setTaskID(m_task->getTaskID());
-        sendSharedLmcpObjectBroadcastMessage(taskStarted);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskStarted);
     }
     return (isSuccessful);
 };
@@ -277,7 +277,7 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                     taskActive->setEntityID(entityState->getID());
                     taskActive->setTimeTaskActivated(uxas::common::Time::getInstance().getUtcTimeSinceEpoch_ms());
                     auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(taskActive);
-                    sendSharedLmcpObjectBroadcastMessage(newMessage);
+                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
                     std::this_thread::sleep_for(std::chrono::milliseconds(50));
                 }
                 m_assignedVehicleIdVsLastTaskWaypoint[entityState->getID()] = entityState->getCurrentWaypoint();
@@ -300,7 +300,7 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                     taskCompleteUxas->setTaskID(m_task->getTaskID());
                     taskCompleteUxas->setTimeTaskCompleted(uxas::common::Time::getInstance().getUtcTimeSinceEpoch_ms());
                     auto newMessageUxas = std::static_pointer_cast<avtas::lmcp::Object>(taskCompleteUxas);
-                    sendSharedLmcpObjectBroadcastMessage(newMessageUxas);
+                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessageUxas);
                     m_assignedVehicleIdVsLastTaskWaypoint.erase(entityState->getID());
                 }
             }
@@ -492,7 +492,7 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
 
                         m_taskPlanOptions->setComposition(compositionString);
                         auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-                        sendSharedLmcpObjectBroadcastMessage(newResponse);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
                     }
                     else
                     {
@@ -752,7 +752,7 @@ void TaskServiceBase::buildAndSendImplementationRouteRequestBase(const int64_t& 
             m_routeIdVsTaskImplementationRequest[routePlanRequest->getRequestID()] = taskImplementationRequest;
 
             auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(routePlanRequest);
-            sendSharedLmcpObjectBroadcastMessage(newMessage);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
         }
         else //if ((itTaskOptionClass != m_optionIdVsTaskOptionClass.end()))
         {
@@ -810,7 +810,7 @@ void TaskServiceBase::processOptionsRoutePlanResponseBase(const std::shared_ptr<
                     {
                         // once all options are complete, send out the message
                         auto objectTaskPlanOptions = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-                        sendSharedLmcpObjectBroadcastMessage(objectTaskPlanOptions);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectTaskPlanOptions);
                     }
                 }
             } //for (auto routePlan : routePlanResponse->getRouteResponses())
@@ -988,7 +988,7 @@ void TaskServiceBase::processImplementationRoutePlanResponseBase(const std::shar
 
                                     // send out the response
                                     auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(taskImplementationResponse);
-                                    sendSharedLmcpObjectBroadcastMessage(newMessage);
+                                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
                                     m_assignedVehicleIdVsAssignedOptionId[vehicleId] = optionId;
                                 }
                                 else //if(!taskImplementationResponse->getTaskWaypoints().empty())
@@ -1017,7 +1017,7 @@ void TaskServiceBase::processImplementationRoutePlanResponseBase(const std::shar
                                 taskImplementationResponse->setVehicleID(vehicleId);
                                 taskImplementationResponse->setFinalLocation(itTaskImplementationRequest->second->getStartPosition()->clone());
                                 taskImplementationResponse->setFinalHeading(itTaskImplementationRequest->second->getStartHeading());
-                                sendSharedLmcpObjectBroadcastMessage(taskImplementationResponse);
+                                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskImplementationResponse);
                             } //if (itEntityConfiguration != m_idVsEntityConfiguration.end())
                         } //if(itTaskOptionClass->second->m_pendingRouteIds.empty())
                     } //if(itTaskOptionClass->second->m_pendingRouteIds.find(routePlan->getRouteID()) != itTaskOptionClass->second->m_pendingRouteIds.end())

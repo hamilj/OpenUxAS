@@ -105,7 +105,7 @@ void LoiterTaskService::buildTaskPlanOptions() {
     m_taskPlanOptions->setComposition(compositionString);
 
     auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-    sendSharedLmcpObjectBroadcastMessage(newResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
 };
 
 bool LoiterTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse,

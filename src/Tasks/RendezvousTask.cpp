@@ -281,7 +281,7 @@ void RendezvousTask::buildTaskPlanOptions()
             if(option) delete option;
         m_taskPlanOptions->getOptions().clear();
         m_taskPlanOptions->setComposition("");
-        sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
         return;
     }
     
@@ -340,7 +340,7 @@ void RendezvousTask::buildTaskPlanOptions()
     }
     
     m_taskPlanOptions->setComposition(compositionString);
-    sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
     
 }
 
@@ -648,7 +648,7 @@ void RendezvousTask::activeEntityState(const std::shared_ptr<afrl::cmasi::Entity
     s->setSpeed(desired_speed);
     s->getAssociatedTaskList().push_back(m_task->getTaskID());
     vehicleActionCommand->getVehicleActionList().push_back(s);
-    sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
 }
     
 double RendezvousTask::ArrivalDistance(const std::shared_ptr<afrl::cmasi::EntityState>& state)

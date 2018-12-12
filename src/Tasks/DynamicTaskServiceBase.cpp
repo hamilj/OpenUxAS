@@ -119,7 +119,7 @@ void DynamicTaskServiceBase::buildTaskPlanOptions()
 
     // send out the options
     auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-    sendSharedLmcpObjectBroadcastMessage(newResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
 }
 
 bool DynamicTaskServiceBase::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
@@ -180,7 +180,7 @@ bool DynamicTaskServiceBase::processReceivedLmcpMessageTask(std::shared_ptr<avta
 
             processMissionCommand(mish);
 
-            sendSharedLmcpObjectBroadcastMessage(mish);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(mish);
 
         }
     }
@@ -328,7 +328,7 @@ void DynamicTaskServiceBase::activeEntityState(const std::shared_ptr<afrl::cmasi
 
         request->getRouteRequests().push_back(constraint);
 
-        sendSharedLmcpObjectBroadcastMessage(request);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(request);
     }
 
 std::shared_ptr<afrl::cmasi::VehicleActionCommand> DynamicTaskServiceBase::calculateGimbalStareAction(const std::shared_ptr<afrl::cmasi::EntityConfiguration>& config, const std::shared_ptr<afrl::cmasi::Location3D> loc)

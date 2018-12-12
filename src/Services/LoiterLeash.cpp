@@ -115,7 +115,7 @@ bool LoiterLeash::processReceivedLmcpMessage(std::unique_ptr<uxas::communication
             //COUT_FILE_LINE_MSG("routePlanResponse->getRouteResponses().front()->getWaypoints().size()[" << routePlanResponse->getRouteResponses().front()->getWaypoints().size() << "]")
             if((!routePlanResponse->getRouteResponses().front()->getWaypoints().empty()) && (routePlanResponse->getRouteResponses().front()->getWaypoints().size() < 3))
             {
-                sendSharedLmcpObjectBroadcastMessage(m_nextVehicleActionCommand);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_nextVehicleActionCommand);
                 m_nextVehicleActionCommand.reset();
             }
         }
@@ -232,11 +232,11 @@ bool LoiterLeash::processReceivedLmcpMessage(std::unique_ptr<uxas::communication
             routeConstraints = nullptr; //just gave up ownership                                
             
             
-            sendSharedLmcpObjectBroadcastMessage(routePlanRequest);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(routePlanRequest);
         }
     }
 
-    // sendSharedLmcpObjectBroadcastMessage(keyValuePairOut);
+    // m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(keyValuePairOut);
 
     return false; // return false unless terminating
 }

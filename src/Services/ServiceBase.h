@@ -76,11 +76,6 @@ public:
 
     void updateNetworkId(int64_t networkId);
 
-    inline void sendSharedLmcpObjectBroadcastMessage(const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)
-    {
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(lmcpObject);
-    }
-
     inline void sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)
     {
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(castAddress, lmcpObject);

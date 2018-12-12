@@ -144,7 +144,7 @@ void PlanBuilderService::sendError(std::string& errMsg)
     keyValuePair->setKey(std::string("No UniqueAutomationResponse"));
     keyValuePair->setValue(errMsg);
     serviceStatus->getInfo().push_back(keyValuePair);
-    sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
 }
 
 void PlanBuilderService::processTaskAssignmentSummary(const std::shared_ptr<uxas::messages::task::TaskAssignmentSummary>& taskAssignmentSummary)
@@ -299,7 +299,7 @@ bool PlanBuilderService::sendNextTaskImplementationRequest(int64_t uniqueRequest
     }
     
     m_remainingAssignments[uniqueRequestID].pop_front();
-    sendSharedLmcpObjectBroadcastMessage(taskImplementationRequest);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskImplementationRequest);
     return true;
 };
 
@@ -448,7 +448,7 @@ void PlanBuilderService::checkNextTaskImplementationRequest(int64_t uniqueReques
                         wp->setTurnType(m_turnType);
             }
 
-            sendSharedLmcpObjectBroadcastMessage(response);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(response);
             m_inProgressResponse.erase(uniqueRequestID);
             m_reqeustIDVsOverrides.erase(uniqueRequestID);
 
@@ -458,7 +458,7 @@ void PlanBuilderService::checkNextTaskImplementationRequest(int64_t uniqueReques
             std::string message = "UniqueAutomationResponse[" + std::to_string(uniqueRequestID) + "] - sent";
             keyValuePair->setKey(message);
             serviceStatus->getInfo().push_back(keyValuePair);
-            sendSharedLmcpObjectBroadcastMessage(serviceStatus);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
         }
         else
         {

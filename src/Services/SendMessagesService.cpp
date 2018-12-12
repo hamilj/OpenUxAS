@@ -229,7 +229,7 @@ SendMessagesService::sendMessages()
                     if ((*itMessage)->m_messageAddress.empty())
                     { 
                         UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::sendMessages BEFORE sending single-shot broadcast");
-                        sendSharedLmcpObjectBroadcastMessage((*itMessage)->m_lmcpObjectPayload);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage((*itMessage)->m_lmcpObjectPayload);
                         UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::sendMessages AFTER sending single-shot broadcast");
                     }
                     else
@@ -252,7 +252,7 @@ SendMessagesService::sendMessages()
                     if ((*itMessage)->m_messageAddress.empty())
                     {
                         UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::sendMessages BEFORE sending periodic broadcast");
-                        sendSharedLmcpObjectBroadcastMessage((*itMessage)->m_lmcpObjectPayload);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage((*itMessage)->m_lmcpObjectPayload);
                         UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::sendMessages AFTER sending periodic broadcast");
                     }
                     else
