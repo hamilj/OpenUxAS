@@ -103,47 +103,47 @@ AutomationRequestValidatorService::configure(const pugi::xml_node & ndComponent)
     if(m_maxResponseTime_ms < 10) m_maxResponseTime_ms = 10;
 
     // translate regular, impact, and task automation requests to unique automation requests
-    addSubscriptionAddress(afrl::cmasi::AutomationRequest::Subscription);
-    addSubscriptionAddress(afrl::impact::ImpactAutomationRequest::Subscription);
-    addSubscriptionAddress(uxas::messages::task::TaskAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::ImpactAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskAutomationRequest::Subscription);
     
     // respond with appropriate automation response based on unique response
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationResponse::Subscription);
 
     // track all entity configurations
-    addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
     std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
     for(auto child : childconfigs)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
     
     // track all entity states
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
     
     // track airspace constraints
-    addSubscriptionAddress(afrl::cmasi::OperatingRegion::Subscription);
-    addSubscriptionAddress(afrl::cmasi::KeepInZone::Subscription);
-    addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::OperatingRegion::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepInZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
     
     // track indicated locations of interest
-    addSubscriptionAddress(afrl::impact::AreaOfInterest::Subscription);
-    addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
-    addSubscriptionAddress(afrl::impact::PointOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::AreaOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::PointOfInterest::Subscription);
     
     // track all tasks
-    addSubscriptionAddress(afrl::cmasi::Task::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::Task::Subscription);
     std::vector< std::string > childtasks = afrl::cmasi::TaskDescendants();
     for(auto child : childtasks)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     // task removal and initialization
-    addSubscriptionAddress(afrl::cmasi::RemoveTasks::Subscription);
-    addSubscriptionAddress(uxas::messages::task::TaskInitialized::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::RemoveTasks::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskInitialized::Subscription);
     
     // track errors during automation request pipeline
-    addSubscriptionAddress(afrl::cmasi::ServiceStatus::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::ServiceStatus::Subscription);
 
     return true;
 }

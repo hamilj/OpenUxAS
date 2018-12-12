@@ -76,11 +76,6 @@ public:
 
     void updateNetworkId(int64_t networkId);
 
-    inline bool addSubscriptionAddress(const std::string& address)
-    {
-        return m_pLmcpObjectNetworkClient->addSubscriptionAddress(address);
-    }
-
     inline void sendSharedLmcpObjectBroadcastMessage(const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)
     {
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(lmcpObject);

@@ -58,28 +58,28 @@ RoutePlannerService::configure(const pugi::xml_node& serviceXmlNode)
     //  (1) environment construction (keep-in/keep-out zones and operating region)
     //  (2) current states of entities for non-specified start locations
     //  (3) entity configurations to determine kinematic and/or dynamic constraints
-    addSubscriptionAddress(afrl::cmasi::KeepInZone::Subscription);
-    addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
-    addSubscriptionAddress(afrl::impact::WaterZone::Subscription);
-    addSubscriptionAddress(afrl::cmasi::OperatingRegion::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepInZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::WaterZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::OperatingRegion::Subscription);
     
     //ENTITY CONFIGURATIONS
-    addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
     std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
     for(auto child : childconfigs)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
     
     // ENTITY STATES
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
     
     // service 'global' path planning requests (system assumes aircraft)
-    addSubscriptionAddress(uxas::messages::route::RoutePlanRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RoutePlanRequest::Subscription);
     
     // requests directed to an aircraft planner should also be handled
-    addSubscriptionAddress(uxas::common::MessageGroup::AircraftPathPlanner());
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::common::MessageGroup::AircraftPathPlanner());
 
     return true;
 }

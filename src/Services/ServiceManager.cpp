@@ -98,7 +98,7 @@ ServiceManager::configureServiceManager()
 
     if (isSuccess)
     {
-        addSubscriptionAddress(uxas::messages::uxnative::CreateNewService::Subscription);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::uxnative::CreateNewService::Subscription);
         m_isConfigured = true;
         UXAS_LOG_INFORM(s_typeName(), "::configureServiceManager succeeded configuration");
     }

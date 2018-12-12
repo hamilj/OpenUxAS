@@ -47,19 +47,19 @@ SimpleWaypointPlanManagerService::configure(const pugi::xml_node& ndComponent)
         m_vehicleID = ndComponent.attribute(STRING_XML_VEHICLE_ID).as_uint();
     }
     
-    addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
 
     // ENTITY CONFIGURATIONS
-    addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
     std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
     for(auto child : childconfigs)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     // ENTITY STATES
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
     
     return true;
 }

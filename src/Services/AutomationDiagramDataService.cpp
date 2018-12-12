@@ -93,34 +93,34 @@ AutomationDiagramDataService::configure(const pugi::xml_node& ndComponent)
     //assert(strComponentType==STRING_XML_COMPONENT_TYPE)
     
     // ENTITY STATES
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     //AUTOMATION
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationResponse::Subscription);
 
     //BOUNDARIES
-    addSubscriptionAddress(afrl::cmasi::OperatingRegion::Subscription);
-    addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
-    addSubscriptionAddress(afrl::cmasi::KeepInZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::OperatingRegion::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepInZone::Subscription);
 
     //REGION OF INTEREST
-    addSubscriptionAddress(afrl::impact::AreaOfInterest::Subscription);
-    addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
-    addSubscriptionAddress(afrl::impact::PointOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::AreaOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::PointOfInterest::Subscription);
 
-    addSubscriptionAddress(afrl::impact::AreaOfInterest::Subscription);
-    addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
-    addSubscriptionAddress(afrl::impact::PointOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::AreaOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::PointOfInterest::Subscription);
     
     // Subscribe to Task and all derivatives of Task
-    addSubscriptionAddress(afrl::cmasi::Task::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::Task::Subscription);
     std::vector< std::string > childtasks = afrl::cmasi::TaskDescendants();
     for(auto child : childtasks)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     return (isSuccess);
 }

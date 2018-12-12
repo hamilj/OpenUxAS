@@ -65,7 +65,7 @@ LoiterTaskService::configureTask(const pugi::xml_node& ndComponent) {
             isSuccessful = false;
         }
     } //isSuccessful
-    addSubscriptionAddress(uxas::messages::route::RouteResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RouteResponse::Subscription);
     return (isSuccessful);
 }
 

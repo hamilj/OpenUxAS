@@ -70,28 +70,28 @@ RouteAggregatorService::configure(const pugi::xml_node& ndComponent)
     // [EntityConfigurations] are used for nominal speed values (all costs are in terms of time to arrive)
     
     //ENTITY CONFIGURATIONS
-    addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
     std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
     for(auto child : childconfigs)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
     
     // ENTITY STATES
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     // track requests to kickoff matrix calculation
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
 
     // subscribe to task plan options to build matrix
-    addSubscriptionAddress(uxas::messages::task::TaskPlanOptions::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskPlanOptions::Subscription);
 
     // handle batch route requests
-    addSubscriptionAddress(uxas::messages::route::RouteRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RouteRequest::Subscription);
 
     // listen for responses to requests from route planner(s)
-    addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
 
     // Subscribe to group messages (whisper from local route planner)
     //TODO REVIEW DESIGN "RouteAggregator" "RoutePlanner" flip message addressing effecting session behavior

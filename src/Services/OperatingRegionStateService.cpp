@@ -45,11 +45,10 @@ OperatingRegionStateService::configure(const pugi::xml_node& serviceXmlNode)
 {
     m_additionalPadding = serviceXmlNode.attribute(STRING_XML_ADDITIONAL_PADDING).as_double(0.0);
 
-    addSubscriptionAddress(afrl::cmasi::KeepInZone::Subscription);
-    addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
-    addSubscriptionAddress(afrl::cmasi::RemoveZones::Subscription);
-    addSubscriptionAddress(afrl::impact::WaterZone::Subscription);
-
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepInZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::RemoveZones::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::WaterZone::Subscription);
 
     m_region.reset(new afrl::cmasi::OperatingRegion);
     m_region->setID(0); // YEAR2: simply match all requests from agent

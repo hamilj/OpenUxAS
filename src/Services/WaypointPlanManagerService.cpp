@@ -140,14 +140,14 @@ WaypointPlanManagerService::configure(const pugi::xml_node& ndComponent)
         m_gimbalPayloadId = ndComponent.attribute(STRING_XML_GIMBAL_PAYLOAD_ID).as_int64();
     }
 
-    addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
     // Air Vehicle States
-    addSubscriptionAddress(afrl::cmasi::AirVehicleState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AirVehicleState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::AirVehicleStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
-    addSubscriptionAddress(uxas::messages::uxnative::IncrementWaypoint::Subscription);
-    addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription); // for direct implementation outside of automation response
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::uxnative::IncrementWaypoint::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription); // for direct implementation outside of automation response
     return (bSucceeded);
 }
 

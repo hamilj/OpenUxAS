@@ -196,24 +196,24 @@ bool TaskServiceBase::configure(const pugi::xml_node& serviceXmlNode)
         m_uniqueRouteRequestId = -m_uniqueRouteRequestId;
 
     //ENTITY CONFIGURATIONS
-    addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
     std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
     for (auto child : childconfigs)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     // ENTITY STATES
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for (auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationResponse::Subscription);
-    addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
-    addSubscriptionAddress(uxas::messages::task::TaskImplementationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskImplementationRequest::Subscription);
 
-    addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription);
-    addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
 
     isSuccessful = isSuccessful && configureTask(serviceXmlNode);
 

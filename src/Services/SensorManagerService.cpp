@@ -76,15 +76,15 @@ SensorManagerService::configure(const pugi::xml_node& ndComponent)
 
     std::string strComponentType = ndComponent.attribute(STRING_XML_TYPE).value();
     //assert(strComponentType==STRING_XML_COMPONENT_TYPE)
-    addSubscriptionAddress(afrl::cmasi::RemoveTasks::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::RemoveTasks::Subscription);
     
     //ENTITY CONFIGURATIONS
-    addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
     std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
     for(auto child : childconfigs)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
-    addSubscriptionAddress(uxas::messages::task::SensorFootprintRequests::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::SensorFootprintRequests::Subscription);
 
     return (isSuccess);
 }

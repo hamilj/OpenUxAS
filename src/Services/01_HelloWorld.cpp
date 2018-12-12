@@ -66,7 +66,7 @@ bool HelloWorld::configure(const pugi::xml_node& ndComponent)
     }
 
     // subscribe to messages::
-    addSubscriptionAddress(afrl::cmasi::KeyValuePair::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeyValuePair::Subscription);
 
     return (isSuccess);
 }

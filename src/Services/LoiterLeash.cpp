@@ -66,22 +66,22 @@ bool LoiterLeash::configure(const pugi::xml_node& ndComponent)
     // subscribe to messages
 
     //ENTITY CONFIGURATIONS
-    addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
     std::vector< std::string > childconfigs = afrl::cmasi::EntityConfigurationDescendants();
     for (auto child : childconfigs)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     // ENTITY STATES
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for (auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     // route planning
-    addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RoutePlanResponse::Subscription);
 
     // main message that drives this service
-    addSubscriptionAddress(uxas::messages::uxnative::SafeHeadingAction::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::uxnative::SafeHeadingAction::Subscription);
 
     return (true);
 }

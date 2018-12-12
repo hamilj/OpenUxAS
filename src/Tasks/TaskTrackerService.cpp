@@ -52,24 +52,24 @@ bool
 TaskTrackerService::configure(const pugi::xml_node& serviceXmlNode)
 {
     // track all vehicles
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
-    addSubscriptionAddress(afrl::impact::AreaOfInterest::Subscription);
-    addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
-    addSubscriptionAddress(afrl::impact::PointOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::AreaOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::PointOfInterest::Subscription);
     
     // Subscribe to Task and all derivatives of Task
-    addSubscriptionAddress(afrl::cmasi::Task::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::Task::Subscription);
     std::vector< std::string > childtasks = afrl::cmasi::TaskDescendants();
     for(auto child : childtasks)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     // Register tasks that vehicles are attempting
-    addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
-    addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription);
 
     return true;
 }

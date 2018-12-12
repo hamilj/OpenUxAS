@@ -84,16 +84,16 @@ AssignmentCoordinatorTaskService::configureTask(const pugi::xml_node& ndComponen
 
     // subscribe to messages::
     //TODO:: add entities
-    //    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    //    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     
     // Air Vehicle States
-    addSubscriptionAddress(afrl::cmasi::AirVehicleState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AirVehicleState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::AirVehicleStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
-    addSubscriptionAddress(uxas::messages::task::CoordinatedAutomationRequest::Subscription);
-    addSubscriptionAddress(uxas::messages::task::TaskAutomationResponse::Subscription);
-    addSubscriptionAddress(uxas::messages::task::AssignmentCoordination::Subscription);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::CoordinatedAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::AssignmentCoordination::Subscription);
 
     return (isSuccess);
 }

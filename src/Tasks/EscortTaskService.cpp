@@ -103,10 +103,10 @@ EscortTaskService::configureDynamicTask(const pugi::xml_node& ndComponent)
 
     } //if(isSuccessful)
 
-    addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription);
-    addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
-    addSubscriptionAddress(afrl::cmasi::FollowPathCommand::Subscription);
-    addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::FollowPathCommand::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::LineOfInterest::Subscription);
 
     return (isSuccessful);
 }

@@ -130,20 +130,20 @@ OsmPlannerService::configure(const pugi::xml_node& ndComponent)
 
     // ground planner does not respond to 'global' route requests
     // however, it will respond to route requests that are sent in a limited-cast fashion
-    //addSubscriptionAddress(uxas::messages::route::RoutePlanRequest::Subscription);
-    addSubscriptionAddress(uxas::common::MessageGroup::GroundPathPlanner());
+    //m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RoutePlanRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::common::MessageGroup::GroundPathPlanner());
 
     // need to keep track of all ground vehicles and their configurations for proper speed setting
-    addSubscriptionAddress(afrl::vehicles::GroundVehicleConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::vehicles::GroundVehicleConfiguration::Subscription);
 
     // only the ground planner can fulfill this request, response (as typical) will be limited-cast back
-    addSubscriptionAddress(uxas::messages::route::EgressRouteRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::EgressRouteRequest::Subscription);
 
     // subscribe, but only sends response for ground vehicles
-    addSubscriptionAddress(uxas::messages::route::RoutePlanRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RoutePlanRequest::Subscription);
 
     // returns LineOfInterest, does not depend on entity configuration 
-    addSubscriptionAddress(uxas::messages::route::RoadPointsRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RoadPointsRequest::Subscription);
 
     return (isSuccessful);
 }

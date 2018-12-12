@@ -75,7 +75,7 @@ ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi
         // subscribe to messages addressed to non-empty source group value
         if (!m_pLmcpObjectNetworkClient->m_messageSourceGroup.empty())
         {
-            addSubscriptionAddress(m_pLmcpObjectNetworkClient->m_messageSourceGroup);
+            m_pLmcpObjectNetworkClient->addSubscriptionAddress(m_pLmcpObjectNetworkClient->m_messageSourceGroup);
         }
     }
     else

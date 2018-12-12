@@ -54,7 +54,7 @@ bool DynamicTaskServiceBase::configureTask(const pugi::xml_node& serviceXmlNode)
         }
     }
 
-    addSubscriptionAddress(messages::route::RoutePlanResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(messages::route::RoutePlanResponse::Subscription);
 
     for (auto koz : m_keepOutZones)
     {
@@ -62,9 +62,9 @@ bool DynamicTaskServiceBase::configureTask(const pugi::xml_node& serviceXmlNode)
         m_KeepOutZoneIDVsPolygon[koz.second->getZoneID()] = poly;
     }
 
-    addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
-    addSubscriptionAddress(afrl::cmasi::OperatingRegion::Subscription);
-    addSubscriptionAddress(messages::task::UniqueAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::OperatingRegion::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(messages::task::UniqueAutomationResponse::Subscription);
     configureDynamicTask(serviceXmlNode);
     return true;
 }

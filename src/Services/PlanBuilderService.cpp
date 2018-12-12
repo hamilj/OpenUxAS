@@ -77,17 +77,17 @@ PlanBuilderService::configure(const pugi::xml_node& ndComponent)
         }
     }
 
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
-    addSubscriptionAddress(uxas::messages::task::TaskAssignmentSummary::Subscription);
-    addSubscriptionAddress(uxas::messages::task::TaskImplementationResponse::Subscription);
-    addSubscriptionAddress(afrl::impact::ImpactAutomationRequest::Subscription);
-    addSubscriptionAddress(afrl::impact::ImpactAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskAssignmentSummary::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskImplementationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::ImpactAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::ImpactAutomationResponse::Subscription);
 
     // ENTITY STATES
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
     return true;
 }
 

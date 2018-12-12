@@ -113,11 +113,11 @@ AssignmentTreeBranchBoundBase::configure(const pugi::xml_node& ndComponent)
         }
     }
 
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
-    addSubscriptionAddress(uxas::messages::task::TaskPlanOptions::Subscription);
-    addSubscriptionAddress(uxas::messages::task::AssignmentCostMatrix::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskPlanOptions::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::AssignmentCostMatrix::Subscription);
 #ifdef AFRL_INTERNAL_ENABLED
-    addSubscriptionAddress(uxas::project::pisr::PSIR_AssignmentType::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::project::pisr::PSIR_AssignmentType::Subscription);
 #endif
 
     configureAssignment(ndComponent);

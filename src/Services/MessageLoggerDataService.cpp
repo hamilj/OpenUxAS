@@ -73,7 +73,7 @@ MessageLoggerDataService::configure(const pugi::xml_node& serviceXmlNode)
             std::string messageType = currentXmlNode.attribute(uxas::common::StringConstant::MessageType().c_str()).value();
             if (!messageType.empty())
             {
-                addSubscriptionAddress(messageType);
+                m_pLmcpObjectNetworkClient->addSubscriptionAddress(messageType);
             }
         }
     }

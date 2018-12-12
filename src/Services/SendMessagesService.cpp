@@ -190,7 +190,7 @@ SendMessagesService::configure(const pugi::xml_node& serviceXmlNode)
         UXAS_LOG_WARN(s_typeName(), "::configure failed to load messages to be sent");
     }
     
-    addSubscriptionAddress(uxas::messages::uxnative::StartupComplete::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::uxnative::StartupComplete::Subscription);
 
     return (isSuccess);
 };

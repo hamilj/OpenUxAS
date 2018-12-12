@@ -54,10 +54,10 @@ RendezvousTask::configureTask(const pugi::xml_node& ndComponent)
 
     // add subscription to TaskAssignmentSummary to determine the complete
     // set of vehicles assigned to this task
-    addSubscriptionAddress(uxas::messages::task::TaskAssignmentSummary::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::TaskAssignmentSummary::Subscription);
     
     // add subscription to AssignmentCostMatrix to determine timing between options
-    addSubscriptionAddress(uxas::messages::task::AssignmentCostMatrix::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::AssignmentCostMatrix::Subscription);
 
     // Process task options
     pugi::xml_node ndTaskOptions = ndComponent.child(m_taskOptions_XmlTag.c_str());

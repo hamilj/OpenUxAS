@@ -59,7 +59,7 @@ bool MustFlyTaskService::configureTask(const pugi::xml_node& ndComponent)
         UXAS_LOG_ERROR("ERROR:: **MustFlyTaskService::bConfigure failed: taskObject[" + m_task->getFullLmcpTypeName() + "] is not a MustFlyTask.");
         return false;
     }
-    addSubscriptionAddress(uxas::messages::route::RouteResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RouteResponse::Subscription);
     return true;
 }
 

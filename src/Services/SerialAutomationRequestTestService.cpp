@@ -68,10 +68,10 @@ SerialAutomationRequestTestService::configure(const pugi::xml_node& ndComponent)
         m_maxResponseTime_ms = ndComponent.attribute(STRING_XML_MAX_RESPONSE_TIME_MS).as_uint();
     }
 
-    addSubscriptionAddress(afrl::cmasi::AutomationRequest::Subscription);
-    addSubscriptionAddress(afrl::impact::ImpactAutomationRequest::Subscription);
-    addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
-    addSubscriptionAddress(afrl::impact::ImpactAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::ImpactAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::ImpactAutomationResponse::Subscription);
 
     return (isSucceeded);
 }

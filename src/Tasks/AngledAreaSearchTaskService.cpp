@@ -117,8 +117,8 @@ AngledAreaSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
         UXAS_LOG_WARN("Lane spacing min and max not both positive");
     }
 
-    addSubscriptionAddress(uxas::messages::task::SensorFootprintResponse::Subscription);
-    addSubscriptionAddress(uxas::messages::route::RouteResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::SensorFootprintResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RouteResponse::Subscription);
     return (isSuccessful);
 }
 

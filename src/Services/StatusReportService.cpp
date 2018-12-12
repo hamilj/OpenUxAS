@@ -92,15 +92,15 @@ bool StatusReportService::configure(const pugi::xml_node& ndComponent)
     if(m_keepAliveExpirationTime_ms < 1000) m_keepAliveExpirationTime_ms = 1000;
     
     // subscribe to join, exit, and keep-alive messages
-    addSubscriptionAddress(uxas::messages::uxnative::EntityJoin::Subscription);
-    addSubscriptionAddress(uxas::messages::uxnative::EntityExit::Subscription);
-    addSubscriptionAddress(uxas::messages::uxnative::AutopilotKeepAlive::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::uxnative::EntityJoin::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::uxnative::EntityExit::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::uxnative::AutopilotKeepAlive::Subscription);
     
     // track all entity states
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();
     for(auto child : childstates)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
 
     return (true);
 }

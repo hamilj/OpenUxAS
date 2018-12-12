@@ -69,21 +69,21 @@ bool
     }
 
 
-    addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     for (auto descendant : afrl::cmasi::EntityStateDescendants())
-        addSubscriptionAddress(descendant);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(descendant);
     
-    addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityConfiguration::Subscription);
     for (auto descendant : afrl::cmasi::EntityConfigurationDescendants())
-        addSubscriptionAddress(descendant);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(descendant);
 
 
     //assume all KOZs apply to all vehicles for checking conflictsWithROZ
-    addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::KeepOutZone::Subscription);
 
     // Primary messages for actual route construction
-    addSubscriptionAddress(afrl::impact::BatchSummaryRequest::Subscription);
-    addSubscriptionAddress(messages::task::TaskAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::BatchSummaryRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(messages::task::TaskAutomationResponse::Subscription);
 
     return true; // may not have the proper fast plan value, but proceed anyway
 }
