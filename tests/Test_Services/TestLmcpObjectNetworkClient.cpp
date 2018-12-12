@@ -14,7 +14,6 @@ TestLmcpObjectNetworkClient::TestLmcpObjectNetworkClient(uint32_t entityId, cons
     m_entityType = entityType;
 
     m_networkId = networkId;
-    m_networkIdString = std::to_string(m_networkId);
 }
 
 bool TestLmcpObjectNetworkClient::configureNetworkClient(const std::string& subclassTypeName, const pugi::xml_node& networkClientXmlNode,

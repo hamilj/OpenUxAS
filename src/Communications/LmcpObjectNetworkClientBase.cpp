@@ -300,9 +300,9 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceEntityId:   [", receivedLmcpMessage->m_attributes->getSourceEntityId(), "]");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceServiceId:  [", receivedLmcpMessage->m_attributes->getSourceServiceId(), "]");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("AttributesString: [", receivedLmcpMessage->m_attributes->getString(), "]");
-                    if ((m_isBaseClassKillServiceProcessingPermitted
+                    if (m_isBaseClassKillServiceProcessingPermitted
                             && uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object)
-                            && m_networkIdString.compare(std::to_string(std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getServiceID())) == 0)
+                            && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getServiceID()))
                             || msgProcessor.processReceivedLmcpMessage(std::move(receivedLmcpMessage)))
                     {
                         UXAS_LOG_INFORM(m_networkClientTypeName, "::executeNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
@@ -387,7 +387,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
                     std::shared_ptr<avtas::lmcp::Object> lmcpObject = deserializeMessage(nextReceivedSerializedLmcpObject->getPayload());
                     // check KillService serviceID == my serviceID
                     if (uxas::messages::uxnative::isKillService(lmcpObject)
-                            && m_networkIdString.compare(std::to_string(std::static_pointer_cast<uxas::messages::uxnative::KillService>(lmcpObject)->getServiceID())) == 0)
+                            && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(lmcpObject)->getServiceID())))
                     {
                         UXAS_LOG_INFORM(m_networkClientTypeName, "::executeSerializedNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
                         m_isTerminateNetworkClient = true;

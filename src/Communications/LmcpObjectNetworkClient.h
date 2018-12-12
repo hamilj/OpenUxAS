@@ -136,9 +136,6 @@ public:
     /** \brief Unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
     int64_t m_networkId;
 
-    /** \brief String representation of the unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
-    std::string m_networkIdString;
-
     /** \brief Name of subclass used for logging/messaging. */
     std::string m_networkClientTypeName;
 

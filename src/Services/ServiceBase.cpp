@@ -149,7 +149,6 @@ void ServiceBase::updateNetworkId(int64_t networkId)
 {
     m_pLmcpObjectNetworkClient->removeSubscriptionAddress(uxas::communications::getNetworkClientUnicastAddress(getEntityId(), m_pLmcpObjectNetworkClient->m_networkId));
     m_pLmcpObjectNetworkClient->m_networkId = networkId;
-    m_pLmcpObjectNetworkClient->m_networkIdString = std::to_string(networkId);
     m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::communications::getNetworkClientUnicastAddress(getEntityId(), m_pLmcpObjectNetworkClient->m_networkId));
 }
 
