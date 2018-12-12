@@ -235,7 +235,7 @@ SendMessagesService::sendMessages()
                     else
                     {
                         UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::sendMessages BEFORE sending single-shot limited-cast");
-                        sendSharedLmcpObjectLimitedCastMessage((*itMessage)->m_messageAddress, (*itMessage)->m_lmcpObjectPayload);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage((*itMessage)->m_messageAddress, (*itMessage)->m_lmcpObjectPayload);
                         UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::sendMessages AFTER sending single-shot limited-cast");
                     }
                     itMessage = m_messagesToSend.erase(itMessage); // remove single-shot send message
@@ -258,7 +258,7 @@ SendMessagesService::sendMessages()
                     else
                     {
                         UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::sendMessages BEFORE sending periodic limited-cast");
-                        sendSharedLmcpObjectLimitedCastMessage((*itMessage)->m_messageAddress, (*itMessage)->m_lmcpObjectPayload);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage((*itMessage)->m_messageAddress, (*itMessage)->m_lmcpObjectPayload);
                         UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::sendMessages AFTER sending periodic limited-cast");
                     }
                     (*itMessage)->m_messageSendTime_ms += (*itMessage)->m_messageSendPeriod_ms;

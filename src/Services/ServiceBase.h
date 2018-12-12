@@ -76,11 +76,6 @@ public:
 
     void updateNetworkId(int64_t networkId);
 
-    inline void sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)
-    {
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(castAddress, lmcpObject);
-    }
-
     inline bool getIsTerminationFinished()
     {
         return m_pLmcpObjectNetworkClient->getIsTerminationFinished();

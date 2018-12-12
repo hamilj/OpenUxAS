@@ -171,7 +171,7 @@ OsmPlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicatio
             routePlanResponse->setResponseID(request->getRequestID());
             bProcessRoutePlanRequest(request, routePlanResponse);
             auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(routePlanResponse);
-            sendSharedLmcpObjectLimitedCastMessage(
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(
                                                    uxas::communications::getNetworkClientUnicastAddress(
                                                                                   receivedLmcpMessage->m_attributes->getSourceEntityId(),
                                                                                   receivedLmcpMessage->m_attributes->getSourceServiceId()
@@ -187,7 +187,7 @@ OsmPlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicatio
         auto roadPointsResponse = std::make_shared<uxas::messages::route::RoadPointsResponse>();
         if (isProcessRoadPointsRequest(request, roadPointsResponse))
         {
-            sendSharedLmcpObjectLimitedCastMessage(
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(
                                                    uxas::communications::getNetworkClientUnicastAddress(
                                                                                   receivedLmcpMessage->m_attributes->getSourceEntityId(),
                                                                                   receivedLmcpMessage->m_attributes->getSourceServiceId()
@@ -201,7 +201,7 @@ OsmPlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicatio
         if (bProcessEgressRequest(std::static_pointer_cast<uxas::messages::route::EgressRouteRequest>(receivedLmcpMessage->m_object), egressResponse))
         {
             auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(egressResponse);
-            sendSharedLmcpObjectLimitedCastMessage(
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(
                                                    uxas::communications::getNetworkClientUnicastAddress(
                                                                                   receivedLmcpMessage->m_attributes->getSourceEntityId(),
                                                                                   receivedLmcpMessage->m_attributes->getSourceServiceId()

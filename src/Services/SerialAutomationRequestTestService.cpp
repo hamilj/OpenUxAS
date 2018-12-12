@@ -95,7 +95,7 @@ SerialAutomationRequestTestService::processReceivedLmcpMessage(std::unique_ptr<u
             if (m_waitingRequests.empty() && m_isAllClear)
             {
                 m_isAllClear = false;
-                sendSharedLmcpObjectLimitedCastMessage("UniqueAutomationRequest", receivedLmcpMessage->m_object);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage("UniqueAutomationRequest", receivedLmcpMessage->m_object);
 
                 // reset the timer
                 uxas::common::TimerManager::getInstance().startSingleShotTimer(m_responseTimerId, m_maxResponseTime_ms);
@@ -122,7 +122,7 @@ void SerialAutomationRequestTestService::OnResponseTimeout()
     {
         std::shared_ptr<avtas::lmcp::Object> toSend = m_waitingRequests.front();
         m_waitingRequests.pop_front();
-        sendSharedLmcpObjectLimitedCastMessage("UniqueAutomationRequest", toSend);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage("UniqueAutomationRequest", toSend);
 
         // reset the timer
         uxas::common::TimerManager::getInstance().startSingleShotTimer(m_responseTimerId, m_maxResponseTime_ms);

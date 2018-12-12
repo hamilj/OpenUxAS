@@ -364,7 +364,7 @@ void RouteAggregatorService::BuildMatrixRequests(int64_t reqId, const std::share
     for (size_t k = 0; k < sendAirPlanRequest.size(); k++)
     {
         std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(sendAirPlanRequest.at(k));
-        sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), pRequest);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), pRequest);
     }
 
     // send all requests for ground plans
@@ -379,7 +379,7 @@ void RouteAggregatorService::BuildMatrixRequests(int64_t reqId, const std::share
         else
         {
             // send externally
-            sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), pRequest);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), pRequest);
         }
     }
 
@@ -431,13 +431,13 @@ void RouteAggregatorService::HandleRouteRequest(std::shared_ptr<uxas::messages::
             else
             {
                 // send externally
-                sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), pRequest);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), pRequest);
             }
         }
         else
         {
             // send to aircraft planner
-            sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), pRequest);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), pRequest);
         }
     }
 

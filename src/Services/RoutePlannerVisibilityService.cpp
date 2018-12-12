@@ -227,7 +227,7 @@ RoutePlannerVisibilityService::processReceivedLmcpMessage(std::unique_ptr<uxas::
             {
                 auto message = std::static_pointer_cast<avtas::lmcp::Object>(routePlanResponse);
                 // always limited-cast route plan responses
-                sendSharedLmcpObjectLimitedCastMessage(
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(
                         uxas::communications::getNetworkClientUnicastAddress(
                             receivedLmcpMessage->m_attributes->getSourceEntityId(),
                             receivedLmcpMessage->m_attributes->getSourceServiceId()
