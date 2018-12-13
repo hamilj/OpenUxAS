@@ -25,6 +25,41 @@
 
 #include <functional>
 
+namespace
+{
+
+/** \brief The <B><i>deserializeMessage</i></B> method deserializes an LMCP
+ * string into an LMCP object.
+ *
+ * @return unique pointer to LMCP object if succeeds; unique pointer with
+ * unassigned native pointer.
+ */
+std::shared_ptr<avtas::lmcp::Object> deserializeMessage(const std::string& payload)
+{
+    std::shared_ptr<avtas::lmcp::Object> lmcpObject;
+
+    // allocate memory
+    avtas::lmcp::ByteBuffer lmcpByteBuffer;
+    lmcpByteBuffer.allocate(payload.size());
+    lmcpByteBuffer.rewind();
+
+    for (size_t charIndex = 0; charIndex < payload.size(); charIndex++)
+    {
+        lmcpByteBuffer.putByte(payload[charIndex]); // TODO REVIEW
+    }
+    lmcpByteBuffer.rewind();
+
+    lmcpObject.reset(avtas::lmcp::Factory::getObject(lmcpByteBuffer));
+    if (!lmcpObject)
+    {
+        UXAS_LOG_ERROR("LmcpObjectMessageReceiverPipe::deserializeMessage failed to convert message payload string into an LMCP object");
+    }
+
+    return (lmcpObject);
+}
+
+}
+
 namespace uxas
 {
 namespace communications
@@ -432,31 +467,6 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
     {
         UXAS_LOG_ERROR(m_clientName, "::executeSerializedNetworkClient EXCEPTION: ", ex.what());
     }
-};
-
-std::shared_ptr<avtas::lmcp::Object>
-LmcpObjectNetworkClientBase::deserializeMessage(const std::string& payload)
-{
-    std::shared_ptr<avtas::lmcp::Object> lmcpObject;
-
-    // allocate memory
-    avtas::lmcp::ByteBuffer lmcpByteBuffer;
-    lmcpByteBuffer.allocate(payload.size());
-    lmcpByteBuffer.rewind();
-
-    for (size_t charIndex = 0; charIndex < payload.size(); charIndex++)
-    {
-        lmcpByteBuffer.putByte(payload[charIndex]); // TODO REVIEW
-    }
-    lmcpByteBuffer.rewind();
-    
-    lmcpObject.reset(avtas::lmcp::Factory::getObject(lmcpByteBuffer));
-    if (!lmcpObject)
-    {
-        UXAS_LOG_ERROR("LmcpObjectMessageReceiverPipe::deserializeMessage failed to convert message payload string into an LMCP object");
-    }
-
-    return (lmcpObject);
 };
 
 void

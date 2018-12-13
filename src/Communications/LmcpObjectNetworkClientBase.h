@@ -245,15 +245,6 @@ private:
     void
     executeSerializedNetworkClient(LmcpObjectMessageProcessor& msgProcessor);
 
-    /** \brief The <B><i>deserializeMessage</i></B> method deserializes an LMCP 
-     * string into an LMCP object.
-     * 
-     * @return unique pointer to LMCP object if succeeds; unique pointer with 
-     * unassigned native pointer. 
-     */
-    std::shared_ptr<avtas::lmcp::Object>
-    deserializeMessage(const std::string& payload);
-
     /** \brief Name of client used for logging/messaging. */
     std::string m_clientName;
     
@@ -270,7 +261,6 @@ private:
     std::set<std::string> m_preStartLmcpSubscriptionAddresses;
 
     uxas::communications::LmcpObjectMessageSenderPipe m_lmcpObjectMessageSenderPipe;
-    
 };
 
 }; //namespace communications
