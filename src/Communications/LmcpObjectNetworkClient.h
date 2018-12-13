@@ -123,18 +123,6 @@ public:
 
     void setMessageSourceGroup(const std::string& messageSourceGroup);
 
-    /** \brief Unique ID for UxAS entity instance; value read from configuration XML */
-    uint32_t m_entityId;
-
-    /** \brief String representation of the unique ID for UxAS entity instance; value read from configuration XML */
-    std::string m_entityIdString;
-
-    /** \brief Type of UxAS entity instance; value read from configuration XML */
-    std::string m_entityType;
-
-    /** \brief Unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
-    int64_t m_networkId;
-
     /** \class ReceiveProcessingType
      *
      * \par Enumeration specifying whether or not to de-serialize a received message.
@@ -149,8 +137,19 @@ public:
         SERIALIZED_LMCP
     };
 
-    /** \brief  this is the unique ID for the entity represented by this instance of the UxAS software, configured in component manager XML*/
-    ReceiveProcessingType m_receiveProcessingType;
+    void setReceiveProcessingType(ReceiveProcessingType type);
+
+    /** \brief Unique ID for UxAS entity instance; value read from configuration XML */
+    uint32_t m_entityId;
+
+    /** \brief String representation of the unique ID for UxAS entity instance; value read from configuration XML */
+    std::string m_entityIdString;
+
+    /** \brief Type of UxAS entity instance; value read from configuration XML */
+    std::string m_entityType;
+
+    /** \brief Unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
+    int64_t m_networkId;
 
     std::atomic<bool> m_isBaseClassKillServiceProcessingPermitted;
     std::atomic<bool> m_isTerminateNetworkClient;
@@ -164,6 +163,9 @@ public:
 protected:
     /** \brief Multi-cast group address that is subscribed to and included in sent messages  */
     std::string m_messageSourceGroup;
+
+    /** \brief  this is the unique ID for the entity represented by this instance of the UxAS software, configured in component manager XML*/
+    ReceiveProcessingType m_receiveProcessingType;
 };
 
 }; // namespace communications

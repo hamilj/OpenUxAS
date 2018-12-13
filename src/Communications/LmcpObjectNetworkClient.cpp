@@ -91,5 +91,10 @@ void LmcpObjectNetworkClient::setMessageSourceGroup(const std::string& messageSo
     m_messageSourceGroup = messageSourceGroup;
 }
 
+void LmcpObjectNetworkClient::setReceiveProcessingType(ReceiveProcessingType type)
+{
+    m_receiveProcessingType = type;
+}
+
 } // namespace communications
 } // namespace uxas

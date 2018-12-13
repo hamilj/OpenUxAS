@@ -16,7 +16,9 @@ namespace communications
 
 LmcpObjectNetworkBridge::LmcpObjectNetworkBridge()
     : m_entityIdNetworkIdUnicastString(getNetworkClientUnicastAddress(m_entityId, m_networkId))
-{ }
+{
+    m_receiveProcessingType = LmcpObjectNetworkClient::ReceiveProcessingType::SERIALIZED_LMCP;
+}
 
 } // namespace communications
 } // namespace uxas
