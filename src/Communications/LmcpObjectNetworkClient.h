@@ -153,9 +153,6 @@ public:
     /** \brief  this is the unique ID for the entity represented by this instance of the UxAS software, configured in component manager XML*/
     ReceiveProcessingType m_receiveProcessingType;
 
-    /** \brief Unicast message address for messaging case of sending message to only this network client instance */
-    std::string m_entityIdNetworkIdUnicastString;
-
     /** \brief Multi-cast group address that is subscribed to and included in sent messages  */
     std::string m_messageSourceGroup;
 

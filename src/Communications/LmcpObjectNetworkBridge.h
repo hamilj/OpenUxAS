@@ -21,7 +21,13 @@ namespace communications
 class LmcpObjectNetworkBridge : public LmcpObjectNetworkClientBase, public LmcpObjectMessageProcessor
 {
 public:
+    LmcpObjectNetworkBridge();
+
     virtual ~LmcpObjectNetworkBridge() { }
+
+protected:
+    /** \brief Unicast message address for messaging case of sending message to only this network client instance */
+    const std::string m_entityIdNetworkIdUnicastString;
 };
 
 }; // namespace communications

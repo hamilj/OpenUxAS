@@ -36,6 +36,10 @@ std::string LmcpObjectNetworkClientBase::s_entityServicesCastAllAddress
 LmcpObjectNetworkClientBase::LmcpObjectNetworkClientBase()
     : LmcpObjectNetworkClient()
 {
+    m_entityId = uxas::common::ConfigurationManager::getInstance().getEntityId();
+    m_entityIdString = std::to_string(m_entityId);
+    m_entityType = uxas::common::ConfigurationManager::getInstance().getEntityType();
+
     UXAS_LOG_INFORM("LmcpObjectNetworkClientBase initializing LMCP network ID ", m_networkId);
 };
 
@@ -52,9 +56,6 @@ LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassT
     LmcpObjectMessageProcessor& msgProcessor)
 {
     UXAS_LOG_DEBUGGING("LmcpObjectNetworkClientBase::configureNetworkClient method START");
-    m_entityId = uxas::common::ConfigurationManager::getInstance().getEntityId();
-    m_entityIdString = std::to_string(m_entityId);
-    m_entityType = uxas::common::ConfigurationManager::getInstance().getEntityType();
     m_clientName = subclassTypeName;
 
     //
@@ -65,9 +66,9 @@ LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassT
     // - bridges never subscribe to the entity ID + service ID uni-cast address on an external network (since already subscribing to the entity cast address)
     //
     // subscribe to messages addressed to network client (bridge, service, etc.)
-    m_entityIdNetworkIdUnicastString = getNetworkClientUnicastAddress(m_entityId, m_networkId);
-    UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient subscribing to service uni-cast address [", m_entityIdNetworkIdUnicastString, "]");
-    addSubscriptionAddress(m_entityIdNetworkIdUnicastString);
+    auto address = getNetworkClientUnicastAddress(m_entityId, m_networkId);
+    UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient subscribing to service uni-cast address [", address, "]");
+    addSubscriptionAddress(address);
     s_entityServicesCastAllAddress = getEntityServicesCastAllAddress(m_entityId);
     UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient subscribing to entity cast-to-all services address [", s_entityServicesCastAllAddress, "]");
     addSubscriptionAddress(s_entityServicesCastAllAddress);

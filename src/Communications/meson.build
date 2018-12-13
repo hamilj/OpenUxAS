@@ -34,6 +34,7 @@ lib_uxas_communications = static_library(
     'LmcpObjectMessageSenderPipe.cpp',
     'LmcpObjectMessageTcpReceiverSenderPipe.cpp',
     'LmcpObjectNetworkBridgeManager.cpp',
+    'LmcpObjectNetworkBridge.cpp',
     'LmcpObjectNetworkClient.cpp',
     'LmcpObjectNetworkClientBase.cpp',
     'LmcpObjectNetworkPublishPullBridge.cpp',
