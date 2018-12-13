@@ -56,9 +56,9 @@ LmcpObjectNetworkBridgeManager::terminateAllBridges(std::shared_ptr<uxas::commun
     {
         if (svcIt->second && !svcIt->second->getIsTerminationFinished())
         {
-            UXAS_LOG_INFORM(s_typeName(), "::terminateAllBridges sending [", uxas::messages::uxnative::KillService::TypeName, "] message to ", svcIt->second->m_networkClientTypeName, " having entity ID [", svcIt->second->m_entityId, "] and network ID [", svcIt->second->m_networkId, "]");
+            UXAS_LOG_INFORM(s_typeName(), "::terminateAllBridges sending [", uxas::messages::uxnative::KillService::TypeName, "] message to ", svcIt->second->getClientName(), " having entity ID [", svcIt->second->m_entityId, "] and network ID [", svcIt->second->m_networkId, "]");
 
-            std::cout << std::endl << s_typeName() << "::terminateAllBridges sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->m_networkClientTypeName << " having entity ID [" << svcIt->second->m_entityId << "] and network ID [" << svcIt->second->m_networkId << "]" << std::endl;
+            std::cout << std::endl << s_typeName() << "::terminateAllBridges sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->getClientName() << " having entity ID [" << svcIt->second->m_entityId << "] and network ID [" << svcIt->second->m_networkId << "]" << std::endl;
             auto killService = uxas::stduxas::make_unique<uxas::messages::uxnative::KillService>();
             killService->setServiceID(svcIt->second->m_networkId);
             pLmcpObjectNetworkClient->sendLmcpObjectLimitedCastMessage(getNetworkClientUnicastAddress(svcIt->second->m_entityId, svcIt->second->m_networkId), std::move(killService));
@@ -77,13 +77,13 @@ LmcpObjectNetworkBridgeManager::removeTerminatedBridges(uint32_t &runningSvcCnt,
     {
         if (svcIt->second->getIsTerminationFinished())
         {
-            UXAS_LOG_INFORM(s_typeName(), "::removeTerminatedServices removing reference to terminated ", svcIt->second->m_networkClientTypeName, " ID ", svcIt->second->m_networkId);
+            UXAS_LOG_INFORM(s_typeName(), "::removeTerminatedServices removing reference to terminated ", svcIt->second->getClientName(), " ID ", svcIt->second->m_networkId);
             terminatedSvcCnt++;
             svcIt = m_bridgesByNetworkId.erase(svcIt); // remove finished service (enables destruction)
         }
         else
         {
-            UXAS_LOG_DEBUGGING(s_typeName(), "::removeTerminatedServices retaining reference to non-terminated ", svcIt->second->m_networkClientTypeName, " ID ", svcIt->second->m_networkId);
+            UXAS_LOG_DEBUGGING(s_typeName(), "::removeTerminatedServices retaining reference to non-terminated ", svcIt->second->getClientName(), " ID ", svcIt->second->m_networkId);
             runningSvcCnt++;
             svcIt++;
         }
@@ -154,7 +154,7 @@ LmcpObjectNetworkBridgeManager::createTestBridges(const std::string& cfgXmlFileP
                 networkId++;
                 if (newTestBridge)
                 {
-                    UXAS_LOG_INFORM(s_typeName(), "::createTestBridges added ", newTestBridge->m_networkClientTypeName, " bridge with entity ID ", newTestBridge->m_entityId," and network ID ", newTestBridge->m_networkId, " from XML configuration ", cfgXmlFilePath);
+                    UXAS_LOG_INFORM(s_typeName(), "::createTestBridges added ", newTestBridge->getClientName(), " bridge with entity ID ", newTestBridge->m_entityId," and network ID ", newTestBridge->m_networkId, " from XML configuration ", cfgXmlFilePath);
                     testBridgesByNetworkIdMap.emplace(newTestBridge->m_networkId, std::move(newTestBridge));
                 }
                 else
@@ -230,23 +230,23 @@ LmcpObjectNetworkBridgeManager::createBridge(const pugi::xml_node& bridgeXmlNode
                     newBridge->m_networkId = networkId;
                     newBridge->removeSubscriptionAddress(originalUnicastAddress);
                     newBridge->addSubscriptionAddress(getNetworkClientUnicastAddress(newBridge->m_entityId, newBridge->m_networkId));
-                    UXAS_LOG_WARN(s_typeName(), "::createBridge re-configuring ", newBridge->m_networkClientTypeName, " entity ID ", newBridge->m_entityId, " network ID ", newBridge->m_networkId);
+                    UXAS_LOG_WARN(s_typeName(), "::createBridge re-configuring ", newBridge->getClientName(), " entity ID ", newBridge->m_entityId, " network ID ", newBridge->m_networkId);
                 }
-                UXAS_LOG_INFORM(s_typeName(), "::createBridge configured ", newBridge->m_networkClientTypeName, " entity ID ", newBridge->m_entityId, " network ID ", newBridge->m_networkId);
+                UXAS_LOG_INFORM(s_typeName(), "::createBridge configured ", newBridge->getClientName(), " entity ID ", newBridge->m_entityId, " network ID ", newBridge->m_networkId);
                 if (newBridge->initializeAndStart(*newBridge))
                 {
                     newBridgeFinal = std::move(newBridge);
-                    UXAS_LOG_INFORM(s_typeName(), "::createBridge initialized and started ", newBridgeFinal->m_networkClientTypeName, " network ID ", newBridgeFinal->m_networkId);
+                    UXAS_LOG_INFORM(s_typeName(), "::createBridge initialized and started ", newBridgeFinal->getClientName(), " network ID ", newBridgeFinal->m_networkId);
                 }
                 else
                 {
-                    UXAS_LOG_ERROR(s_typeName(), "::createBridge failed to initialize and start ", newBridge->m_networkClientTypeName, " network ID ", newBridge->m_networkId);
+                    UXAS_LOG_ERROR(s_typeName(), "::createBridge failed to initialize and start ", newBridge->getClientName(), " network ID ", newBridge->m_networkId);
                     newBridge.reset();
                 }
             }
             else
             {
-                UXAS_LOG_ERROR(s_typeName(), "::createBridge failed to configure ", newBridge->m_networkClientTypeName, " network ID ", newBridge->m_networkId);
+                UXAS_LOG_ERROR(s_typeName(), "::createBridge failed to configure ", newBridge->getClientName(), " network ID ", newBridge->m_networkId);
             }
         }
         else

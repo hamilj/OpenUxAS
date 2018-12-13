@@ -91,13 +91,7 @@ class LmcpObjectMessageProcessor;
  */
 class LmcpObjectNetworkClientBase : public LmcpObjectNetworkClient
 {
-protected:
-    
-    /** \brief static entity service cast address.  */
-    static std::string s_entityServicesCastAllAddress;
-            
 public:
-
     /** \brief Type name for the <B><i>LmcpObjectNetworkClientBase</i></B> class */
     static const std::string&
     s_typeName() { static std::string s_string("LmcpObjectNetworkClientBase"); return (s_string); };
@@ -106,16 +100,6 @@ public:
 
     virtual
     ~LmcpObjectNetworkClientBase();
-
-private:
-
-    /** \brief Copy construction not permitted */
-    LmcpObjectNetworkClientBase(LmcpObjectNetworkClientBase const&) = delete;
-
-    /** \brief Copy assignment operation not permitted */
-    void operator=(LmcpObjectNetworkClientBase const&) = delete;
-
-public:
 
     // TODO consider LmcpObjectNetworkBridgeManager friend declaration and 
     // make configureNetworkClient protected
@@ -146,8 +130,7 @@ public:
      */
     bool
     initializeAndStart(LmcpObjectMessageProcessor& msgProcessor) override;
-    
-public:
+
     /** \brief The <B><i>addSubscriptionAddress</i></B> can be invoked 
      * at any time to add specified message subscription address. 
      * 
@@ -183,6 +166,8 @@ public:
      */
     void
     sendLmcpObjectLimitedCastMessage(const std::string& castAddress, std::unique_ptr<avtas::lmcp::Object> lmcpObject) override;
+
+    inline std::string getClientName() const { return m_clientName; }
     
 protected:
     /** \brief The <B><i>sendLmcpObjectBroadcastMessage</i></B> method can be 
@@ -221,8 +206,16 @@ protected:
     void
     sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject) override;
 
+    /** \brief static entity service cast address.  */
+    static std::string s_entityServicesCastAllAddress;
+
 private:
-    
+    /** \brief Copy construction not permitted */
+    LmcpObjectNetworkClientBase(LmcpObjectNetworkClientBase const&) = delete;
+
+    /** \brief Copy assignment operation not permitted */
+    void operator=(LmcpObjectNetworkClientBase const&) = delete;
+
     /** \brief The <B><i>initializeNetworkClient</i></B> method is invoked by 
      * the <B><i>initializeAndStart</i></B> method to perform 
      * <B><i>LmcpObjectNetworkClientBase</i></B>-specific initialization 
@@ -261,7 +254,8 @@ private:
     std::shared_ptr<avtas::lmcp::Object>
     deserializeMessage(const std::string& payload);
 
-private:
+    /** \brief Name of client used for logging/messaging. */
+    std::string m_clientName;
     
     /** \brief  */
     bool m_isConfigured{false};

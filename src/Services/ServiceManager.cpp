@@ -397,22 +397,22 @@ ServiceManager::instantiateConfigureInitializeStartService(const pugi::xml_node&
             if (networkId > 0)
             {
                 newService->updateNetworkId(networkId);
-                UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService re-configuring ", lmcpClient->m_networkClientTypeName, " entity ID ", newService->getEntityId(), " service ID ", newService->getServiceId());
+                UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService re-configuring ", lmcpClient->getClientName(), " entity ID ", newService->getEntityId(), " service ID ", newService->getServiceId());
             }
-            UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully configured ", lmcpClient->m_networkClientTypeName, " entity ID ", newService->getEntityId(), " service ID ", newService->getServiceId());
+            UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully configured ", lmcpClient->getClientName(), " entity ID ", newService->getEntityId(), " service ID ", newService->getServiceId());
             if (newService->initializeAndStartService())
             {
                 newServiceFinal = std::move(newService);
-                UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully initialized and started ", lmcpClient->m_networkClientTypeName, " service ID ", newServiceFinal->getServiceId());
+                UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully initialized and started ", lmcpClient->getClientName(), " service ID ", newServiceFinal->getServiceId());
             }
             else
             {
-                UXAS_LOG_ERROR(s_typeName(), "::instantiateConfigureInitializeStartService failed to initialize and start ", lmcpClient->m_networkClientTypeName, " service ID ", newService->getServiceId());
+                UXAS_LOG_ERROR(s_typeName(), "::instantiateConfigureInitializeStartService failed to initialize and start ", lmcpClient->getClientName(), " service ID ", newService->getServiceId());
             }
         }
         else
         {
-            UXAS_LOG_ERROR(s_typeName(), "::instantiateConfigureInitializeStartService failed to configure ", lmcpClient->m_networkClientTypeName, " service ID ", newService->getServiceId());
+            UXAS_LOG_ERROR(s_typeName(), "::instantiateConfigureInitializeStartService failed to configure ", lmcpClient->getClientName(), " service ID ", newService->getServiceId());
         }
     }
     else

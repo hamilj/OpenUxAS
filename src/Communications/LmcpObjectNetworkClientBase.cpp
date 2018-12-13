@@ -55,7 +55,7 @@ LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassT
     m_entityId = uxas::common::ConfigurationManager::getInstance().getEntityId();
     m_entityIdString = std::to_string(m_entityId);
     m_entityType = uxas::common::ConfigurationManager::getInstance().getEntityType();
-    m_networkClientTypeName = subclassTypeName;
+    m_clientName = subclassTypeName;
 
     //
     // DESIGN 20150911 RJT message addressing - entity ID + service ID (uni-cast)
@@ -66,10 +66,10 @@ LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassT
     //
     // subscribe to messages addressed to network client (bridge, service, etc.)
     m_entityIdNetworkIdUnicastString = getNetworkClientUnicastAddress(m_entityId, m_networkId);
-    UXAS_LOG_INFORM(m_networkClientTypeName, "::configureNetworkClient subscribing to service uni-cast address [", m_entityIdNetworkIdUnicastString, "]");
+    UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient subscribing to service uni-cast address [", m_entityIdNetworkIdUnicastString, "]");
     addSubscriptionAddress(m_entityIdNetworkIdUnicastString);
     s_entityServicesCastAllAddress = getEntityServicesCastAllAddress(m_entityId);
-    UXAS_LOG_INFORM(m_networkClientTypeName, "::configureNetworkClient subscribing to entity cast-to-all services address [", s_entityServicesCastAllAddress, "]");
+    UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient subscribing to entity cast-to-all services address [", s_entityServicesCastAllAddress, "]");
     addSubscriptionAddress(s_entityServicesCastAllAddress);
     
     // network client can be terminated via received KillService message
@@ -78,103 +78,103 @@ LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassT
 #ifdef DEBUG_VERBOSE_LOGGING_ENABLED_MESSAGING
     std::stringstream xmlNd{""};
     networkClientXmlNode.print(xmlNd);
-    UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_networkClientTypeName, "::configureNetworkClient calling configure - passing XML ", xmlNd.str());
+    UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_clientName, "::configureNetworkClient calling configure - passing XML ", xmlNd.str());
 #endif
     m_isConfigured = msgProcessor.configure(networkClientXmlNode);
 
     if (m_isConfigured)
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::configureNetworkClient configure call succeeded");
+        UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient configure call succeeded");
     }
     else
     {
-        UXAS_LOG_ERROR(m_networkClientTypeName, "::configureNetworkClient configure call failed");
+        UXAS_LOG_ERROR(m_clientName, "::configureNetworkClient configure call failed");
     }
 
-    UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::configureNetworkClient method END");
+    UXAS_LOG_DEBUGGING(m_clientName, "::configureNetworkClient method END");
     return (m_isConfigured);
 };
 
 bool
 LmcpObjectNetworkClientBase::initializeAndStart(LmcpObjectMessageProcessor& msgProcessor)
 {
-    UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::initializeAndStart method START");
+    UXAS_LOG_DEBUGGING(m_clientName, "::initializeAndStart method START");
 
     if (m_isConfigured)
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart started since configureNetworkClient has been called");
+        UXAS_LOG_INFORM(m_clientName, "::initializeAndStart started since configureNetworkClient has been called");
     }
     else
     {
-        UXAS_LOG_ERROR(m_networkClientTypeName, "::initializeAndStart failed - must invoke configureNetworkClient method BEFORE calling initializeAndStart");
+        UXAS_LOG_ERROR(m_clientName, "::initializeAndStart failed - must invoke configureNetworkClient method BEFORE calling initializeAndStart");
         return (false);
     }
 
     if (initializeNetworkClient())
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart initializeNetworkClient call succeeded");
+        UXAS_LOG_INFORM(m_clientName, "::initializeAndStart initializeNetworkClient call succeeded");
     }
     else
     {
-        UXAS_LOG_ERROR(m_networkClientTypeName, "::initializeAndStart initializeNetworkClient call failed");
+        UXAS_LOG_ERROR(m_clientName, "::initializeAndStart initializeNetworkClient call failed");
         return (false);
     }
 
     if (msgProcessor.initialize())
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart initialize call succeeded");
+        UXAS_LOG_INFORM(m_clientName, "::initializeAndStart initialize call succeeded");
     }
     else
     {
-        UXAS_LOG_ERROR(m_networkClientTypeName, "::initializeAndStart initialize call failed");
+        UXAS_LOG_ERROR(m_clientName, "::initializeAndStart initialize call failed");
         return (false);
     }
 
     if (msgProcessor.start())
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart start call succeeded");
+        UXAS_LOG_INFORM(m_clientName, "::initializeAndStart start call succeeded");
     }
     else
     {
-        UXAS_LOG_ERROR(m_networkClientTypeName, "::initializeAndStart start call failed");
+        UXAS_LOG_ERROR(m_clientName, "::initializeAndStart start call failed");
         return (false);
     }
 
-    UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart processing thread starting ...");
+    UXAS_LOG_INFORM(m_clientName, "::initializeAndStart processing thread starting ...");
     switch (m_receiveProcessingType)
     {
         case ReceiveProcessingType::LMCP:
             m_networkClientThread = uxas::stduxas::make_unique<std::thread>(&LmcpObjectNetworkClientBase::executeNetworkClient, this, std::ref(msgProcessor));
-            UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart started LMCP network client processing thread [", m_networkClientThread->get_id(), "]");
+            UXAS_LOG_INFORM(m_clientName, "::initializeAndStart started LMCP network client processing thread [", m_networkClientThread->get_id(), "]");
             break;
         case ReceiveProcessingType::SERIALIZED_LMCP:
             m_networkClientThread = uxas::stduxas::make_unique<std::thread>(&LmcpObjectNetworkClientBase::executeSerializedNetworkClient, this, std::ref(msgProcessor));
-            UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart started LMCP network client serialized processing thread [", m_networkClientThread->get_id(), "]");
+            UXAS_LOG_INFORM(m_clientName, "::initializeAndStart started LMCP network client serialized processing thread [", m_networkClientThread->get_id(), "]");
             break;
         default:
-            UXAS_LOG_ERROR(m_networkClientTypeName, "::initializeAndStart failed to initialize LMCP network client processing thread; un-handled ReceiveProcessingType case");
+            UXAS_LOG_ERROR(m_clientName, "::initializeAndStart failed to initialize LMCP network client processing thread; un-handled ReceiveProcessingType case");
     }
 
-    UXAS_LOG_INFORM(m_networkClientTypeName, "::initializeAndStart processing thread started");
+    UXAS_LOG_INFORM(m_clientName, "::initializeAndStart processing thread started");
 
-    UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::initializeAndStart method END");
+    UXAS_LOG_DEBUGGING(m_clientName, "::initializeAndStart method END");
     return (true);
 };
 
 bool
 LmcpObjectNetworkClientBase::addSubscriptionAddress(const std::string& address)
 {
-    UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::addSubscriptionAddress method START");
+    UXAS_LOG_DEBUGGING(m_clientName, "::addSubscriptionAddress method START");
     bool isAdded{false};
     if (m_isThreadStarted)
     {
         if (m_lmcpObjectMessageReceiverPipe.addLmcpObjectSubscriptionAddress(address))
         {
-            UXAS_LOG_INFORM(m_networkClientTypeName, "::addSubscriptionAddress subscribed to message address [", address, "]");
+            UXAS_LOG_INFORM(m_clientName, "::addSubscriptionAddress subscribed to message address [", address, "]");
         }
         else
         {
-            UXAS_LOG_INFORM(m_networkClientTypeName, "::addSubscriptionAddress attempted to subscribe to message address [", address, "] "
+            UXAS_LOG_INFORM(m_clientName, "::addSubscriptionAddress attempted to subscribe to message address [", address, "] "
                        " subscription not added since already exists");
         }
     }
@@ -182,16 +182,16 @@ LmcpObjectNetworkClientBase::addSubscriptionAddress(const std::string& address)
     {
         if (m_preStartLmcpSubscriptionAddresses.emplace(address).second)
         {
-            UXAS_LOG_INFORM(m_networkClientTypeName, "::addSubscriptionAddress staged subscribe address [", address, "]");
+            UXAS_LOG_INFORM(m_clientName, "::addSubscriptionAddress staged subscribe address [", address, "]");
         }
         else
         {
-            UXAS_LOG_INFORM(m_networkClientTypeName, "::addSubscriptionAddress attempted to stage subscribe address  [", address, "] "
+            UXAS_LOG_INFORM(m_clientName, "::addSubscriptionAddress attempted to stage subscribe address  [", address, "] "
                        " subscription not added since already staged");
         }
     }
 
-    UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::addSubscriptionAddress method END");
+    UXAS_LOG_DEBUGGING(m_clientName, "::addSubscriptionAddress method END");
     return (true);
 };
 
@@ -210,11 +210,11 @@ LmcpObjectNetworkClientBase::removeSubscriptionAddress(const std::string& addres
 
     if (isRemoved)
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::removeSubscriptionAddress unsubscribed to LMCP message address [", address, "]");
+        UXAS_LOG_INFORM(m_clientName, "::removeSubscriptionAddress unsubscribed to LMCP message address [", address, "]");
     }
     else
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::removeSubscriptionAddress attempted to unsubscribe to LMCP message address [", address, "] "
+        UXAS_LOG_INFORM(m_clientName, "::removeSubscriptionAddress attempted to unsubscribe to LMCP message address [", address, "] "
                    " subscription not removed since did not exist");
     }
 
@@ -237,11 +237,11 @@ LmcpObjectNetworkClientBase::removeAllSubscriptionAddresses()
 
     if (isRemoved)
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::removeAllSubscriptionAddresses unsubscribed to all LMCP message addresses");
+        UXAS_LOG_INFORM(m_clientName, "::removeAllSubscriptionAddresses unsubscribed to all LMCP message addresses");
     }
     else
     {
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::removeAllSubscriptionAddresses cleared all pre-start LMCP message addresses");
+        UXAS_LOG_INFORM(m_clientName, "::removeAllSubscriptionAddresses cleared all pre-start LMCP message addresses");
     }
 
     return false;
@@ -250,7 +250,7 @@ LmcpObjectNetworkClientBase::removeAllSubscriptionAddresses()
 bool
 LmcpObjectNetworkClientBase::initializeNetworkClient()
 {
-    UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::initializeNetworkClient method START");
+    UXAS_LOG_DEBUGGING(m_clientName, "::initializeNetworkClient method START");
 
     m_lmcpObjectMessageReceiverPipe.initializeSubscription(m_entityId, m_networkId);
 
@@ -258,18 +258,18 @@ LmcpObjectNetworkClientBase::initializeNetworkClient()
     {
         if (m_lmcpObjectMessageReceiverPipe.addLmcpObjectSubscriptionAddress(address))
         {
-            UXAS_LOG_INFORM(m_networkClientTypeName, "::addSubscriptionAddress subscribed to staged message address [", address, "]");
+            UXAS_LOG_INFORM(m_clientName, "::addSubscriptionAddress subscribed to staged message address [", address, "]");
         }
         else
         {
-            UXAS_LOG_INFORM(m_networkClientTypeName, "::addSubscriptionAddress attempted to subscribe to staged message address [", address, "] "
+            UXAS_LOG_INFORM(m_clientName, "::addSubscriptionAddress attempted to subscribe to staged message address [", address, "] "
                        " subscription not added since already exists");
         }
     }
 
     m_lmcpObjectMessageSenderPipe.initializePush(m_messageSourceGroup, m_entityId, m_networkId);
 
-    UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::initializesendAddressedAttributedMessageNetworkClient method END");
+    UXAS_LOG_DEBUGGING(m_clientName, "::initializesendAddressedAttributedMessageNetworkClient method END");
     return (true);
 };
 
@@ -278,22 +278,22 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
 {
     try
     {
-        UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::executeNetworkClient method START");
-        UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::executeNetworkClient method START infinite while loop");
+        UXAS_LOG_DEBUGGING(m_clientName, "::executeNetworkClient method START");
+        UXAS_LOG_DEBUGGING(m_clientName, "::executeNetworkClient method START infinite while loop");
         m_isThreadStarted = true;
         while (!m_isTerminateNetworkClient)
         {
             try
             {
                 // get the next LMCP message (if any) from the LMCP network server
-                UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_networkClientTypeName, "::executeNetworkClient calling m_lmcpObjectMessageReceiverPipe.getNextMessageObject()");
+                UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_clientName, "::executeNetworkClient calling m_lmcpObjectMessageReceiverPipe.getNextMessageObject()");
                 std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage
                         = m_lmcpObjectMessageReceiverPipe.getNextMessageObject();
-                UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_networkClientTypeName, "::executeNetworkClient completed calling m_lmcpObjectMessageReceiverPipe.getNextMessageObject()");
+                UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_clientName, "::executeNetworkClient completed calling m_lmcpObjectMessageReceiverPipe.getNextMessageObject()");
 
                 if (receivedLmcpMessage)
                 {
-                    UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_networkClientTypeName, "::executeNetworkClient processing received LMCP message");
+                    UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_clientName, "::executeNetworkClient processing received LMCP message");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("ContentType:      [", receivedLmcpMessage->m_attributes->getContentType(), "]");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("Descriptor:       [", receivedLmcpMessage->m_attributes->getDescriptor(), "]");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceGroup:      [", receivedLmcpMessage->m_attributes->getSourceGroup(), "]");
@@ -305,18 +305,18 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
                             && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getServiceID()))
                             || msgProcessor.processReceivedLmcpMessage(std::move(receivedLmcpMessage)))
                     {
-                        UXAS_LOG_INFORM(m_networkClientTypeName, "::executeNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
+                        UXAS_LOG_INFORM(m_clientName, "::executeNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
                         m_isTerminateNetworkClient = true;
                     }
                 }
             }
             catch (std::exception& ex)
             {
-                UXAS_LOG_ERROR(m_networkClientTypeName, "::executeNetworkClient continuing infinite while loop after EXCEPTION: ", ex.what());
+                UXAS_LOG_ERROR(m_clientName, "::executeNetworkClient continuing infinite while loop after EXCEPTION: ", ex.what());
             }
         }
         
-        UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::executeNetworkClient method END infinite while loop");
+        UXAS_LOG_DEBUGGING(m_clientName, "::executeNetworkClient method END infinite while loop");
 
         m_isBaseClassTerminationFinished = true;
 
@@ -326,7 +326,7 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
             m_isSubclassTerminationFinished = msgProcessor.terminate();
             if (m_isSubclassTerminationFinished)
             {
-                UXAS_LOG_INFORM(m_networkClientTypeName, "::executeNetworkClient terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
+                UXAS_LOG_INFORM(m_clientName, "::executeNetworkClient terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
                 break;
             }
 
@@ -334,20 +334,20 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
             subclassTerminateDuration_ms += m_subclassTerminationAttemptPeriod_ms;
             if (subclassTerminateDuration_ms > m_subclassTerminationWarnDuration_ms)
             {
-                UXAS_LOG_WARN(m_networkClientTypeName, "::executeNetworkClient has not terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
+                UXAS_LOG_WARN(m_clientName, "::executeNetworkClient has not terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
             }
             else if (subclassTerminateDuration_ms > m_subclassTerminationAbortDuration_ms)
             {
-                UXAS_LOG_ERROR(m_networkClientTypeName, "::executeNetworkClient aborting termination of subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
+                UXAS_LOG_ERROR(m_clientName, "::executeNetworkClient aborting termination of subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
                 break;
             }
         }
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::executeNetworkClient exiting infinite loop thread [", std::this_thread::get_id(), "]");
-        UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::executeNetworkClient method END");
+        UXAS_LOG_INFORM(m_clientName, "::executeNetworkClient exiting infinite loop thread [", std::this_thread::get_id(), "]");
+        UXAS_LOG_DEBUGGING(m_clientName, "::executeNetworkClient method END");
     }
     catch (std::exception& ex)
     {
-        UXAS_LOG_ERROR(m_networkClientTypeName, "::executeNetworkClient EXCEPTION: ", ex.what());
+        UXAS_LOG_ERROR(m_clientName, "::executeNetworkClient EXCEPTION: ", ex.what());
     }
 };
 
@@ -356,8 +356,8 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
 {
     try
     {
-        UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::executeSerializedNetworkClient method START");
-        UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::executeSerializedNetworkClient method START infinite while loop");
+        UXAS_LOG_DEBUGGING(m_clientName, "::executeSerializedNetworkClient method START");
+        UXAS_LOG_DEBUGGING(m_clientName, "::executeSerializedNetworkClient method START infinite while loop");
         m_isThreadStarted = true;
         while (!m_isTerminateNetworkClient)
         {
@@ -368,7 +368,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
 
             if (nextReceivedSerializedLmcpObject)
             {
-                UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_networkClientTypeName, "::executeSerializedNetworkClient processing received LMCP message");
+                UXAS_LOG_DEBUG_VERBOSE_MESSAGING(m_clientName, "::executeSerializedNetworkClient processing received LMCP message");
                 UXAS_LOG_DEBUG_VERBOSE_MESSAGING("Address:          [", nextReceivedSerializedLmcpObject->getAddress(), "]");
                 UXAS_LOG_DEBUG_VERBOSE_MESSAGING("ContentType:      [", nextReceivedSerializedLmcpObject->getMessageAttributesReference()->getContentType(), "]");
                 UXAS_LOG_DEBUG_VERBOSE_MESSAGING("Descriptor:       [", nextReceivedSerializedLmcpObject->getMessageAttributesReference()->getDescriptor(), "]");
@@ -389,7 +389,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
                     if (uxas::messages::uxnative::isKillService(lmcpObject)
                             && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(lmcpObject)->getServiceID())))
                     {
-                        UXAS_LOG_INFORM(m_networkClientTypeName, "::executeSerializedNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
+                        UXAS_LOG_INFORM(m_clientName, "::executeSerializedNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
                         m_isTerminateNetworkClient = true;
                     }
                 }
@@ -400,7 +400,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
             }
         }
 
-        UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::executeSerializedNetworkClient method END infinite while loop");
+        UXAS_LOG_DEBUGGING(m_clientName, "::executeSerializedNetworkClient method END infinite while loop");
         
         m_isBaseClassTerminationFinished = true;
 
@@ -410,7 +410,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
             m_isSubclassTerminationFinished = msgProcessor.terminate();
             if (m_isSubclassTerminationFinished)
             {
-                UXAS_LOG_INFORM(m_networkClientTypeName, "::executeSerializedNetworkClient terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
+                UXAS_LOG_INFORM(m_clientName, "::executeSerializedNetworkClient terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
                 break;
             }
             
@@ -418,21 +418,21 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
             subclassTerminateDuration_ms += m_subclassTerminationAttemptPeriod_ms;
             if (subclassTerminateDuration_ms > m_subclassTerminationWarnDuration_ms)
             {
-                UXAS_LOG_WARN(m_networkClientTypeName, "::executeSerializedNetworkClient has not terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
+                UXAS_LOG_WARN(m_clientName, "::executeSerializedNetworkClient has not terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
             }
             else if (subclassTerminateDuration_ms > m_subclassTerminationAbortDuration_ms)
             {
-                UXAS_LOG_ERROR(m_networkClientTypeName, "::executeSerializedNetworkClient aborting termination of subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
+                UXAS_LOG_ERROR(m_clientName, "::executeSerializedNetworkClient aborting termination of subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
                 m_isSubclassTerminationFinished = true;
                 break;
             }
         }
-        UXAS_LOG_INFORM(m_networkClientTypeName, "::executeSerializedNetworkClient exiting infinite loop thread [", std::this_thread::get_id(), "]");
-        UXAS_LOG_DEBUGGING(m_networkClientTypeName, "::executeSerializedNetworkClient method END");
+        UXAS_LOG_INFORM(m_clientName, "::executeSerializedNetworkClient exiting infinite loop thread [", std::this_thread::get_id(), "]");
+        UXAS_LOG_DEBUGGING(m_clientName, "::executeSerializedNetworkClient method END");
     }
     catch (std::exception& ex)
     {
-        UXAS_LOG_ERROR(m_networkClientTypeName, "::executeSerializedNetworkClient EXCEPTION: ", ex.what());
+        UXAS_LOG_ERROR(m_clientName, "::executeSerializedNetworkClient EXCEPTION: ", ex.what());
     }
 };
 
