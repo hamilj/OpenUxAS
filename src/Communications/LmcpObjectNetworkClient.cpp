@@ -81,6 +81,11 @@ LmcpObjectNetworkClient::LmcpObjectNetworkClient()
     m_subclassTerminationAbortDuration_ms(10000), m_subclassTerminationWarnDuration_ms(3000), m_subclassTerminationAttemptPeriod_ms(500)
 { }
 
+bool LmcpObjectNetworkClient::getIsTerminationFinished() const
+{
+    return(m_isBaseClassTerminationFinished && m_isSubclassTerminationFinished);
+}
+
 void LmcpObjectNetworkClient::setMessageSourceGroup(const std::string& messageSourceGroup)
 {
     m_messageSourceGroup = messageSourceGroup;

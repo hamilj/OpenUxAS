@@ -76,17 +76,14 @@ public:
 
     void updateNetworkId(int64_t networkId);
 
-    inline bool getIsTerminationFinished()
-    {
-        return m_pLmcpObjectNetworkClient->getIsTerminationFinished();
-    }
+    bool getIsTerminationFinished() const;
 
     // TODO: factor out entity state to base/interface and remove wrapper (part of configuration?)
-    inline uint32_t getEntityId() const { return m_pLmcpObjectNetworkClient->m_entityId; }
+    uint32_t getEntityId() const;
 
-    inline std::string getEntityIdString() const { return m_pLmcpObjectNetworkClient->m_entityIdString; }
+    const std::string& getEntityIdString() const;
 
-    inline uint32_t getServiceId() const { return m_pLmcpObjectNetworkClient->m_networkId; }
+    uint32_t getServiceId() const;
 
     /** \brief  */
     const std::string m_serviceType;

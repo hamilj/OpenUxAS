@@ -153,5 +153,25 @@ void ServiceBase::updateNetworkId(int64_t networkId)
     m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::communications::getNetworkClientUnicastAddress(getEntityId(), m_pLmcpObjectNetworkClient->m_networkId));
 }
 
-}; //namespace service
-}; //namespace uxas
+bool ServiceBase::getIsTerminationFinished() const
+{
+    return m_pLmcpObjectNetworkClient->getIsTerminationFinished();
+}
+
+uint32_t ServiceBase::getEntityId() const
+{
+    return m_pLmcpObjectNetworkClient->m_entityId;
+}
+
+const std::string& ServiceBase::getEntityIdString() const
+{
+    return m_pLmcpObjectNetworkClient->m_entityIdString;
+}
+
+uint32_t ServiceBase::getServiceId() const
+{
+    return m_pLmcpObjectNetworkClient->m_networkId;
+}
+
+} //namespace service
+} //namespace uxas

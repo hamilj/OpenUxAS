@@ -119,10 +119,7 @@ public:
 
     virtual void sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject) = 0;
 
-    inline bool getIsTerminationFinished()
-    {
-        return(m_isBaseClassTerminationFinished && m_isSubclassTerminationFinished);
-    }
+    bool getIsTerminationFinished() const;
 
     void setMessageSourceGroup(const std::string& messageSourceGroup);
 

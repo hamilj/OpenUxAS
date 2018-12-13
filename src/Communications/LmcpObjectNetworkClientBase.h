@@ -167,7 +167,7 @@ public:
     void
     sendLmcpObjectLimitedCastMessage(const std::string& castAddress, std::unique_ptr<avtas::lmcp::Object> lmcpObject) override;
 
-    inline std::string getClientName() const { return m_clientName; }
+    const std::string& getClientName() const;
     
 protected:
     /** \brief The <B><i>sendLmcpObjectBroadcastMessage</i></B> method can be 

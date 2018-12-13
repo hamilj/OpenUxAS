@@ -497,5 +497,10 @@ LmcpObjectNetworkClientBase::sendSharedLmcpObjectLimitedCastMessage(const std::s
     m_lmcpObjectMessageSenderPipe.sendSharedLimitedCastMessage(castAddress, lmcpObject);
 };
 
+const std::string& LmcpObjectNetworkClientBase::getClientName() const
+{
+    return m_clientName;
+}
+
 }; //namespace communications
 }; //namespace uxas
