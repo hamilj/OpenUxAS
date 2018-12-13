@@ -86,7 +86,6 @@ ServiceManager::configureServiceManager()
 {
     UXAS_LOG_DEBUGGING(s_typeName(), "::configureServiceManager - START");
 
-    m_pLmcpObjectNetworkClient->m_isBaseClassKillServiceProcessingPermitted = true;
     // increase service manager termination time-outs
     m_pLmcpObjectNetworkClient->m_subclassTerminationAbortDuration_ms = 600000;
     m_pLmcpObjectNetworkClient->m_subclassTerminationWarnDuration_ms = 180000;

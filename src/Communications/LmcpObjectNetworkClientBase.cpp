@@ -301,8 +301,7 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceEntityId:   [", receivedLmcpMessage->m_attributes->getSourceEntityId(), "]");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceServiceId:  [", receivedLmcpMessage->m_attributes->getSourceServiceId(), "]");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("AttributesString: [", receivedLmcpMessage->m_attributes->getString(), "]");
-                    if (m_isBaseClassKillServiceProcessingPermitted
-                            && uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object)
+                    if (uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object)
                             && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getServiceID()))
                             || msgProcessor.processReceivedLmcpMessage(std::move(receivedLmcpMessage)))
                     {
@@ -380,9 +379,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
                 UXAS_LOG_DEBUG_VERBOSE_MESSAGING("getPayload:       [", nextReceivedSerializedLmcpObject->getPayload(), "]");
                 UXAS_LOG_DEBUG_VERBOSE_MESSAGING("getString:        [", nextReceivedSerializedLmcpObject->getString(), "]");
 
-                if (m_isBaseClassKillServiceProcessingPermitted
-                        && nextReceivedSerializedLmcpObject->getMessageAttributesReference()->getDescriptor()
-                        .rfind(uxas::messages::uxnative::KillService::Subscription) != std::string::npos)
+                if (nextReceivedSerializedLmcpObject->getMessageAttributesReference()->getDescriptor().rfind(uxas::messages::uxnative::KillService::Subscription) != std::string::npos)
                 {
                     // reconstitute LMCP object
                     std::shared_ptr<avtas::lmcp::Object> lmcpObject = deserializeMessage(nextReceivedSerializedLmcpObject->getPayload());

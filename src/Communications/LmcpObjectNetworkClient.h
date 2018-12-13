@@ -151,7 +151,6 @@ public:
     /** \brief Unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
     int64_t m_networkId;
 
-    std::atomic<bool> m_isBaseClassKillServiceProcessingPermitted;
     std::atomic<bool> m_isTerminateNetworkClient;
     std::atomic<bool> m_isBaseClassTerminationFinished;
     std::atomic<bool> m_isSubclassTerminationFinished;
