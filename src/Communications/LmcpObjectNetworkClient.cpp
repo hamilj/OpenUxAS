@@ -79,8 +79,11 @@ LmcpObjectNetworkClient::LmcpObjectNetworkClient()
     : m_networkId(getUniqueId()), m_receiveProcessingType(ReceiveProcessingType::LMCP), m_isBaseClassKillServiceProcessingPermitted(true),
     m_isTerminateNetworkClient(false), m_isBaseClassTerminationFinished(false), m_isSubclassTerminationFinished(false),
     m_subclassTerminationAbortDuration_ms(10000), m_subclassTerminationWarnDuration_ms(3000), m_subclassTerminationAttemptPeriod_ms(500)
-{
+{ }
 
+void LmcpObjectNetworkClient::setMessageSourceGroup(const std::string& messageSourceGroup)
+{
+    m_messageSourceGroup = messageSourceGroup;
 }
 
 } // namespace communications

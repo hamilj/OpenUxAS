@@ -70,12 +70,13 @@ ServiceBase::configureService(const std::string& parentWorkDirectory, const pugi
     if (!serviceXmlNode.attribute(uxas::common::StringConstant::MessageGroup().c_str()).empty())
     {
         // set source group value that will be assigned to source group field of sent messages
-        m_pLmcpObjectNetworkClient->m_messageSourceGroup = serviceXmlNode.attribute(uxas::common::StringConstant::MessageGroup().c_str()).value();
-        UXAS_LOG_INFORM(m_serviceType, "::configureService setting m_messageSourceGroup to [", m_pLmcpObjectNetworkClient->m_messageSourceGroup, "] from XML configuration");
+        const std::string group = serviceXmlNode.attribute(uxas::common::StringConstant::MessageGroup().c_str()).value();
+        m_pLmcpObjectNetworkClient->setMessageSourceGroup(group);
+        UXAS_LOG_INFORM(m_serviceType, "::configureService setting messageSourceGroup to [", group, "] from XML configuration");
         // subscribe to messages addressed to non-empty source group value
-        if (!m_pLmcpObjectNetworkClient->m_messageSourceGroup.empty())
+        if (!group.empty())
         {
-            m_pLmcpObjectNetworkClient->addSubscriptionAddress(m_pLmcpObjectNetworkClient->m_messageSourceGroup);
+            m_pLmcpObjectNetworkClient->addSubscriptionAddress(group);
         }
     }
     else

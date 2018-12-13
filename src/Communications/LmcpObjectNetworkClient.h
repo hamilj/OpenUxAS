@@ -124,6 +124,8 @@ public:
         return(m_isBaseClassTerminationFinished && m_isSubclassTerminationFinished);
     }
 
+    void setMessageSourceGroup(const std::string& messageSourceGroup);
+
     /** \brief Unique ID for UxAS entity instance; value read from configuration XML */
     uint32_t m_entityId;
 
@@ -153,9 +155,6 @@ public:
     /** \brief  this is the unique ID for the entity represented by this instance of the UxAS software, configured in component manager XML*/
     ReceiveProcessingType m_receiveProcessingType;
 
-    /** \brief Multi-cast group address that is subscribed to and included in sent messages  */
-    std::string m_messageSourceGroup;
-
     std::atomic<bool> m_isBaseClassKillServiceProcessingPermitted;
     std::atomic<bool> m_isTerminateNetworkClient;
     std::atomic<bool> m_isBaseClassTerminationFinished;
@@ -164,6 +163,10 @@ public:
     uint32_t m_subclassTerminationAbortDuration_ms;
     uint32_t m_subclassTerminationWarnDuration_ms;
     uint32_t m_subclassTerminationAttemptPeriod_ms;
+
+protected:
+    /** \brief Multi-cast group address that is subscribed to and included in sent messages  */
+    std::string m_messageSourceGroup;
 };
 
 }; // namespace communications
