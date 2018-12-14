@@ -74,19 +74,20 @@ LmcpObjectNetworkServer::executeNetworkServer()
         // get the next LMCP object message (if any) sent to the LMCP network hub
         std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> receivedLmcpMessage 
                 = m_lmcpObjectMessageReceiverPipe.getNextSerializedMessage();
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("LmcpObjectNetworkServer::executeNetworkServer RECEIVED serialized message");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("Address:          [", receivedLmcpMessage->getAddress(), "]");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("ContentType:      [", receivedLmcpMessage->getMessageAttributesReference()->getContentType(), "]");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("Descriptor:       [", receivedLmcpMessage->getMessageAttributesReference()->getDescriptor(), "]");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceGroup:      [", receivedLmcpMessage->getMessageAttributesReference()->getSourceGroup(), "]");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceEntityId:   [", receivedLmcpMessage->getMessageAttributesReference()->getSourceEntityId(), "]");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceServiceId:  [", receivedLmcpMessage->getMessageAttributesReference()->getSourceServiceId(), "]");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("AttributesString: [", receivedLmcpMessage->getMessageAttributesReference()->getString(), "]");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("getPayload:       [", receivedLmcpMessage->getPayload(), "]");
-        UXAS_LOG_DEBUG_VERBOSE_MESSAGING("getString:        [", receivedLmcpMessage->getString(), "]");
 
         if (receivedLmcpMessage)
         {
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("LmcpObjectNetworkServer::executeNetworkServer RECEIVED serialized message");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("Address:          [", receivedLmcpMessage->getAddress(), "]");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("ContentType:      [", receivedLmcpMessage->getMessageAttributesReference()->getContentType(), "]");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("Descriptor:       [", receivedLmcpMessage->getMessageAttributesReference()->getDescriptor(), "]");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceGroup:      [", receivedLmcpMessage->getMessageAttributesReference()->getSourceGroup(), "]");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceEntityId:   [", receivedLmcpMessage->getMessageAttributesReference()->getSourceEntityId(), "]");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceServiceId:  [", receivedLmcpMessage->getMessageAttributesReference()->getSourceServiceId(), "]");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("AttributesString: [", receivedLmcpMessage->getMessageAttributesReference()->getString(), "]");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("getPayload:       [", receivedLmcpMessage->getPayload(), "]");
+            UXAS_LOG_DEBUG_VERBOSE_MESSAGING("getString:        [", receivedLmcpMessage->getString(), "]");
+
             m_lmcpObjectMessageSenderPipe.sendSerializedMessage(std::move(receivedLmcpMessage));
             UXAS_LOG_DEBUG_VERBOSE_MESSAGING("LmcpObjectNetworkServer::executeNetworkServer SENT serialized message");
         }
