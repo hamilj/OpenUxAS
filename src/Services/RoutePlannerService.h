@@ -108,9 +108,6 @@ private:
     //bool
     //start() override;
 
-    //bool
-    //terminate() override;
-
     bool
     processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage) override;
 

@@ -86,7 +86,7 @@ bool HelloWorld::start()
     return (uxas::common::TimerManager::getInstance().startPeriodicTimer(m_sendMessageTimerId,0,m_sendPeriod_ms));
 };
 
-bool HelloWorld::terminate()
+void HelloWorld::terminate()
 {
     // kill the timer
     uint64_t delayTime_ms{1000};
@@ -95,8 +95,6 @@ bool HelloWorld::terminate()
         UXAS_LOG_WARN(s_typeName(), "::HelloWorld::terminate() failed to destroy message send timer ",
                  "with timer ID ", m_sendMessageTimerId, " within ", delayTime_ms, " millisecond timeout");
     }
-    
-    return (true);
 }
 
 bool HelloWorld::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)

@@ -62,7 +62,7 @@ public:
      * inheriting classes to perform inheriting class termination logic 
      * (e.g., thread joining). 
      */
-    virtual bool terminate() { return true; };
+    virtual void terminate() { }
 
     /** \brief The virtual <B><i>processReceivedLmcpMessage</i></B> is 
      * repeatedly invoked by the <B><i>LmcpObjectNetworkClientBase</i></B> class in an 

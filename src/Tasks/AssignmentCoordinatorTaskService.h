@@ -115,7 +115,7 @@ private:
     
     bool startTask() override;
     
-    bool terminateTask() override;
+    void terminateTask() override;
     
     bool processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject) override;
 

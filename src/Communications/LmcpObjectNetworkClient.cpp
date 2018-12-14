@@ -77,13 +77,17 @@ std::string getNetworkClientUnicastAddress(const std::string& entityId, const in
 
 LmcpObjectNetworkClient::LmcpObjectNetworkClient()
     : m_networkId(getUniqueId()), m_receiveProcessingType(ReceiveProcessingType::LMCP),
-    m_isTerminateNetworkClient(false), m_isBaseClassTerminationFinished(false), m_isSubclassTerminationFinished(false),
-    m_subclassTerminationAbortDuration_ms(10000), m_subclassTerminationWarnDuration_ms(3000), m_subclassTerminationAttemptPeriod_ms(500)
+    m_isTerminateNetworkClient(false), m_isBaseClassTerminationFinished(false)
 { }
+
+void LmcpObjectNetworkClient::terminate()
+{
+    m_isTerminateNetworkClient = true;
+}
 
 bool LmcpObjectNetworkClient::getIsTerminationFinished() const
 {
-    return(m_isBaseClassTerminationFinished && m_isSubclassTerminationFinished);
+    return m_isBaseClassTerminationFinished;
 }
 
 void LmcpObjectNetworkClient::setMessageSourceGroup(const std::string& messageSourceGroup)

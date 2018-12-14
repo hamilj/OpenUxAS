@@ -83,12 +83,10 @@ bool ServiceTemplate::start()
     return (true);
 };
 
-bool ServiceTemplate::terminate()
+void ServiceTemplate::terminate()
 {
     // perform any action required during service termination, before destructor is called.
     std::cout << "*** TERMINATING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
-    
-    return (true);
 }
 
 bool ServiceTemplate::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)

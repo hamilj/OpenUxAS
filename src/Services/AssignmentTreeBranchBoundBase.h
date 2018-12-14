@@ -327,8 +327,6 @@ private:
 
     bool start() override;
 
-    bool terminate() override;
-
     bool processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage) override;
 
 protected: //virtual
@@ -359,9 +357,6 @@ protected: //virtual
     /** brief Children classes can override this to
      * perform start up functions */
     virtual bool isStartAssignment(){return(true);};
-    /** brief Children classes can override this to
-     * perform terminate functions */
-    virtual bool isTerminateAssignment(){return(true);};
     /** brief Children classes can override this to handle
      * messages after they are processed by the base class. */
     virtual void processReceivedLmcpMessageAssignment(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage){};

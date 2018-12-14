@@ -128,7 +128,7 @@ LmcpObjectNetworkSerialBridge::start()
     return (true);
 };
 
-bool
+void
 LmcpObjectNetworkSerialBridge::terminate()
 {
     m_isTerminate = true;
@@ -141,7 +141,6 @@ LmcpObjectNetworkSerialBridge::terminate()
     {
         UXAS_LOG_WARN(s_typeName(), "::terminate unexpectedly could not join m_serialProcessingThread");
     }
-    return (true);
 };
 
 bool

@@ -142,7 +142,7 @@ LmcpObjectNetworkTcpBridge::start()
     return (true);
 };
 
-bool
+void
 LmcpObjectNetworkTcpBridge::terminate()
 {
     m_isTerminate = true;
@@ -155,7 +155,6 @@ LmcpObjectNetworkTcpBridge::terminate()
     {
         UXAS_LOG_WARN(s_typeName(), "::terminate unexpectedly could not join m_tcpProcessingThread");
     }
-    return (true);
 };
 
 bool

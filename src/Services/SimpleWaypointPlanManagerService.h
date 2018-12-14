@@ -114,9 +114,6 @@ private:
     //start() override;
 
     bool
-    terminate() override;
-
-    bool
     processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage) override;
 
     /*! \brief  special case handling for situations where plan consists of a single waypoint */

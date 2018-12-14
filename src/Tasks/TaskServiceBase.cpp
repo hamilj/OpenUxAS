@@ -240,11 +240,9 @@ bool TaskServiceBase::start()
     return (isSuccessful);
 };
 
-bool TaskServiceBase::terminate()
+void TaskServiceBase::terminate()
 {
-    bool isKillTheService(true);
-    isKillTheService = terminateTask();
-    return (isKillTheService);
+    terminateTask();
 };
 
 bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)

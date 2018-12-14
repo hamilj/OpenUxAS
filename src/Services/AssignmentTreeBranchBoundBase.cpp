@@ -74,11 +74,6 @@ bool AssignmentTreeBranchBoundBase::start()
     return (isStartAssignment());
 }
 
-bool AssignmentTreeBranchBoundBase::terminate()
-{
-    return (isTerminateAssignment());
-}
-
 bool
 AssignmentTreeBranchBoundBase::configure(const pugi::xml_node& ndComponent)
 

@@ -147,7 +147,7 @@ LmcpObjectNetworkSubscribePushBridge::start()
     return (true);
 };
 
-bool
+void
 LmcpObjectNetworkSubscribePushBridge::terminate()
 {
     m_isTerminate = true;
@@ -160,7 +160,6 @@ LmcpObjectNetworkSubscribePushBridge::terminate()
     {
         UXAS_LOG_WARN(s_typeName(), "::terminate unexpectedly could not join m_externalReceiveProcessingThread");
     }
-    return (true);
 };
 
 bool

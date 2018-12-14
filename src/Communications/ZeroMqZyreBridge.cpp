@@ -161,7 +161,7 @@ ZeroMqZyreBridge::start(const std::string& zyreNetworkDevice, const std::string&
     return (true);
 };
 
-bool
+void
 ZeroMqZyreBridge::terminate()
 {
     std::unique_lock<std::mutex> lock(m_mutex);
@@ -170,7 +170,6 @@ ZeroMqZyreBridge::terminate()
     lock.unlock();
     lock.lock();
     terminateZyreNodeAndThread();
-    return (true);
 };
 
 void

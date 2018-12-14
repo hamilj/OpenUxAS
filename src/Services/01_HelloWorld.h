@@ -104,7 +104,7 @@ private:
     bool
     start() override;
 
-    bool
+    void
     terminate() override;
 
     bool

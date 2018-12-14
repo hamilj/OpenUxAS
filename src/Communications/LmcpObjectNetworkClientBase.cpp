@@ -336,9 +336,9 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceEntityId:   [", receivedLmcpMessage->m_attributes->getSourceEntityId(), "]");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("SourceServiceId:  [", receivedLmcpMessage->m_attributes->getSourceServiceId(), "]");
                     UXAS_LOG_DEBUG_VERBOSE_MESSAGING("AttributesString: [", receivedLmcpMessage->m_attributes->getString(), "]");
-                    if (uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object)
-                            && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getServiceID()))
-                            || msgProcessor.processReceivedLmcpMessage(std::move(receivedLmcpMessage)))
+                    if ((uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object)
+                            && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object)->getServiceID())))
+                        || msgProcessor.processReceivedLmcpMessage(std::move(receivedLmcpMessage)))
                     {
                         UXAS_LOG_INFORM(m_clientName, "::executeNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
                         m_isTerminateNetworkClient = true;
@@ -354,30 +354,8 @@ LmcpObjectNetworkClientBase::executeNetworkClient(LmcpObjectMessageProcessor& ms
         UXAS_LOG_DEBUGGING(m_clientName, "::executeNetworkClient method END infinite while loop");
 
         m_isBaseClassTerminationFinished = true;
+        msgProcessor.terminate();
 
-        uint32_t subclassTerminateDuration_ms{0};
-        while (true)
-        {
-            m_isSubclassTerminationFinished = msgProcessor.terminate();
-            if (m_isSubclassTerminationFinished)
-            {
-                UXAS_LOG_INFORM(m_clientName, "::executeNetworkClient terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
-                break;
-            }
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(m_subclassTerminationAttemptPeriod_ms));
-            subclassTerminateDuration_ms += m_subclassTerminationAttemptPeriod_ms;
-            if (subclassTerminateDuration_ms > m_subclassTerminationWarnDuration_ms)
-            {
-                UXAS_LOG_WARN(m_clientName, "::executeNetworkClient has not terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
-            }
-            else if (subclassTerminateDuration_ms > m_subclassTerminationAbortDuration_ms)
-            {
-                UXAS_LOG_ERROR(m_clientName, "::executeNetworkClient aborting termination of subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
-                break;
-            }
-        }
-        UXAS_LOG_INFORM(m_clientName, "::executeNetworkClient exiting infinite loop thread [", std::this_thread::get_id(), "]");
         UXAS_LOG_DEBUGGING(m_clientName, "::executeNetworkClient method END");
     }
     catch (std::exception& ex)
@@ -420,7 +398,7 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
                     std::shared_ptr<avtas::lmcp::Object> lmcpObject = deserializeMessage(nextReceivedSerializedLmcpObject->getPayload());
                     // check KillService serviceID == my serviceID
                     if (uxas::messages::uxnative::isKillService(lmcpObject)
-                            && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(lmcpObject)->getServiceID())))
+                        && (m_networkId == (std::static_pointer_cast<uxas::messages::uxnative::KillService>(lmcpObject)->getServiceID())))
                     {
                         UXAS_LOG_INFORM(m_clientName, "::executeSerializedNetworkClient starting termination since received [", uxas::messages::uxnative::KillService::TypeName, "] message ");
                         m_isTerminateNetworkClient = true;
@@ -436,31 +414,8 @@ LmcpObjectNetworkClientBase::executeSerializedNetworkClient(LmcpObjectMessagePro
         UXAS_LOG_DEBUGGING(m_clientName, "::executeSerializedNetworkClient method END infinite while loop");
         
         m_isBaseClassTerminationFinished = true;
+        msgProcessor.terminate();
 
-        uint32_t subclassTerminateDuration_ms{0};
-        while (true)
-        {
-            m_isSubclassTerminationFinished = msgProcessor.terminate();
-            if (m_isSubclassTerminationFinished)
-            {
-                UXAS_LOG_INFORM(m_clientName, "::executeSerializedNetworkClient terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
-                break;
-            }
-            
-            std::this_thread::sleep_for(std::chrono::milliseconds(m_subclassTerminationAttemptPeriod_ms));
-            subclassTerminateDuration_ms += m_subclassTerminationAttemptPeriod_ms;
-            if (subclassTerminateDuration_ms > m_subclassTerminationWarnDuration_ms)
-            {
-                UXAS_LOG_WARN(m_clientName, "::executeSerializedNetworkClient has not terminated subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
-            }
-            else if (subclassTerminateDuration_ms > m_subclassTerminationAbortDuration_ms)
-            {
-                UXAS_LOG_ERROR(m_clientName, "::executeSerializedNetworkClient aborting termination of subclass processing after [", subclassTerminateDuration_ms, "] milliseconds on thread [", std::this_thread::get_id(), "]");
-                m_isSubclassTerminationFinished = true;
-                break;
-            }
-        }
-        UXAS_LOG_INFORM(m_clientName, "::executeSerializedNetworkClient exiting infinite loop thread [", std::this_thread::get_id(), "]");
         UXAS_LOG_DEBUGGING(m_clientName, "::executeSerializedNetworkClient method END");
     }
     catch (std::exception& ex)

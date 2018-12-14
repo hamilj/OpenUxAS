@@ -68,12 +68,6 @@ bool
 SimpleWaypointPlanManagerService::initialize()
 {
     return true;
-};
-
-bool
-SimpleWaypointPlanManagerService::terminate()
-{
-    return true;
 }
 
 bool

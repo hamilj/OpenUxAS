@@ -119,6 +119,8 @@ public:
 
     virtual void sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject) = 0;
 
+    void terminate();
+
     bool getIsTerminationFinished() const;
 
     void setMessageSourceGroup(const std::string& messageSourceGroup);
@@ -151,23 +153,18 @@ public:
     /** \brief Unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
     int64_t m_networkId;
 
-    std::atomic<bool> m_isTerminateNetworkClient;
-    std::atomic<bool> m_isBaseClassTerminationFinished;
-    std::atomic<bool> m_isSubclassTerminationFinished;
-
-    uint32_t m_subclassTerminationAbortDuration_ms;
-    uint32_t m_subclassTerminationWarnDuration_ms;
-    uint32_t m_subclassTerminationAttemptPeriod_ms;
-
 protected:
     /** \brief Multi-cast group address that is subscribed to and included in sent messages  */
     std::string m_messageSourceGroup;
 
     /** \brief  this is the unique ID for the entity represented by this instance of the UxAS software, configured in component manager XML*/
     ReceiveProcessingType m_receiveProcessingType;
+
+    std::atomic<bool> m_isTerminateNetworkClient;
+    std::atomic<bool> m_isBaseClassTerminationFinished;
 };
 
-}; // namespace communications
-}; // namespace uxas
+} // namespace communications
+} // namespace uxas
 
 #endif /* UXAS_MESSAGE_LMCP_OBJECT_NETWORK_CLIENT_H */

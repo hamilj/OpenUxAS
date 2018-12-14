@@ -185,7 +185,7 @@ ImpactSubscribePushBridge::start()
     return (true);
 };
 
-bool
+void
 ImpactSubscribePushBridge::terminate()
 {
     m_isTerminate = true;
@@ -198,8 +198,6 @@ ImpactSubscribePushBridge::terminate()
     {
         UXAS_LOG_WARN(s_typeName(), "::terminate unexpectedly could not join m_externalReceiveProcessingThread");
     }
-
-    return (true);
 };
 
 bool

@@ -86,10 +86,6 @@ ServiceManager::configureServiceManager()
 {
     UXAS_LOG_DEBUGGING(s_typeName(), "::configureServiceManager - START");
 
-    // increase service manager termination time-outs
-    m_pLmcpObjectNetworkClient->m_subclassTerminationAbortDuration_ms = 600000;
-    m_pLmcpObjectNetworkClient->m_subclassTerminationWarnDuration_ms = 180000;
-
     bool isSuccess = configureService((uxas::common::ConfigurationManager::getInstance().getRootDataWorkDirectory()),
             uxas::common::ConfigurationManager::getInstance().getEnabledServices()
             .find_child_by_attribute(uxas::common::StringConstant::Service().c_str()
@@ -165,16 +161,17 @@ ServiceManager::runUntil(uint32_t duration_s)
     UXAS_LOG_INFORM_ASSIGNMENT(s_typeName(),"****** All Services have been Terminated !!! ******");
 
     // terminate my client thread
-    m_pLmcpObjectNetworkClient->m_isTerminateNetworkClient = true;
+    m_pLmcpObjectNetworkClient->terminate();
+
     uint32_t checkBaseTerminateCount{0};
-    while (!m_pLmcpObjectNetworkClient->m_isBaseClassTerminationFinished && checkBaseTerminateCount++ < 20)
+    while (!m_pLmcpObjectNetworkClient->getIsTerminationFinished() && checkBaseTerminateCount++ < 20)
     {
         UXAS_LOG_INFORM_ASSIGNMENT(s_typeName(),"****** ServiceManager is Terminating it's Client Thread !!! ******");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     if (m_isServiceManagerTermination) // service manager termination exit
     {
-        if (m_pLmcpObjectNetworkClient->m_isBaseClassTerminationFinished)
+        if (m_pLmcpObjectNetworkClient->getIsTerminationFinished())
         {
             UXAS_LOG_INFORM(s_typeName(), "::runUntil found base class terminated after [", checkBaseTerminateCount, "] attempts (service manager termination exit)");
         }
@@ -188,7 +185,7 @@ ServiceManager::runUntil(uint32_t duration_s)
     }
     else
     {
-        if (m_pLmcpObjectNetworkClient->m_isBaseClassTerminationFinished)
+        if (m_pLmcpObjectNetworkClient->getIsTerminationFinished())
         {
             UXAS_LOG_INFORM(s_typeName(), "::runUntil found base class terminated after [", checkBaseTerminateCount, "] attempts (run duration exit)");
         }

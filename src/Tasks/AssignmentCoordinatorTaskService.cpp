@@ -116,13 +116,11 @@ bool AssignmentCoordinatorTaskService::startTask()
     return (true);
 };
 
-bool AssignmentCoordinatorTaskService::terminateTask()
+void AssignmentCoordinatorTaskService::terminateTask()
 {
     // perform any action required during service termination, before destructor is called.
     std::cout << "*** TERMINATING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
     m_sendTaskAutomationRequestTimer.KillTimer();
-
-    return (true);
 }
 
 bool AssignmentCoordinatorTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)

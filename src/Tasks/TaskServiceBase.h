@@ -258,13 +258,13 @@ namespace task
         virtual bool configure(const pugi::xml_node& serviceXmlNode) override;
         virtual bool initialize() override;
         virtual bool start() override;
-        virtual bool terminate() override;
+        virtual void terminate() override;
         virtual bool processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage) override;
 
         virtual bool configureTask(const pugi::xml_node& serviceXmlNode){return(true);};
         virtual bool initializeTask(){return(true);};
         virtual bool startTask(){return(true);};
-        virtual bool terminateTask(){return(true);};
+        virtual void terminateTask(){};
         virtual bool processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject){return(false);};
 
     protected:

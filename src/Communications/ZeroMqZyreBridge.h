@@ -76,7 +76,7 @@ public:
     start(const std::string& zyreNetworkDevice, const std::string& zyreEndpoint, const std::string& gossipEndpoint, const bool& isGossipBind,
                          const std::string& zyreNodeId, const std::unique_ptr<std::unordered_map<std::string, std::string>>& headerKeyValuePairs);
     
-    bool
+    void
     terminate();
     
     /** \brief Send Zyre unicast message to another (external) entity.

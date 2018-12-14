@@ -164,7 +164,7 @@ WaypointPlanManagerService::initialize()
     return (bSuccess);
 };
 
-bool
+void
 WaypointPlanManagerService::terminate()
 {
     // stop timer
@@ -174,7 +174,6 @@ WaypointPlanManagerService::terminate()
         UXAS_LOG_WARN("WaypointPlanManagerService::terminate failed to destroy new mission sender timer "
                  "(m_sendNewMissionTimerId) with timer ID ", m_sendNewMissionTimerId, " within ", delayTime_ms, " millisecond timeout");
     }
-    return true;
 }
 
 bool

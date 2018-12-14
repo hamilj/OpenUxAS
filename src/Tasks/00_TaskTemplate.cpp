@@ -115,12 +115,10 @@ bool TaskTemplate::startTask()
     return (true);
 };
 
-bool TaskTemplate::terminateTask()
+void TaskTemplate::terminateTask()
 {
     // perform any action required during service termination, before destructor is called.
     std::cout << "*** TERMINATING:: Service[" << s_typeName() << "] Service Id[" << getServiceId() << "] with working directory [" << m_workDirectoryName << "] *** " << std::endl;
-    
-    return (true);
 }
 
 bool TaskTemplate::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)

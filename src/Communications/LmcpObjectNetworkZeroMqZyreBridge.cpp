@@ -183,10 +183,10 @@ LmcpObjectNetworkZeroMqZyreBridge::start()
     return (m_zeroMqZyreBridge.start(m_zyreNetworkDevice, m_zyreEndpoint, m_gossipEndpoint, m_isGossipBind, m_entityIdString, m_headerKeyValuePairs));
 };
 
-bool
+void
 LmcpObjectNetworkZeroMqZyreBridge::terminate()
 {
-    return (m_zeroMqZyreBridge.terminate());
+    m_zeroMqZyreBridge.terminate();
 };
 
 bool
