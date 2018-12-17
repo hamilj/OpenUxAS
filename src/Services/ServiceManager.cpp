@@ -513,7 +513,7 @@ ServiceManager::terminateAllServices()
             std::cout << std::endl << s_typeName() << "::terminateAllServices sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->getServiceType() << " having entity ID [" << svcIt->second->getEntityId() << "] and service ID [" << svcIt->second->getServiceId() << "]" << std::endl;
             auto killService = uxas::stduxas::make_unique<uxas::messages::uxnative::KillService>();
             killService->setServiceID(svcIt->second->getServiceId());
-            m_pLmcpObjectNetworkClient->sendLmcpObjectLimitedCastMessage(uxas::communications::getNetworkClientUnicastAddress(getEntityIdString(), svcIt->second->getServiceId()), std::move(killService));
+            m_pLmcpObjectNetworkClient->sendLmcpObjectLimitedCastMessage(uxas::communications::getNetworkClientUnicastAddress(m_pLmcpObjectNetworkClient->getEntityIdString(), svcIt->second->getServiceId()), std::move(killService));
         }
         else
         {

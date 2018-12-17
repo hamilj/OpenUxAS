@@ -160,7 +160,7 @@ bool ServiceBase::getIsTerminationFinished() const
 
 uint32_t ServiceBase::getServiceId() const
 {
-    return m_pLmcpObjectNetworkClient->m_networkId;
+    return m_pLmcpObjectNetworkClient->getNetworkId();
 }
 
 const std::string& ServiceBase::getServiceType() const
@@ -175,17 +175,7 @@ const std::string& ServiceBase::getWorkingDirectoryName() const
 
 uint32_t ServiceBase::getEntityId() const
 {
-    return m_pLmcpObjectNetworkClient->m_entityId;
-}
-
-const std::string& ServiceBase::getEntityIdString() const
-{
-    return m_pLmcpObjectNetworkClient->m_entityIdString;
-}
-
-const std::string& ServiceBase::getEntityType() const
-{
-    return m_pLmcpObjectNetworkClient->m_entityType;
+    return m_pLmcpObjectNetworkClient->getEntityId();
 }
 
 } //namespace service

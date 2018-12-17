@@ -100,10 +100,35 @@ void LmcpObjectNetworkClient::setReceiveProcessingType(ReceiveProcessingType typ
     m_receiveProcessingType = type;
 }
 
+uint32_t LmcpObjectNetworkClient::getEntityId() const
+{
+    return m_entityId;
+}
+
 void LmcpObjectNetworkClient::setEntityId(uint32_t entityId)
 {
     m_entityId = entityId;
     m_entityIdString = std::to_string(m_entityId);
+}
+
+const std::string& LmcpObjectNetworkClient::getEntityIdString() const
+{
+    return m_entityIdString;
+}
+
+const std::string& LmcpObjectNetworkClient::getEntityType() const
+{
+    return m_entityType;
+}
+
+int64_t LmcpObjectNetworkClient::getNetworkId() const
+{
+    return m_networkId;
+}
+
+void LmcpObjectNetworkClient::setNetworkId(int64_t networkId)
+{
+    m_networkId = networkId;
 }
 
 } // namespace communications

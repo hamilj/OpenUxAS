@@ -141,8 +141,19 @@ public:
 
     void setReceiveProcessingType(ReceiveProcessingType type);
 
+    uint32_t getEntityId() const;
+
     void setEntityId(uint32_t entityId);
 
+    const std::string& getEntityIdString() const;
+
+    const std::string& getEntityType() const;
+
+    int64_t getNetworkId() const;
+
+    void setNetworkId(int64_t networkId);
+
+protected:
     /** \brief Unique ID for UxAS entity instance; value read from configuration XML */
     uint32_t m_entityId;
 
@@ -155,7 +166,6 @@ public:
     /** \brief Unique ID of the <b>LMCP</b> object communication network actor (e.g., bridge or service). */
     int64_t m_networkId;
 
-protected:
     /** \brief Multi-cast group address that is subscribed to and included in sent messages  */
     std::string m_messageSourceGroup;
 

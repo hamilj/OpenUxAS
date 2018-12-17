@@ -84,12 +84,7 @@ public:
 
     const std::string& getWorkingDirectoryName() const;
 
-    // TODO: factor out entity state to base/interface and remove wrapper (part of configuration?)
     uint32_t getEntityId() const;
-
-    const std::string& getEntityIdString() const;
-
-    const std::string& getEntityType() const;
 
 protected:
     /** \brief  */
