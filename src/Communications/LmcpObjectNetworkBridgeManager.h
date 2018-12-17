@@ -104,20 +104,23 @@ class LmcpObjectNetworkBridgeManager final
 public:
 
     static const std::string&
-    s_typeName() { static std::string s_string("LmcpObjectNetworkBridgeManager"); return (s_string); };
+    s_typeName() { static std::string s_string("LmcpObjectNetworkBridgeManager"); return (s_string); }
 
     static LmcpObjectNetworkBridgeManager&
     getInstance();
 
     void terminateAllBridges(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
+
     void removeTerminatedBridges(uint32_t &runningSvcCnt, uint32_t &terminatedSvcCnt);
     
-    ~LmcpObjectNetworkBridgeManager() { };
+    ~LmcpObjectNetworkBridgeManager() { }
+
+    bool initialize();
 
 private:
 
     /** \brief Public, direct construction not permitted (singleton pattern) */
-    LmcpObjectNetworkBridgeManager() { };
+    LmcpObjectNetworkBridgeManager() { }
 
     /** \brief Copy construction not permitted */
     LmcpObjectNetworkBridgeManager(LmcpObjectNetworkBridgeManager const&) = delete;
@@ -127,22 +130,9 @@ private:
 
     static std::unique_ptr<LmcpObjectNetworkBridgeManager> s_instance;
 
-public:
-
-    bool
-    initialize();
-    
-    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkBridge>>
-    createTestBridges(const std::string& cfgXmlFilePath, uint32_t entityId, uint32_t firstNetworkId);
-    
-private:
-    
-    std::unique_ptr<LmcpObjectNetworkBridge>
-    createBridge(const pugi::xml_node& bridgeXmlNode, uint32_t entityId, uint32_t networkId);
-
     bool m_isInitializedBridges{false};
-    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkBridge>> m_bridgesByNetworkId;
 
+    std::unordered_map<uint32_t, std::unique_ptr<LmcpObjectNetworkBridge>> m_bridgesByNetworkId;
 };
 
 }; //namespace communications
