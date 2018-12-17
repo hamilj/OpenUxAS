@@ -141,6 +141,8 @@ public:
 
     void setReceiveProcessingType(ReceiveProcessingType type);
 
+    void setEntityId(uint32_t entityId);
+
     /** \brief Unique ID for UxAS entity instance; value read from configuration XML */
     uint32_t m_entityId;
 

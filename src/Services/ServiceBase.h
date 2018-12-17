@@ -78,22 +78,28 @@ public:
 
     bool getIsTerminationFinished() const;
 
+    uint32_t getServiceId() const;
+
+    const std::string& getServiceType() const;
+
+    const std::string& getWorkingDirectoryName() const;
+
     // TODO: factor out entity state to base/interface and remove wrapper (part of configuration?)
     uint32_t getEntityId() const;
 
     const std::string& getEntityIdString() const;
 
-    uint32_t getServiceId() const;
+    const std::string& getEntityType() const;
 
+protected:
     /** \brief  */
     const std::string m_serviceType;
 
     /** \brief  */
-    const std::string m_workDirectoryName;
-
-protected:
-    /** \brief  */
     bool m_isConfigured{false};
+
+    /** \brief  */
+    const std::string m_workDirectoryName;
 
     /** \brief  */
     std::string m_workDirectoryPath;

@@ -100,5 +100,11 @@ void LmcpObjectNetworkClient::setReceiveProcessingType(ReceiveProcessingType typ
     m_receiveProcessingType = type;
 }
 
+void LmcpObjectNetworkClient::setEntityId(uint32_t entityId)
+{
+    m_entityId = entityId;
+    m_entityIdString = std::to_string(m_entityId);
+}
+
 } // namespace communications
 } // namespace uxas

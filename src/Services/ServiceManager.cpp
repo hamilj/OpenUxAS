@@ -274,13 +274,13 @@ ServiceManager::removeTerminatedServices() // lock m_servicesByIdMutex before in
     {
         if (svcIt->second->getIsTerminationFinished())
         {
-            UXAS_LOG_INFORM(s_typeName(), "::removeTerminatedServices removing reference to terminated ", svcIt->second->m_serviceType, " ID ", svcIt->second->getServiceId());
+            UXAS_LOG_INFORM(s_typeName(), "::removeTerminatedServices removing reference to terminated ", svcIt->second->getServiceType(), " ID ", svcIt->second->getServiceId());
             terminatedSvcCnt++;
             svcIt = m_servicesById.erase(svcIt); // remove finished service (enables destruction)
         }
         else
         {
-            UXAS_LOG_DEBUGGING(s_typeName(), "::removeTerminatedServices retaining reference to non-terminated ", svcIt->second->m_serviceType, " ID ", svcIt->second->getServiceId());
+            UXAS_LOG_DEBUGGING(s_typeName(), "::removeTerminatedServices retaining reference to non-terminated ", svcIt->second->getServiceType(), " ID ", svcIt->second->getServiceId());
             runningSvcCnt++;
             svcIt++;
         }
@@ -350,7 +350,7 @@ ServiceManager::createService(const pugi::xml_node& serviceXmlNode, int64_t newS
     std::unique_ptr<ServiceBase> newService = instantiateConfigureInitializeStartService(serviceXmlNode, newServiceId);
     if (newService)
     {
-        UXAS_LOG_INFORM(s_typeName(), "::createService successfully created ", newService->m_serviceType, " service ID ", newService->getServiceId());
+        UXAS_LOG_INFORM(s_typeName(), "::createService successfully created ", newService->getServiceType(), " service ID ", newService->getServiceId());
         m_servicesById.emplace(newService->getServiceId(), std::move(newService));
         return (true);
     }
@@ -387,7 +387,7 @@ ServiceManager::instantiateConfigureInitializeStartService(const pugi::xml_node&
 
     if (newService)
     {
-        UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully instantiated ", newService->m_serviceType, " service ID ", newService->getServiceId(), " and work directory name [", newService->m_workDirectoryName, "]");
+        UXAS_LOG_INFORM(s_typeName(), "::instantiateConfigureInitializeStartService successfully instantiated ", newService->getServiceType(), " service ID ", newService->getServiceId(), " and work directory name [", newService->getWorkingDirectoryName(), "]");
         if (newService->configureService(uxas::common::ConfigurationManager::getInstance().getRootDataWorkDirectory(), serviceXmlNode))
         {
             if (networkId > 0)
@@ -508,9 +508,9 @@ ServiceManager::terminateAllServices()
     {
         if (svcIt->second && !svcIt->second->getIsTerminationFinished())
         {
-            UXAS_LOG_INFORM(s_typeName(), "::terminateAllServices sending [", uxas::messages::uxnative::KillService::TypeName, "] message to ", svcIt->second->m_serviceType, " having entity ID [", svcIt->second->getEntityId(), "] and service ID [", svcIt->second->getServiceId(), "]");
+            UXAS_LOG_INFORM(s_typeName(), "::terminateAllServices sending [", uxas::messages::uxnative::KillService::TypeName, "] message to ", svcIt->second->getServiceType(), " having entity ID [", svcIt->second->getEntityId(), "] and service ID [", svcIt->second->getServiceId(), "]");
 
-            std::cout << std::endl << s_typeName() << "::terminateAllServices sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->m_serviceType << " having entity ID [" << svcIt->second->getEntityId() << "] and service ID [" << svcIt->second->getServiceId() << "]" << std::endl;
+            std::cout << std::endl << s_typeName() << "::terminateAllServices sending [" << uxas::messages::uxnative::KillService::TypeName << "] message to " << svcIt->second->getServiceType() << " having entity ID [" << svcIt->second->getEntityId() << "] and service ID [" << svcIt->second->getServiceId() << "]" << std::endl;
             auto killService = uxas::stduxas::make_unique<uxas::messages::uxnative::KillService>();
             killService->setServiceID(svcIt->second->getServiceId());
             m_pLmcpObjectNetworkClient->sendLmcpObjectLimitedCastMessage(uxas::communications::getNetworkClientUnicastAddress(getEntityIdString(), svcIt->second->getServiceId()), std::move(killService));

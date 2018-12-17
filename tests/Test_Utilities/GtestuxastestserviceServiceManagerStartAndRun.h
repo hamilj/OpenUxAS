@@ -87,7 +87,7 @@ gtestuxastestserviceServiceManagerStartAndRun(uint32_t duration_s, std::string b
         UXAS_LOG_INFORM("Retrieving Message Log Path");
         for (auto& service : uxas::service::ServiceManager::getInstance().getServicesById())
         {
-            if (service.second->m_serviceType == std::string("MessageLoggerDataService"))
+            if (service.second->getServiceType() == std::string("MessageLoggerDataService"))
             {
                 auto messageLoggerDataService = static_cast<uxas::service::data::MessageLoggerDataService*> (service.second.get());
                 logFilePath = messageLoggerDataService->m_logFilePath;
