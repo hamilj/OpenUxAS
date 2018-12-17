@@ -206,9 +206,6 @@ protected:
     void
     sendSharedLmcpObjectLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject) override;
 
-    /** \brief static entity service cast address.  */
-    static std::string s_entityServicesCastAllAddress;
-
 private:
     /** \brief Copy construction not permitted */
     LmcpObjectNetworkClientBase(LmcpObjectNetworkClientBase const&) = delete;

@@ -65,9 +65,6 @@ namespace uxas
 namespace communications
 {
 
-std::string LmcpObjectNetworkClientBase::s_entityServicesCastAllAddress 
-        = getEntityServicesCastAllAddress(uxas::common::ConfigurationManager::getInstance().getEntityId());
-
 LmcpObjectNetworkClientBase::LmcpObjectNetworkClientBase()
     : LmcpObjectNetworkClient()
 {
@@ -104,9 +101,9 @@ LmcpObjectNetworkClientBase::configureNetworkClient(const std::string& subclassT
     auto address = getNetworkClientUnicastAddress(m_entityId, m_networkId);
     UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient subscribing to service uni-cast address [", address, "]");
     addSubscriptionAddress(address);
-    s_entityServicesCastAllAddress = getEntityServicesCastAllAddress(m_entityId);
-    UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient subscribing to entity cast-to-all services address [", s_entityServicesCastAllAddress, "]");
-    addSubscriptionAddress(s_entityServicesCastAllAddress);
+    auto entityServicesCastAllAddress = getEntityServicesCastAllAddress(m_entityId);
+    UXAS_LOG_INFORM(m_clientName, "::configureNetworkClient subscribing to entity cast-to-all services address [", entityServicesCastAllAddress, "]");
+    addSubscriptionAddress(entityServicesCastAllAddress);
     
     // network client can be terminated via received KillService message
     addSubscriptionAddress(uxas::messages::uxnative::KillService::Subscription);
