@@ -116,14 +116,12 @@ ZeroMqAddressedAttributedMessageTcpReceiverSender::getNextMessage()
                 UXAS_LOG_DEBUG_VERBOSE("ZeroMqAddressedAttributedMessageTcpReceiverSender::getNextMessage zero-length data frame indicating client connect/disconnect");
 
                 // if the identityFrame is already in the client list, assume this is a disconnect and remove from client list
-                size_t clientindex = 0;
                 bool alreadyconnected = false;
                 for(size_t k=0; k<m_clients.size(); k++)
                 {
                     if(zframe_eq(m_clients.at(k),identityFrame))
                     {
                         alreadyconnected = true;
-                        clientindex = k;
                         break;
                     }
                 }
@@ -135,10 +133,6 @@ ZeroMqAddressedAttributedMessageTcpReceiverSender::getNextMessage()
                     // don't process potential disconnects: likely very few
                     // clients in general and not worth tracking spurious
                     // disconnects due to reception of a zero length message
-                    // disconnect logic is below if desired
-                    /*  auto clientdisconnect = m_clients.at(clientindex);
-                        m_clients.erase(m_clients.begin()+clientindex);
-                        zframe_destroy(&clientdisconnect); */
                 }
                 else
                 {

@@ -103,13 +103,6 @@ Time::calibrateWithReferenceUtcTimeImpl(int year, int month, int day, int weeks,
     dateTm.tm_isdst = -1;
 
     dateTm.tm_year = year - 1900; // year since 1900
-    std::time_t tmtNow = std::time(nullptr);
-#ifdef _WIN32
-    std::tm tmNow;
-    gmtime_s(&tmNow, &tmtNow);
-#else
-    std::tm* tmNow = gmtime(&tmtNow);
-#endif
 
     UXAS_LOG_DEBUG_VERBOSE_TIME("Time::calibrateWithReferenceUtcTimeImpl dateTm.tm_year [", dateTm.tm_year, "]");
 

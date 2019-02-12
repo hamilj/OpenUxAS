@@ -2,7 +2,7 @@ project('zyre', 'c')
 
 os = target_machine.system()
 c = meson.get_compiler('c')
-c_args = []
+c_args_zyre = []
 cdata = configuration_data()
 
 dep_zeromq = dependency(
@@ -21,20 +21,20 @@ deps = [
 ]
 
 if os == 'linux'
-  c_args += [
+  c_args_zyre += [
     '-std=c11',
     '-DLINUX',
     '-D_GNU_SOURCE',
     '-DZYRE_HAVE_LINUX=1',
   ]
 elif os == 'darwin'
-  c_args += [
+  c_args_zyre += [
     '-std=c11',
     '-D_DARWIN_C_SOURCE',
     '-DZYRE_HAVE_OSX=1',
   ]
 elif os == 'windows'
-  c_args += [
+  c_args_zyre += [
     '-D_CRT_SECURE_NO_WARNINGS',
     '-DBASE_THREADSAFE',
     '-DZYRE_STATIC',
@@ -89,7 +89,7 @@ endforeach
 
 # check for both time and sys/time
 if c.has_header('time.h') and c.has_header('sys/time.h')
-  c_args += ['-DTIME_WITH_SYS_TIME']
+  c_args_zyre += ['-DTIME_WITH_SYS_TIME']
 endif
 
 check_functions = [
@@ -121,6 +121,10 @@ deps += [dependency('threads')]
 
 subdir('src')
 
+c_args_zyre += [
+  '-Wno-array-bounds',
+]
+
 lib = static_library(
   'zyre',
   [
@@ -133,7 +137,7 @@ lib = static_library(
     'src/zyre_peer.c',
   ],
   dependencies: deps,
-  c_args: c_args,
+  c_args: c_args_zyre,
   include_directories: include_directories(
     'include',
     'src',

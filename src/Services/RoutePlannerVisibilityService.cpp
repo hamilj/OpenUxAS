@@ -88,7 +88,6 @@ RoutePlannerVisibilityService::configure(const pugi::xml_node& ndComponent)
 {
     bool isSucceeded{true};
     std::string strBasePath = m_workDirectoryPath;
-    uint32_t ui32LmcpMessageSize_max = 100000;
     std::stringstream sstrErrors;
 
     std::string strComponentType = ndComponent.attribute(STRING_XML_TYPE).value();
@@ -112,8 +111,8 @@ RoutePlannerVisibilityService::configure(const pugi::xml_node& ndComponent)
         auto start = std::chrono::system_clock::now();
 
         m_osmBaseVisibilityGraph = std::make_shared<n_FrameworkLib::CVisibilityGraph>();
-        auto errAddPolygon = m_osmBaseVisibilityGraph->errBuildVisibilityGraphWithOsm(osmFileName);
 #ifdef STEVETEST
+        auto errAddPolygon = m_osmBaseVisibilityGraph->errBuildVisibilityGraphWithOsm(osmFileName);
         if (errAddPolygon == n_FrameworkLib::CVisibilityGraph::errNoError)
         {
             errAddPolygon = m_osmBaseVisibilityGraph->errInitializeGraphBase();

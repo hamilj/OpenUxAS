@@ -10,65 +10,6 @@
 #include "Dpss.h"
 using namespace std;
 
-int Dpss::UavWpToVscsWp(int uavWp)
-{
-    return uavWp;
-}
-
-int Dpss::VscsWpToUavWp(int vscsWp)
-{
-    return vscsWp;
-}
-
-int Dpss::UavWpToStandardWp(int uavWp)
-{
-    return uavWp;
-}
-
-int Dpss::StandardWpToUavWp(int standardWp)
-{
-    return standardWp;
-}
-
-int Dpss::RoadIndexToClosestStandardWp(int roadIndex, int direction)
-{
-    return roadIndex;
-}
-
-int Dpss::StandardWpToRoadIndex(int standardWp)
-{
-    return standardWp;
-}
-
-double Dpss::RoadIndexToNormalizedRoadPos(int roadIndex)
-{
-    return 0.0;
-}
-
-int Dpss::NormalizedRoadPosToClosestRoadIndex(double normalizedRoadPos)
-{
-    return 0;
-}
-
-double Dpss::NormalizedRoadPosToVehiclePos(xyPoint& p, double normalizedRoadPos, int direction)
-{
-    return 0.0;
-}
-
-double Dpss::VehiclePosToNormalizedRoadPos(xyPoint& vehiclePos)
-{
-    return 0.0;
-}
-
-void Dpss::RoadIndexToVehiclePos(xyPoint& p, int roadIndex, int direction)
-{
-}
-
-int Dpss::VehiclePosToRoadIndex(xyPoint& vehiclePos)
-{
-    return 0;
-}
-
 unsigned short Dpss::NormalizedRoadPosToVscsWp(double roadPos, int direction)
 {
     int k, rdA = -1, rdB = -1;

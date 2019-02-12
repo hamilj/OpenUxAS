@@ -23,9 +23,6 @@ void Dpss::OffsetPlanForward(std::vector<xyPoint> &xyPlanPoints, std::vector<xyP
         return;
     }
 
-    //if(!m_TerrainFollowing)
-    //    PrintRoadXYZ("roadInMeters.m", xyPlanPoints);
-
     int len = (int) xyPlanPoints.size();
     for(int k=0; k < len; k++)
     {

@@ -67,7 +67,6 @@ EscortTaskService::configureDynamicTask(const pugi::xml_node& ndComponent)
 
 {
     std::string strBasePath = m_workDirectoryPath;
-    uint32_t ui32LmcpMessageSize_max = 100000;
     std::stringstream sstrErrors;
 
     bool isSuccessful(true);
@@ -152,7 +151,6 @@ bool EscortTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<av
         m_linesOfInterest[loi->getLineID()] = loi;
     }
     return (false); // always false implies never terminating service from here
-    int64_t optionId(TaskOptionClass::m_firstOptionId);
 }
 
 
@@ -169,12 +167,6 @@ std::shared_ptr<afrl::cmasi::Location3D> EscortTaskService::calculateTargetLocat
     targetHeading = m_supportedEntityStateLast->getHeading();
     targetSpeed = m_supportedEntityStateLast->getGroundspeed();
 
-    double speed = entityState->getGroundspeed();
-    if (m_entityConfigurations.find(entityState->getID()) != m_entityConfigurations.end())
-    {
-        speed = m_entityConfigurations[entityState->getID()]->getNominalSpeed();
-    }
-
     CalculateTargetPoint(targetLocation, targetHeading, targetSpeed, m_escortTask);
     return targetLocation;
 }
@@ -184,7 +176,7 @@ std::shared_ptr<afrl::cmasi::Location3D> EscortTaskService::calculateTargetLocat
 void EscortTaskService::CalculateTargetPoint(std::shared_ptr<afrl::cmasi::Location3D>& targetLocation, double targetHeading, double targetSpeed, std::shared_ptr<afrl::impact::EscortTask>& task)
 {
     //if standoff is zero, don't mess with the targetLocation
-    if (abs(task->getStandoffDistance() - .001) <  .1)
+    if (fabs(task->getStandoffDistance() - .001) <  .1)
     {
         return;
     }

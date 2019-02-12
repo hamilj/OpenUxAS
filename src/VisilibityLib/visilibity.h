@@ -1633,19 +1633,6 @@ namespace VisiLibity
     Polyline shortest_path(const Point& start,
                const Point& finish,
                double epsilon=0.0);
-    /** \brief  compute the faces (partition cells) of an arrangement
-     *          of Line_Segments inside the Environment
-     *
-     * \author  Karl J. Obermeyer
-     * \todo  finish this
-     */
-    std::vector<Polygon> compute_partition_cells( std::vector<Line_Segment> 
-                          partition_inducing_segments,
-                          double epsilon=0.0 )
-    {
-      std::vector<Polygon> cells;
-      return cells;
-    }
     /** \brief  write lists of vertices to *.environment file 
      *
      * uses intuitive human and computer readable decimal format with

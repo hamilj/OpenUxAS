@@ -448,66 +448,6 @@ double Dpss::ComputeSeperation(double& beta, xyPoint& a, xyPoint& b, xyPoint& c)
     return seperation;
 }
 
-void Dpss::PrintRoadXY(char fileName[], std::vector<xyPoint> &road)
-{
-#ifdef TODO
-  char realFileName[512];
-  sprintf_s(realFileName, "%s%s",m_OutputPath.c_str(), fileName);
-    ofstream out(realFileName);
-    if( !out )
-        return;
-
-    out << "sroad = [";
-    for(int i=0; i<(int)road.size(); i++)
-    {
-        out << "[" << road[i].x << ", " << road[i].y << "]; ..." << endl;
-    }
-    out << "];" << endl;
-
-    out.close();
-#endif
-}
-
-void Dpss::PrintRoadXYZ(char fileName[], std::vector<xyPoint> &road)
-{
-#ifdef TODO
-  char realFileName[512];
-  sprintf_s(realFileName, "%s%s",m_OutputPath.c_str(), fileName);
-    ofstream out(realFileName);
-    if( !out )
-        return;
-
-    out << "sroad = [";
-    for(int i=0; i<(int)road.size(); i++)
-    {
-        out << "[" << road[i].x << ", " << road[i].y << ", " << road[i].z << "]; ..." << endl;
-    }
-    out << "];" << endl;
-
-    out.close();
-#endif
-}
-
-void Dpss::PrintRoadLatLon(char fileName[], DpssWaypoint* wp, int numWps)
-{
-#ifdef TODO
-  char realFileName[512];
-  sprintf_s(realFileName, "%s%s",m_OutputPath.c_str(), fileName);
-    ofstream out(realFileName);
-    if( !out )
-        return;
-
-    out << "sroad = [";
-    for(int i=0; i<numWps; i++)
-    {
-        out << "[" << wp[i].latitudeInRadians << ", " << wp[i].longitudeInRadians << "]; ..." << endl;
-    }
-    out << "];" << endl;
-
-    out.close();
-#endif
-}
-
 void Dpss::FullDebugPlan()
 {
 #ifdef TODO

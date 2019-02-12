@@ -59,18 +59,18 @@ foreach f : check_functions
 endforeach
 
 c = meson.get_compiler('c')
-c_args = []
+c_args_zmq = []
 deps = [
   dep_zeromq,
 ]
 
 os = target_machine.system()
 if os == 'linux'
-  c_args += ['-std=c11', '-D_GNU_SOURCE', '-DLINUX', '-DCZMQ_HAVE_LINUX=1']
+  c_args_zmq += ['-std=c11', '-D_GNU_SOURCE', '-DLINUX', '-DCZMQ_HAVE_LINUX=1']
 elif os == 'darwin'
-  c_args += ['-std=c11', '-D_DARWIN_C_SOURCE', '-DCZMQ_HAVE_OSX=1']
+  c_args_zmq += ['-std=c11', '-D_DARWIN_C_SOURCE', '-DCZMQ_HAVE_OSX=1']
 elif os == 'windows'
-  c_args += [
+  c_args_zmq += [
     '-D_CRT_SECURE_NO_WARNINGS',
     '-DBASE_THREADSAFE',
     '-DCZMQ_STATIC',
@@ -89,6 +89,10 @@ elif os == 'windows'
 endif
 
 subdir('src')
+
+c_args_zmq += [
+  '-Wno-array-bounds',
+]
 
 lib = static_library(
   'czmq',
@@ -129,7 +133,7 @@ lib = static_library(
     'src/zuuid.c',
   ],
   dependencies: deps,
-  c_args: c_args,
+  c_args: c_args_zmq,
   include_directories: include_directories(
     'include',
     'src',

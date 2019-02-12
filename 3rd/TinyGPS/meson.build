@@ -21,6 +21,10 @@ dep_boost = dependency(
   fallback: ['boost', 'dep'],
 )
 
+cpp_args_tinygps += [
+  '-Wno-unused-private-field',
+]
+
 lib = static_library(
   'tinygps',
   'TinyGPS.cpp',

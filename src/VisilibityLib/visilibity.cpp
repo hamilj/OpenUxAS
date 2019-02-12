@@ -2980,7 +2980,7 @@ namespace VisiLibity
                    double epsilon)
   {
     for(unsigned i=0; i<positions_.size(); i++)
-      positions_[i].snap_to_vertices_of(environment_temp);
+      positions_[i].snap_to_vertices_of(environment_temp, epsilon);
   }
 
 
@@ -2988,7 +2988,7 @@ namespace VisiLibity
                    double epsilon)
   {
     for(unsigned i=0; i<positions_.size(); i++)
-      positions_[i].snap_to_vertices_of(polygon_temp);
+      positions_[i].snap_to_vertices_of(polygon_temp, epsilon);
   }
 
 
@@ -2996,7 +2996,7 @@ namespace VisiLibity
                    double epsilon)
   {
     for(unsigned i=0; i<positions_.size(); i++)
-      positions_[i].snap_to_boundary_of(environment_temp);
+      positions_[i].snap_to_boundary_of(environment_temp, epsilon);
   }
 
 
@@ -3004,7 +3004,7 @@ namespace VisiLibity
                    double epsilon)
   {
     for(unsigned i=0; i<positions_.size(); i++)
-      positions_[i].snap_to_boundary_of(polygon_temp);
+      positions_[i].snap_to_boundary_of(polygon_temp, epsilon);
   }
 
 
@@ -3964,7 +3964,7 @@ namespace VisiLibity
       {
         auto visPoly  = visPolyList[0];
         //for each point in VisiLibity polygon
-        for (int pointIdx = 0; pointIdx < visPoly.n(); pointIdx++)
+        for (size_t pointIdx = 0; pointIdx < visPoly.n(); pointIdx++)
         {
           auto b_point = to_boost(visPoly[pointIdx]);
           boost::geometry::append(b_poly.outer(), b_point);
@@ -3977,11 +3977,11 @@ namespace VisiLibity
         //resize list of inner rings from 0 to size of remaining rings in list
         b_poly.inners().resize(visPolyList.size() - 1);
         //for each inner (CW) ring
-        for(int polyIdx = 1; polyIdx < visPolyList.size(); polyIdx++)
+        for(size_t polyIdx = 1; polyIdx < visPolyList.size(); polyIdx++)
         {
           auto visPoly = visPolyList[polyIdx];
           //for each point in VisiLibity polygon
-          for (int pointIdx = 0; pointIdx < visPoly.n(); pointIdx++)
+          for (size_t pointIdx = 0; pointIdx < visPoly.n(); pointIdx++)
           {
             auto b_point = to_boost(visPoly[pointIdx]);
             //subtract 1 because index is for VisiLibity polygon list, where the first element is the outer ring
@@ -4047,10 +4047,10 @@ namespace VisiLibity
     {   
       //for each polygon, calculate distance to each other polygon, snap closest points to second polygon if distance is greater than 0 and less than epsilon
       //outer loop is first polygon for distance calculation
-      for (int idx1 = 0; idx1 < polygonList.size(); idx1++)
+      for (size_t idx1 = 0; idx1 < polygonList.size(); idx1++)
       {
         //start with polygon after outer loop so we don't compare a polygon to itself
-        for (int idx2 = idx1+1; idx2 < polygonList.size(); idx2++)
+        for (size_t idx2 = idx1+1; idx2 < polygonList.size(); idx2++)
         {
           //make sure both polygons are valid
           boost::geometry::validity_failure_type failure;
@@ -4064,7 +4064,7 @@ namespace VisiLibity
               auto poly2 = to_visiLibity(polygonList[idx2]);
 
               //for each point in outer ring of poly1 (ignore inner rings)
-              for (int pointIdx = 0; pointIdx < poly1[0].n(); pointIdx++)
+              for (size_t pointIdx = 0; pointIdx < poly1[0].n(); pointIdx++)
               {
                 if(boundary_distance(poly1[0][pointIdx], poly2) < epsilon)
                 {
@@ -4074,7 +4074,7 @@ namespace VisiLibity
                 }
               }
 
-              for (int pointIdx = 0; pointIdx < poly2[0].n(); pointIdx++)
+              for (size_t pointIdx = 0; pointIdx < poly2[0].n(); pointIdx++)
               {
                 if(boundary_distance(poly2[0][pointIdx], poly1) < epsilon)
                 {              
@@ -4097,19 +4097,19 @@ namespace VisiLibity
       std::vector<std::pair<int, int> > result;
       //for each polygon, calculate distance to each other polygon, return true if any are overlapping
       //outer loop is first polygon for distance calculation
-      for (int idx1 = 0; idx1 < polygonList.size(); idx1++)
+      for (size_t idx1 = 0; idx1 < polygonList.size(); idx1++)
       {
         boost::geometry::validity_failure_type failure;
 
         //start with polygon after outer loop so we don't compare a polygon to itself
-        for (int idx2 = idx1+1; idx2 < polygonList.size(); idx2++)
+        for (size_t idx2 = idx1+1; idx2 < polygonList.size(); idx2++)
         {
           //make sure both polygons are valid
           if(boost::geometry::is_valid(polygonList[idx1], failure) && boost::geometry::is_valid(polygonList[idx2], failure))
           {
 
             //if these polygons overlap
-            if( boost::geometry::distance(polygonList[idx1], polygonList[idx2]) > 0 == false)
+            if( boost::geometry::distance(polygonList[idx1], polygonList[idx2]) <= 0)
             {
               result.push_back(std::pair<int, int>(idx1, idx2));
             }

@@ -67,7 +67,6 @@ OsmPlannerService::~OsmPlannerService() { };
 bool
 OsmPlannerService::configure(const pugi::xml_node& ndComponent)
 {
-    uint32_t ui32LmcpMessageSize_max = 100000;
     std::stringstream sstrErrors;
 
     bool isSuccessful(true);
@@ -1089,8 +1088,6 @@ bool OsmPlannerService::isBuildRoadGraphWithOsm(const string & osmFile)
                                 if (!ndCurrent.attribute("lon").empty())
                                 {
                                     double lon = ndCurrent.attribute("lon").as_double() * n_Const::c_Convert::dDegreesToRadians();
-                                    double dNorth_m(0.0);
-                                    double dEast_m(0.0);
                                     auto newNode = std::unique_ptr<n_FrameworkLib::CPosition>(new n_FrameworkLib::CPosition(lat, lon, 0.0, m_flatEarth));
                                     northMax_m = (newNode->m_north_m > northMax_m) ? (newNode->m_north_m) : (northMax_m);
                                     northMin_m = (newNode->m_north_m < northMin_m) ? (newNode->m_north_m) : (northMin_m);
@@ -1117,8 +1114,6 @@ bool OsmPlannerService::isBuildRoadGraphWithOsm(const string & osmFile)
             } //ffor (pugi::xml_node ndCurrent = osmMap.child("node"); ndCurrent; ndCurrent = ndCurr ... 
 
             // build map of cells
-            int32_t extentNorth_m = static_cast<int32_t> (std::abs(std::round(northMax_m - northMin_m)));
-            int32_t extentEast_m = static_cast<int32_t> (std::abs(std::round(eastMax_m - eastMin_m)));
 
             if (isSuccess)
             {
@@ -1656,7 +1651,7 @@ bool OsmPlannerService::isExamineCellsInSquare(const n_FrameworkLib::CPosition& 
         }
         // west to east cells
         int32_t localEastStart = eastStart + 1; //already checked the corners, so add 1
-        int32_t localEastEnd = eastEnd - 1; //already checked the corners, so subtract 1
+
         while ((localEastStart <= eastEnd))
         {
             // north side of square

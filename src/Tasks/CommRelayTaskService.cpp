@@ -153,7 +153,7 @@ CommRelayTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<avta
 std::shared_ptr<afrl::cmasi::Location3D> CommRelayTaskService::calculateTargetLocation(const std::shared_ptr<afrl::cmasi::EntityState> entityState)
 {
     auto middle = std::shared_ptr<afrl::cmasi::Location3D>(entityState->getLocation()->clone());
-    int64_t optionId(TaskOptionClass::m_firstOptionId);
+
     if (m_supportedEntityStateLast)
     {
         // look up speed to use for commanding vehicle

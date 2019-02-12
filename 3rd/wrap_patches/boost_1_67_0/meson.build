@@ -69,6 +69,7 @@ lib = static_library(
   ],
   cpp_args: [
     '-std=c++11',
+    '-Wno-undefined-bool-conversion',
   ],
   include_directories: incs_boost,
 )

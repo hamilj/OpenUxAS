@@ -53,7 +53,6 @@ RouteAggregatorService::configure(const pugi::xml_node& ndComponent)
 
 {
     std::string strBasePath = m_workDirectoryPath;
-    uint32_t ui32LmcpMessageSize_max = 100000;
     std::stringstream sstrErrors;
 
     std::string strComponentType = ndComponent.attribute(STRING_XML_TYPE).value();

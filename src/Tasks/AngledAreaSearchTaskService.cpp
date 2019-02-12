@@ -57,10 +57,8 @@ AngledAreaSearchTaskService::~AngledAreaSearchTaskService() { };
 
 bool
 AngledAreaSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
-
 {
     std::string strBasePath = m_workDirectoryPath;
-    uint32_t ui32LmcpMessageSize_max = 100000;
     std::stringstream sstrErrors;
 
     bool isSuccessful(true);
@@ -112,7 +110,7 @@ AngledAreaSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
         }
     }
 
-    if (lane_spacing_min_m > 0 ^ lane_spacing_max_m > 0)
+    if (!((lane_spacing_min_m > 0) && (lane_spacing_max_m > 0)))
     {
         UXAS_LOG_WARN("Lane spacing min and max not both positive");
     }
@@ -255,8 +253,6 @@ AngledAreaSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avta
 
 void AngledAreaSearchTaskService::buildTaskPlanOptions()
 {
-    bool isSuccessful{ true };
-    
     // constructs four task option for each vehicle
     
     int64_t optionId = TaskOptionClass::m_firstOptionId;

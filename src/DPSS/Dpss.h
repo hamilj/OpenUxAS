@@ -202,25 +202,6 @@ private:
     // helper function to translate from telemetry to xy plane
     int CurrentSegmentAndXYPosition(VehicleTelemetry& uav, xyPoint& xyPos, Segment& currentSegment);
 
-    // coordinate transformations
-    int UavWpToVscsWp(int uavWp);
-    int VscsWpToUavWp(int vscsWp);
-
-    int UavWpToStandardWp(int uavWp);
-    int StandardWpToUavWp(int standardWp);
-    
-    int RoadIndexToClosestStandardWp(int roadIndex, int direction);
-    int StandardWpToRoadIndex(int standardWp);
-    
-    double RoadIndexToNormalizedRoadPos(int roadIndex);
-    int NormalizedRoadPosToClosestRoadIndex(double normalizedRoadPos);
-
-    double NormalizedRoadPosToVehiclePos(xyPoint& p, double normalizedRoadPos, int direction);
-    double VehiclePosToNormalizedRoadPos(xyPoint& vehiclePos);
-    
-    void RoadIndexToVehiclePos(xyPoint& p, int roadIndex, int direction);
-    int VehiclePosToRoadIndex(xyPoint& vehiclePos);
-
     // specialized coordinate transformations
     int NormalizedRoadPosToXyRoadPos(xyPoint& p, double x);
     double CorrespondingNormalizedRoadLocation(VehicleTelemetry &pos);
@@ -241,9 +222,6 @@ private:    //RAS
     double MaxDeviation(double a, double b);
     
     // debug functions for showing results of calculations
-    void PrintRoadXY(char fileName[], std::vector<xyPoint> &road);
-    void PrintRoadXYZ(char fileName[], std::vector<xyPoint> &road);
-    void PrintRoadLatLon(char fileName[], DpssWaypoint* wp, int numWps);
     void FullDebugPlan();
     
 

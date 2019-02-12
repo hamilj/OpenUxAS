@@ -38,7 +38,6 @@ namespace utilities
     c_CallbackTimer::c_CallbackTimer(const enTimerType& tmrtypType)
     :_tmrtypTimerType(tmrtypType)        
     {
-        int64_t temp = {0};
     }
 
     c_CallbackTimer::~c_CallbackTimer()

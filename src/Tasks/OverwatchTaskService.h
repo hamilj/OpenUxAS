@@ -159,7 +159,7 @@ private:
     /** brief Copy assignment operation not permitted */
     void operator=(OverwatchTaskService const&) = delete;
 
-    virtual bool configureDynamicTask(const pugi::xml_node& serviceXmlNode);
+    virtual bool configureDynamicTask(const pugi::xml_node& serviceXmlNode) override;
     virtual bool processRecievedLmcpMessageDynamicTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject) override;
 
     virtual std::shared_ptr<afrl::cmasi::Location3D> calculateTargetLocation(const std::shared_ptr<afrl::cmasi::EntityState> entityState) override;
@@ -171,7 +171,6 @@ private:
 
     std::deque< std::shared_ptr<afrl::cmasi::EntityState> > m_watchedEntityWindow;
     size_t m_windowSize{4};
-    double m_loiterRadius_m = {305.0}; // 1000ft
     bool m_estimateTargetMotion{true};
 };
 

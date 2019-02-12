@@ -121,8 +121,6 @@ OverwatchTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<avta
             m_watchedEntityStateLast = entityState;
         }
     }
-  
-    int64_t optionId(TaskOptionClass::m_firstOptionId);
 
     return (false); // always false implies never terminating service from here
 };
@@ -164,7 +162,7 @@ std::shared_ptr<afrl::cmasi::Location3D> OverwatchTaskService::calculateTargetLo
         double cosheading = 0.0;
         double sinheading = 0.0;
         size_t Nsamples = 0;
-        for(auto i=1; i<m_watchedEntityWindow.size(); i++)
+        for(size_t i=1; i<m_watchedEntityWindow.size(); i++)
         {
             auto cur = m_watchedEntityWindow.at(i);
 

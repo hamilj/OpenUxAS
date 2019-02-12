@@ -1,5 +1,10 @@
 project('zlib', 'c')
 
+c_args_zlib = [
+  '-Wno-implicit-function-declaration',
+  '-Wno-shift-negative-value',
+]
+
 lib = static_library(
   'zlib',
   [
@@ -19,6 +24,7 @@ lib = static_library(
     'uncompr.c',
     'zutil.c',
   ],
+  c_args: c_args_zlib,
 )
 
 dep = declare_dependency(

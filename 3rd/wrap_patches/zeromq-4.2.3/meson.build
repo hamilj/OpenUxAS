@@ -2,19 +2,19 @@ project('zeromq', 'cpp')
 
 os = target_machine.system()
 cpp = meson.get_compiler('cpp')
-cpp_args = ['-DHAVE_CXX11=1']
+cpp_args_zeromq = ['-DHAVE_CXX11=1']
 deps = []
 cdata = configuration_data()
 
 if os == 'linux'
-  cpp_args += ['-DLINUX', '-DZMQ_HAVE_LINUX=1']
+  cpp_args_zeromq += ['-DLINUX', '-DZMQ_HAVE_LINUX=1']
   if cpp.get_id() == 'g++'
-    cpp_args += ['-D_GNU_SOURCE']
+    cpp_args_zeromq += ['-D_GNU_SOURCE']
   endif
 elif os == 'darwin'
-  cpp_args += ['-D_DARWIN_C_SOURCE', '-DZMQ_HAVE_OSX=1']
+  cpp_args_zeromq += ['-D_DARWIN_C_SOURCE', '-DZMQ_HAVE_OSX=1']
 elif os == 'windows'
-  cpp_args += [
+  cpp_args_zeromq += [
     '-D_CRT_SECURE_NO_WARNINGS',
 	'-D_WINSOCK_DEPRECATED_NO_WARNINGS',
 	'-DFD_SETSIZE=16384',
@@ -64,11 +64,11 @@ foreach h : check_headers
   if cpp.has_header(h.get(1))
     cdata.set(h.get(0), 1)
     if h.get(0) == 'HAVE_SYS_EVENTFD_H'
-      cpp_args += ['-DZMQ_HAVE_EVENTFD']
+      cpp_args_zeromq += ['-DZMQ_HAVE_EVENTFD']
     endif
 
     if h.get(0) == 'HAVE_IFADDRS_H'
-      cpp_args += ['-DZMQ_HAVE_IFADDRS']
+      cpp_args_zeromq += ['-DZMQ_HAVE_IFADDRS']
     endif
 
   endif
@@ -76,12 +76,12 @@ endforeach
 
 # some headers define additional flags
 if cpp.has_header('sys/uio.h')
-  cpp_args += ['-DZMQ_HAVE_UIO']
+  cpp_args_zeromq += ['-DZMQ_HAVE_UIO']
 endif
 
 # check for both time and sys/time
 if cpp.has_header('time.h') and cpp.has_header('sys/time.h')
-  cpp_args += ['-DTIME_WITH_SYS_TIME']
+  cpp_args_zeromq += ['-DTIME_WITH_SYS_TIME']
 endif
 
 check_functions = [
@@ -176,17 +176,17 @@ select(1, &t_rfds, NULL, NULL, &tv);
 '''
 
 if cpp.links(kqueue, name: 'kqueue links')
-  cpp_args += ['-DZMQ_USE_KQUEUE']
+  cpp_args_zeromq += ['-DZMQ_USE_KQUEUE']
 elif meson.is_cross_build() and cpp.links(epoll, name: 'epoll links')
-  cpp_args += ['-DZMQ_USE_EPOLL']
+  cpp_args_zeromq += ['-DZMQ_USE_EPOLL']
 elif not meson.is_cross_build() and cpp.run(epoll, name: 'epoll runs').returncode() == 0
-  cpp_args += ['-DZMQ_USE_EPOLL']
+  cpp_args_zeromq += ['-DZMQ_USE_EPOLL']
 elif cpp.links(devpoll, name: 'devpoll links')
-  cpp_args += ['-DZMQ_USE_DEVPOLL']
+  cpp_args_zeromq += ['-DZMQ_USE_DEVPOLL']
 elif cpp.links(poll, name: 'poll links')
-  cpp_args += ['-DZMQ_USE_POLL']
+  cpp_args_zeromq += ['-DZMQ_USE_POLL']
 elif cpp.links(select, name: 'select links')
-  cpp_args += ['-DZMQ_USE_SELECT']
+  cpp_args_zeromq += ['-DZMQ_USE_SELECT']
 endif
 
 foreach f : check_functions
@@ -314,7 +314,7 @@ lib = static_library(
     'src/zmq_utils.cpp',
   ],
   dependencies: deps,
-  cpp_args: cpp_args,
+  cpp_args: cpp_args_zeromq,
   include_directories: include_directories(
     'include',
     'src',

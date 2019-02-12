@@ -90,7 +90,7 @@ namespace n_Const
         };
 
         /*! \brief convert from degrees to radians  */
-        static const double toRadians(const double& degrees) {
+        static double toRadians(const double& degrees) {
             static double dValue(0.01745329251994);
             return (dValue * degrees);
         };
@@ -102,7 +102,7 @@ namespace n_Const
         };
 
         /*! \brief convert from radians to degrees  */
-        static const double toDegrees(const double& radians) {
+        static double toDegrees(const double& radians) {
             static double dValue(57.29577951308232);
             return (dValue * radians);
         };
