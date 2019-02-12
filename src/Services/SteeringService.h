@@ -38,14 +38,15 @@ namespace service
 class SteeringService : public ServiceBase
 {
 public:
-    SteeringService();
+    explicit SteeringService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
 
     virtual ~SteeringService() { }
 
-    static ServiceBase* create()
+    static ServiceBase*
+    create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new SteeringService;
-    }
+        return new SteeringService(pLmcpObjectNetworkClient);
+    };
 
     static const std::string& s_typeName()
     {

@@ -35,6 +35,7 @@
 #include "stdUniquePtr.h"
 
 #include <algorithm>
+#include <unordered_set>
 #include <vector>
 
 #include <cassert>
@@ -210,12 +211,12 @@ namespace service
 SteeringService::SteeringService::CreationRegistrar<SteeringService>
     SteeringService::s_registrar(SteeringService::s_registryServiceTypeNames());
 
-SteeringService::SteeringService()
-    : ServiceBase(SteeringService::s_typeName(), SteeringService::s_directoryName()) { };
+SteeringService::SteeringService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    : ServiceBase(SteeringService::s_typeName(), SteeringService::s_directoryName(), pLmcpObjectNetworkClient) { };
 
 bool SteeringService::configure(const pugi::xml_node& ndComponent)
 {
-    m_vehicleID = m_entityId;
+    m_vehicleID = getEntityId();
 
     if (!ndComponent.attribute(STRING_XML_VEHICLE_ID).empty())
     {
@@ -265,20 +266,20 @@ bool SteeringService::configure(const pugi::xml_node& ndComponent)
     // TODO: implement relevant options from WaypointPlanManagerService?
 
     // track all air vehicle configurations
-    addSubscriptionAddress(afrl::cmasi::AirVehicleConfiguration::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AirVehicleConfiguration::Subscription);
     std::vector< std::string > childconfigs = afrl::cmasi::AirVehicleConfigurationDescendants();
     for(auto child : childconfigs)
-        addSubscriptionAddress(child);
+        m_pLmcpObjectNetworkClient->addSubscriptionAddress(child);
     
-    addSubscriptionAddress(uxas::common::MessageGroup::PartialAirVehicleState());
-    addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
-    addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription);
-    addSubscriptionAddress(uxas::messages::uxnative::SpeedOverrideAction::Subscription);
-    addSubscriptionAddress(afrl::cmasi::VehicleActionCommand::Subscription); // to detect task override
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::common::MessageGroup::PartialAirVehicleState());
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::AutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::MissionCommand::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::uxnative::SpeedOverrideAction::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::VehicleActionCommand::Subscription); // to detect task override
     
     // update operating region
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
-    addSubscriptionAddress(uxas::messages::task::UniqueAutomationResponse::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationRequest::Subscription);
+    m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::task::UniqueAutomationResponse::Subscription);
 
     return (true);
 }
@@ -545,7 +546,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                 safeHeadingAction->setUseAltitude(true);
                 safeHeadingAction->setSpeed(speed_mps);
                 safeHeadingAction->setUseSpeed(true);
-                sendSharedLmcpObjectBroadcastMessage(std::move(safeHeadingAction));
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(std::move(safeHeadingAction));
             }
             else if(!m_isHeadingControlledByTask)
             {
@@ -558,12 +559,12 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                 pAction->setClimbRate(pCurrentWp->getClimbRate());
 
                 auto pCommand = uxas::stduxas::make_unique<afrl::cmasi::VehicleActionCommand>();
-                pCommand->setCommandID(getUniqueEntitySendMessageId());
+                pCommand->setCommandID(uxas::communications::getUniqueEntitySendMessageId());
                 pCommand->setVehicleID(m_vehicleID);
                 pCommand->getVehicleActionList().push_back(pAction.release());
                 pCommand->setStatus(afrl::cmasi::CommandStatusType::Approved);
 
-                sendLmcpObjectBroadcastMessage(std::move(pCommand));
+                m_pLmcpObjectNetworkClient->sendLmcpObjectBroadcastMessage(std::move(pCommand));
             }
         }
 
@@ -577,7 +578,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             pState->getAssociatedTasks().assign(pCurrentWp->getAssociatedTasks().begin(), pCurrentWp->getAssociatedTasks().end());
         }
 
-        sendSharedLmcpObjectBroadcastMessage(pState);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pState);
     }
 
     return false;
