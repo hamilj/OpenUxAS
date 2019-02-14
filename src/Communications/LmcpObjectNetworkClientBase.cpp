@@ -198,7 +198,7 @@ bool
 LmcpObjectNetworkClientBase::addSubscriptionAddress(const std::string& address)
 {
     UXAS_LOG_DEBUGGING(m_clientName, "::addSubscriptionAddress method START");
-    bool isAdded{false};
+
     if (m_isThreadStarted)
     {
         if (m_lmcpObjectMessageReceiverPipe.addLmcpObjectSubscriptionAddress(address))

@@ -14,7 +14,6 @@ else
     '-Wall',
     '-Wextra',
     '-Wno-unused-function',
-    '-Wno-unused-variable',
   ]
 endif
 

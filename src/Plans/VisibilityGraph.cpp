@@ -229,13 +229,10 @@ namespace n_FrameworkLib
                     bool bGoodEdge(true);
                     double dX0 = vposGetVerticiesBase()[itEdge->first].m_north_m;
                     double dY0 = vposGetVerticiesBase()[itEdge->first].m_east_m;
-                    double dZ0 = vposGetVerticiesBase()[itEdge->first].m_altitude_m;
                     double dX1 = vposGetVerticiesBase()[itEdge->second].m_north_m;
                     double dY1 = vposGetVerticiesBase()[itEdge->second].m_east_m;
-                    double dZ1 = vposGetVerticiesBase()[itEdge->second].m_altitude_m;
                     double dMid_X = (dX1 - dX0) / 2.0 + dX0;
                     double dMid_Y = (dY1 - dY0) / 2.0 + dY0;
-                    double dMid_Z = (dZ1 - dZ0) / 2.0 + dZ0;
                     for (V_POLYGON_IT_t itPolygonCheck = vplygnGetPolygons().begin(); itPolygonCheck != vplygnGetPolygons().end(); itPolygonCheck++)
                     {
                         if (itPolygonCheck->plytypGetPolygonType().bGetKeepIn())

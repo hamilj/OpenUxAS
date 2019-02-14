@@ -12,7 +12,6 @@ if cpp.get_id() == 'msvc'
 else
   cpp_args_comms += [
     '-Wno-unused-function',
-    '-Wno-unused-variable',
   ]
 endif
 
