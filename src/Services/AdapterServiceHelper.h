@@ -52,7 +52,7 @@ public:
     std::unique_ptr<avtas::lmcp::Object>
     createLmcpMessageObjectSerialConnectionFailure(
                 const std::string& serviceType, SerialConnectionAction actionType, 
-                const std::string& ttyDevice, const std::exception& exception, std::string& errorMessage)
+                const std::string& ttyDevice, std::string& errorMessage)
     {
         std::string actionString;
         switch (actionType)

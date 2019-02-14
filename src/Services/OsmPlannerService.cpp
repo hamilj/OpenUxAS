@@ -32,6 +32,8 @@
 #include <sstream>  //stringstream
 #include <chrono>       // time functions
 
+#include "boost/graph/astar_search.hpp"
+
 //TODO:: read in a open street map and calculate it's visibility graph
 
 
@@ -48,6 +50,94 @@
 
 
 #define CIRCLE_BOUNDARY_INCREMENT (_PI_O_10)
+
+namespace
+{
+
+// manhattan distance heuristic
+class manhattan_distance_heuristic : public boost::astar_heuristic<uxas::service::OsmPlannerService::Graph_t, int64_t>
+{
+public:
+    manhattan_distance_heuristic(std::shared_ptr<std::unordered_map<int64_t, std::unique_ptr<n_FrameworkLib::CPosition> > >& idVsNode,
+            std::shared_ptr<std::unordered_map<int32_t, int64_t> >& planningIndexVsNodeId,
+            n_FrameworkLib::CPosition& goalPosition)
+    : m_idVsNode(idVsNode), m_planningIndexVsNodeId(planningIndexVsNodeId), m_goalPosition(goalPosition) { }
+
+    int64_t operator()(uxas::service::OsmPlannerService::VertexDescriptor_t v)
+    {
+        int64_t returnDistance((std::numeric_limits<int64_t>::max)());
+
+        auto itNodeId = m_planningIndexVsNodeId->find(v);
+        if (itNodeId != m_planningIndexVsNodeId->end())
+        {
+            auto itPosition = m_idVsNode->find(itNodeId->second);
+            if (itPosition != m_idVsNode->end())
+            {
+                returnDistance = (m_goalPosition.m_north_m - itPosition->second->m_north_m) +
+                        (m_goalPosition.m_east_m - itPosition->second->m_east_m);
+            }
+        }
+        return (returnDistance);
+    }
+
+private:
+    std::shared_ptr<std::unordered_map<int64_t, std::unique_ptr<n_FrameworkLib::CPosition> > > m_idVsNode;
+    std::shared_ptr<std::unordered_map<int32_t, int64_t> > m_planningIndexVsNodeId;
+    n_FrameworkLib::CPosition m_goalPosition;
+};
+
+// euclidean distance heuristic
+class euclidean_distance_heuristic : public boost::astar_heuristic<uxas::service::OsmPlannerService::Graph_t, int64_t>
+{
+public:
+    euclidean_distance_heuristic(std::shared_ptr<std::unordered_map<int64_t, std::unique_ptr<n_FrameworkLib::CPosition> > >& idVsNode,
+            std::shared_ptr<std::unordered_map<int32_t, int64_t> >& planningIndexVsNodeId,
+            n_FrameworkLib::CPosition& goalPosition)
+    : m_idVsNode(idVsNode), m_planningIndexVsNodeId(planningIndexVsNodeId), m_goalPosition(goalPosition) { }
+
+    int64_t operator()(uxas::service::OsmPlannerService::VertexDescriptor_t v)
+    {
+        int64_t returnDistance((std::numeric_limits<int64_t>::max)());
+
+        auto itNodeId = m_planningIndexVsNodeId->find(v);
+        if (itNodeId != m_planningIndexVsNodeId->end())
+        {
+            auto itPosition = m_idVsNode->find(itNodeId->second);
+            if (itPosition != m_idVsNode->end())
+            {
+                returnDistance = static_cast<int64_t> (sqrt(pow(static_cast<double> (m_goalPosition.m_north_m - itPosition->second->m_north_m), 2.0) +
+                        pow(static_cast<double> (m_goalPosition.m_east_m - itPosition->second->m_east_m), 2.0)));
+            }
+        }
+        return (returnDistance);
+    }
+
+private:
+    std::shared_ptr<std::unordered_map<int64_t, std::unique_ptr<n_FrameworkLib::CPosition> > > m_idVsNode;
+    std::shared_ptr<std::unordered_map<int32_t, int64_t> > m_planningIndexVsNodeId;
+    n_FrameworkLib::CPosition m_goalPosition;
+};
+
+struct found_goal { }; // exception for termination
+
+// visitor that terminates when we find the goal
+class astar_goal_visitor : public boost::default_astar_visitor
+{
+public:
+    astar_goal_visitor(uxas::service::OsmPlannerService::VertexDescriptor_t goal) : m_goal(goal) { }
+
+    void examine_vertex(uxas::service::OsmPlannerService::VertexDescriptor_t u, const uxas::service::OsmPlannerService::Graph_t& g)
+    {
+        (void)g; // -Wunused-parameter
+        if (u == m_goal)
+            throw found_goal();
+    }
+
+private:
+    uxas::service::OsmPlannerService::VertexDescriptor_t m_goal;
+};
+
+} // namespace
 
 namespace uxas
 {

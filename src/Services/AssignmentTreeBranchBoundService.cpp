@@ -62,6 +62,11 @@ void c_Node_TreeBranchAndBound::calculateAssignmentCost(std::unique_ptr<c_Vehicl
                                                            const int64_t& taskTime_ms, const int64_t& travelTime_ms,
                                                             int64_t& nodeCost, int64_t& evaluationOrderCost)
 {
+    (void)vehicleAssignmentState; // -Wunused-parameter
+    (void)taskOptionId; // -Wunused-parameter
+    (void)taskTime_ms; // -Wunused-parameter
+    (void)travelTime_ms; // -Wunused-parameter
+
     nodeCost = INT64_MAX / 1000; // this is an error!!
     evaluationOrderCost = nodeCost;
 

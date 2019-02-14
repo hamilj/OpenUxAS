@@ -119,8 +119,6 @@ private:
     
     bool processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject) override;
 
-    void activeEntityState(const std::shared_ptr<afrl::cmasi::EntityState>& entityState)override { };
-
     void buildTaskPlanOptions()override { };
 
 private:

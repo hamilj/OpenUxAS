@@ -64,8 +64,9 @@ EscortTaskService::~EscortTaskService()
 
 bool
 EscortTaskService::configureDynamicTask(const pugi::xml_node& ndComponent)
-
 {
+    (void)ndComponent; // -Wunused-parameter
+
     std::string strBasePath = m_workDirectoryPath;
     std::stringstream sstrErrors;
 
@@ -156,6 +157,8 @@ bool EscortTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<av
 
 std::shared_ptr<afrl::cmasi::Location3D> EscortTaskService::calculateTargetLocation(const std::shared_ptr<afrl::cmasi::EntityState> entityState)
 {
+    (void)entityState; // -Wunused-parameter
+
     std::shared_ptr<afrl::cmasi::Location3D> targetLocation;
     if (!m_supportedEntityStateLast) {
         return targetLocation;

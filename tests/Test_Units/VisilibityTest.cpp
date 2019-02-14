@@ -17,10 +17,11 @@
  */
 #include "gtest/gtest.h"
 
-#include "boost/foreach.hpp"
-
 #include "visilibity.h"
 #include "TestReport.h"
+
+#include "boost/geometry.hpp"
+#include "boost/foreach.hpp"
 
 /** \class TestShape
  * 
@@ -659,7 +660,7 @@ TEST(VisiLibityTest, Polygon_conversion)
     if(convertedVisPolyList.size() == visPolyList.size())
     {
         //compare each converted visiLibity polygon to the original polygon
-        for (int polyIdx = 0; polyIdx < convertedVisPolyList.size(); polyIdx++)
+        for (size_t polyIdx = 0; polyIdx < convertedVisPolyList.size(); polyIdx++)
         {
             EXPECT_TRUE(VisiLibity::equivalent(convertedVisPolyList[polyIdx], visPolyList[polyIdx]));
         }
@@ -707,7 +708,7 @@ TEST(VisiLibityTest, Polygon_conversion_with_holes)
     if(convertedVisPolyList.size() == visPolyList.size())
     {
         //compare each converted visiLibity polygon to the original polygon
-        for (int polyIdx = 0; polyIdx < convertedVisPolyList.size(); polyIdx++)
+        for (size_t polyIdx = 0; polyIdx < convertedVisPolyList.size(); polyIdx++)
         {
             EXPECT_TRUE(VisiLibity::equivalent(convertedVisPolyList[polyIdx], visPolyList[polyIdx]));
         }
@@ -807,7 +808,7 @@ TEST(VisiLibityTest, OffsetPolygon)
     
     EXPECT_TRUE(VisiLibity::Polygon::offset_polygons(polygonList, resultingPolygons, delta, epsilon));
     auto resultSize = resultingPolygons.size();
-    EXPECT_EQ(1, resultSize);
+    EXPECT_EQ(1u, resultSize);
     if(resultSize == 1)
     {
         EXPECT_TRUE(VisiLibity::equivalent(resultingPolygons[0], expectedVisPolyList[0], epsilon));

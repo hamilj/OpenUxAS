@@ -49,6 +49,8 @@ LoiterTaskService::~LoiterTaskService() {
 
 bool
 LoiterTaskService::configureTask(const pugi::xml_node& ndComponent) {
+    (void)ndComponent; // -Wunused-parameter
+
     bool isSuccessful(true);
 
     if (isSuccessful) {
@@ -68,11 +70,6 @@ LoiterTaskService::configureTask(const pugi::xml_node& ndComponent) {
     m_pLmcpObjectNetworkClient->addSubscriptionAddress(uxas::messages::route::RouteResponse::Subscription);
     return (isSuccessful);
 }
-
-bool
-LoiterTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject) {
-    return (false); // always false implies never terminating service from here
-};
 
 void LoiterTaskService::buildTaskPlanOptions() {
     int64_t optionId = TaskOptionClass::m_firstOptionId;
@@ -111,6 +108,9 @@ void LoiterTaskService::buildTaskPlanOptions() {
 bool LoiterTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse,
         std::shared_ptr<TaskOptionClass>& taskOptionClass,
         int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route) {
+    (void)taskOptionClass; // -Wunused-parameter
+    (void)waypointId; // -Wunused-parameter
+    (void)route; // -Wunused-parameter
 
     if (m_loiterTask->getDesiredAction()) {
         auto loiterAction = m_loiterTask->getDesiredAction()->clone();
@@ -124,11 +124,6 @@ bool LoiterTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr
 
     return false;
 }
-
-void LoiterTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::EntityState>& entityState) {
-
-}
-
 
 }; //namespace task
 }; //namespace service

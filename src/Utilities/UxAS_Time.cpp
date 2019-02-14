@@ -99,7 +99,7 @@ Time::calibrateWithReferenceUtcTimeImpl(int year, int month, int day, int weeks,
             (std::chrono::system_clock::now().time_since_epoch()).count();
     UXAS_LOG_DEBUG_VERBOSE_TIME("Time::calibrateWithReferenceUtcTimeImpl nowTimeSinceEpoch_ms [", nowTimeSinceEpoch_ms, "]");
 
-    std::tm dateTm = {0};
+    std::tm dateTm;
     dateTm.tm_isdst = -1;
 
     dateTm.tm_year = year - 1900; // year since 1900

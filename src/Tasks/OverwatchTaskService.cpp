@@ -53,8 +53,9 @@ OverwatchTaskService::~OverwatchTaskService()
 
 bool
 OverwatchTaskService::configureDynamicTask(const pugi::xml_node& ndComponent)
-
 {
+    (void)ndComponent; // -Wunused-parameter
+
     std::string strBasePath = m_workDirectoryPath;
     bool isSuccessful = true;
 

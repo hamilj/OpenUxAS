@@ -65,6 +65,8 @@ bool
 AssignmentCoordinatorTaskService::configureTask(const pugi::xml_node& ndComponent)
 
 {
+    (void)ndComponent; // -Wunused-parameter
+
     bool isSuccess(true);
 
     if (uxas::messages::task::isAssignmentCoordinatorTask(m_task.get()))

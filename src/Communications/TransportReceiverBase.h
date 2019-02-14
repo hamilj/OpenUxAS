@@ -62,11 +62,11 @@ protected:
     
     virtual
     bool
-    addSubscriptionAddressToSocket(const std::string& address) { return false; };
+    addSubscriptionAddressToSocket(const std::string&) { return false; }
 
     virtual
     bool
-    removeSubscriptionAddressFromSocket(const std::string& address) { return false; };
+    removeSubscriptionAddressFromSocket(const std::string&) { return false; }
 
 private:
     

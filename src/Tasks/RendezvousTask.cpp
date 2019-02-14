@@ -348,6 +348,8 @@ bool RendezvousTask::isProcessTaskImplementationRouteResponse(std::shared_ptr<ux
                 std::shared_ptr<TaskOptionClass>& taskOptionClass,
                 int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route)
 {
+    (void)route; // -Wunused-parameter
+
     UXAS_LOG_INFORM_ASSIGNMENT(s_typeName(), " Rendezvous Task processing route response!");
     
     auto avstate = m_entityStates.find(taskImplementationResponse->getVehicleID());

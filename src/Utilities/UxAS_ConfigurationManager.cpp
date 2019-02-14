@@ -111,6 +111,8 @@ ConfigurationManager::unloadXml()
 bool
 ConfigurationManager::loadXml(const std::string& xml, bool isFile, bool isBaseXml, bool isSetEntityPptys)
 {
+    (void)isSetEntityPptys; // -Wunused-parameter
+
     bool isSuccess{false};
     pugi::xml_parse_result xmlParseSuccess;
     if (isBaseXml)

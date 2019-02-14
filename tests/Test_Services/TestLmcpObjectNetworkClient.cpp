@@ -19,6 +19,8 @@ TestLmcpObjectNetworkClient::TestLmcpObjectNetworkClient(uint32_t entityId, cons
 bool TestLmcpObjectNetworkClient::configureNetworkClient(const std::string& subclassTypeName, const pugi::xml_node& networkClientXmlNode,
     uxas::communications::LmcpObjectMessageProcessor& msgProcessor)
 {
+    (void)subclassTypeName; // -Wunused-parameter
+    (void)networkClientXmlNode; // -Wunused-parameter
     return msgProcessor.configure(networkClientXmlNode);
 }
 
@@ -35,12 +37,14 @@ bool TestLmcpObjectNetworkClient::initializeAndStart(uxas::communications::LmcpO
 bool TestLmcpObjectNetworkClient::addSubscriptionAddress(const std::string& address)
 {
     // TODO
+    (void)address; // -Wunused-parameter
     return true;
 }
 
 bool TestLmcpObjectNetworkClient::removeSubscriptionAddress(const std::string& address)
 {
     // TODO
+    (void)address; // -Wunused-parameter
     return true;
 }
 
@@ -63,6 +67,7 @@ void TestLmcpObjectNetworkClient::sendLmcpObjectBroadcastMessage(std::unique_ptr
 void TestLmcpObjectNetworkClient::sendSerializedLmcpObjectMessage(std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> serializedLmcpObject)
 {
     // TODO
+    (void)serializedLmcpObject; // -Wunused-parameter
 }
 
 void TestLmcpObjectNetworkClient::sendSharedLmcpObjectBroadcastMessage(const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)

@@ -40,8 +40,6 @@
 //#include "boost/array.hpp"
 #include "boost/graph/graph_traits.hpp"
 #include "boost/graph/adjacency_list.hpp"
-#include "boost/graph/dijkstra_shortest_paths.hpp"
-#include "boost/graph/johnson_all_pairs_shortest.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -387,6 +385,8 @@ namespace n_FrameworkLib
         }
 
         double dDistanceFromPointToSegment(const CPosition& posPoint, const CPosition& posEndA, const CPosition& posEndB, const double dLengthSegment_m) {
+            (void)dLengthSegment_m; // -Wunused-parameter
+
             double dDistanceToSegment(0.0);
 
             // from Derek's code

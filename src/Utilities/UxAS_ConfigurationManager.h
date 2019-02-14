@@ -110,14 +110,14 @@ public:
      * 
      * @return start time since epoch.
      */
-    static const int64_t
+    static int64_t
     getEntityStartTimeSinceEpoch_ms() { return (s_entityStartTimeSinceEpoch_ms); };
     
     /** \brief UxAS entity ID.
      * 
      * @return entity ID.
      */
-    static const uint32_t
+    static uint32_t
     getEntityId() { return (s_entityId); };
     
     /** \brief UxAS entity type.
@@ -131,14 +131,14 @@ public:
      * 
      * @return true implies include thread ID in log statements
      */
-    static const bool
+    static bool
     getIsLoggingThreadId() { return (s_isLoggingThreadId); };
     
     /** \brief LogManager configuration to timestamp logs.
      *
      * @return true implies include a timestamp in log file names 
      */
-    static const bool
+    static bool
     getIsDataTimeStamp() { return s_isDataTimestamp; };
 
     /** \brief Zero MQ single-part/multi-part messaging boolean.
@@ -146,35 +146,35 @@ public:
      * @return true if using Zero MQ multi-part messaging; false if using Zero MQ 
      * single-part messaging
      */
-    static const bool
+    static bool
     getIsZeroMqMultipartMessage() { return (s_isZeroMqMultipartMessage); };
   
     /** \brief UxAS application run duration (units: seconds).
      * 
      * @return Run duration in seconds.
      */
-    static const uint32_t
+    static uint32_t
     getRunDuration_s() { return (s_runDuration_s); };
     
     /** \brief Zero MQ receive socket poll wait duration (units: milliseconds).
      * 
      * @return Wait duration in milliseconds.
      */
-    static const uint32_t
+    static uint32_t
     getSerialPortWaitTime_ms() { return (s_serialPortWaitTime_ms); };
 
     /** \brief UxAS application start delay (units: milliseconds).
      * 
      * @return application start delay in milliseconds.
      */
-    static const uint32_t
+    static uint32_t
     getStartDelay_ms() { return (s_startDelay_ms); };
 
     /** \brief Zero MQ receive socket poll wait duration (units: milliseconds).
      * 
      * @return Wait duration in milliseconds.
      */
-    static const int32_t
+    static int32_t
     getZeroMqReceiveSocketPollWaitTime_ms() { return (s_zeroMqReceiveSocketPollWaitTime_ms); };
 
     /** \brief The <B><i>loadBaseXmlFile</i></B> method loads base configurations.

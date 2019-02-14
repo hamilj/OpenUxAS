@@ -50,6 +50,9 @@ void CUnitConversions::Initialize(const double& dLatitudeInit_rad, const double&
 
 void CUnitConversions::ReInitialize(const double& dLatitudeInit_rad, const double& dLongitudeInit_rad)
 {
+    (void)dLatitudeInit_rad; // -Wunused-parameter
+    (void)dLongitudeInit_rad; // -Wunused-parameter
+
 //    m_bInitialized = false;
 //    Initialize(dLatitudeInit_rad,dLongitudeInit_rad);
 //#error "ERROR: CUnitConversions::ReInitialize::   reiitialize is no longer allowed!!!"

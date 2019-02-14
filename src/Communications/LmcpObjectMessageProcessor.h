@@ -40,7 +40,7 @@ public:
      * @param xmlNode XML node containing object configurations.
      * @return true if configuration succeeds; false if configuration fails.
      */
-    virtual bool configure(const pugi::xml_node& xmlNode) { return true; };
+    virtual bool configure(const pugi::xml_node&) { return true; }
 
     /** \brief The virtual <B><i>initialize</i></B> method is invoked by the 
      * <B><i>LmcpObjectNetworkClientBase</i></B> class after completing 
@@ -48,7 +48,7 @@ public:
      * 
      * @return true if initialization succeeds; false if initialization fails.
      */
-    virtual bool initialize() { return true; };
+    virtual bool initialize() { return true; }
 
     /** \brief The virtual <B><i>start</i></B> method is invoked by the 
      * <B><i>LmcpObjectNetworkClientBase</i></B> class after initialization and
@@ -56,7 +56,7 @@ public:
      * 
      * @return true if start succeeds; false if start fails.
      */
-    virtual bool start() { return true; };
+    virtual bool start() { return true; }
 
     /** \brief The virtual <B><i>terminate</i></B> method can be implemented by 
      * inheriting classes to perform inheriting class termination logic 
@@ -71,7 +71,7 @@ public:
      * @param receivedLmcpObject received <b>LMCP</b> object.
      * @return true if object is to terminate; false if object is to continue processing.
      */
-    virtual bool processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage) { return false; };
+    virtual bool processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage>) { return false; }
 
     /** \brief The virtual <B><i>processReceivedSerializedLmcpMessage</i></B> is 
      * repeatedly invoked by the <B><i>LmcpObjectNetworkClientBase</i></B> class in an 
@@ -81,7 +81,7 @@ public:
      * @param receivedSerializedLmcpObject received AddressedAttributedMessage object with serialized <b>LMCP</b> object payload.
      * @return true if object is to terminate; false if object is to continue processing.
      */
-    virtual bool processReceivedSerializedLmcpMessage(std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> receivedSerializedLmcpMessage) { return false; };
+    virtual bool processReceivedSerializedLmcpMessage(std::unique_ptr<uxas::communications::data::AddressedAttributedMessage>) { return false; }
 };
 
 }; // namespace communications

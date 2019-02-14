@@ -68,6 +68,7 @@ namespace n_FrameworkLib
                 )
         : m_altitude_m(altitude_m),m_latitude_rad(latitude_rad),m_longitude_rad(longitude_rad)
         {
+            (void)dummy; // -Wunused-parameter
             uxas::common::utilities::CUnitConversions unitConversions;
             unitConversions.ConvertLatLong_radToNorthEast_m(latitude_rad, longitude_rad, m_north_m, m_east_m);
         };
@@ -133,7 +134,7 @@ namespace n_FrameworkLib
             return (n_Const::c_Convert::dNormalizeAngleRad(atan2(dNorth, dEast), 0.0));
         };
 
-        const double relativeAngle2D_rad(const CPosition& posPoint)const {
+        double relativeAngle2D_rad(const CPosition& posPoint)const {
             // returns the relative angle between the two
             // NOTE: the point passed in is located at the vertex of the angle
             double dNorth = m_north_m - posPoint.m_north_m;
@@ -303,7 +304,7 @@ namespace n_FrameworkLib
         rasCPositionID(CPosition posPosition, enType typPositionType = typNone)
         : CPosition(posPosition),
 		m_iID(-1),
-        m_typPositionType(typNone) { };
+        m_typPositionType(typPositionType) { };
 
         rasCPositionID(int iID, CPosition posPosition, enType typPositionType = typNone)
         : CPosition(posPosition),
@@ -314,8 +315,9 @@ namespace n_FrameworkLib
         : m_iID(iID),
         m_typPositionType(typPositionType) { };
 
-        rasCPositionID(const rasCPositionID& rhs) {
-            CPosition::operator=(rhs);
+        rasCPositionID(const rasCPositionID& rhs)
+            : CPosition(rhs)
+        {
             iGetID() = rhs.iGetID();
             typGetPositionType() = rhs.typGetPositionType();
             posGetEndPoint() = rhs.posGetEndPoint();

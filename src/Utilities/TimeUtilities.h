@@ -48,7 +48,6 @@ class c_TimeUtilities
 public:
     c_TimeUtilities();
     virtual ~c_TimeUtilities(){};
-    c_TimeUtilities(const c_TimeUtilities& rhs){};
     
 public:
     

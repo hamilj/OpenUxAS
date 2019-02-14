@@ -85,8 +85,7 @@ public: //member functions
                                       const CPosition& pointDestination,double& dHeadingDestination_rad,
                                       const double& dTurnRadius_m,
                                       const double& dCommandSpeed_vps,
-                                      const double& dMinimumWaypointSeparation_m,
-                                      const double& dObjectID);
+                                      const double& dMinimumWaypointSeparation_m);
 
 protected: //member functions
     double dMinimumDistanceEuclidean(CTrajectoryParameters& cTrajectoryParameters);

@@ -44,7 +44,7 @@ namespace n_FrameworkLib
 /****************************************************/
 /*                Tests if Data Point in Polygon        */
 /****************************************************/    
-bool CPolygon::InPolygon(double x, double y, double z,V_POSITION_t& vposVertexContainer, stringstream &sstrErrorMessage ) 
+bool CPolygon::InPolygon(double x, double y, V_POSITION_t& vposVertexContainer, stringstream &sstrErrorMessage)
 {
 #if DEBUG_FLAG==1
     cout << "CPolygon In Polygon Method\n";
@@ -61,8 +61,7 @@ bool CPolygon::InPolygon(double x, double y, double z,V_POSITION_t& vposVertexCo
             FindPolygonBoundingBox(vposVertexContainer,sstrErrorMessage);
             BBUpdateNeeded = false;
         }
-        //PointInBoundingBox(x,y,z,sstrErrorMessage);
-        bInPolygon = PointInBoundingBox(x,y,z,sstrErrorMessage);
+        bInPolygon = PointInBoundingBox(x,y);
 
         if (bInPolygon) 
         {
@@ -75,7 +74,7 @@ bool CPolygon::InPolygon(double x, double y, double z,V_POSITION_t& vposVertexCo
             switch (SelectedTest) 
             {
             case GRID:
-                GridTest(x,y,z,vposVertexContainer,sstrErrorMessage);
+                GridTest(x,y,vposVertexContainer,sstrErrorMessage);
                 break;
             default:                    //NEVER EVER SHOULD END UP HERE
                 sstrErrorMessage << "ERROR!  Invalid Test in Polygon Algorithm specified.\n";
@@ -93,7 +92,7 @@ bool CPolygon::InPolygon(double x, double y, double z,V_POSITION_t& vposVertexCo
 /****************************************************/
 /*        Is it in Polygon using Grid Test            */
 /****************************************************/
-void CPolygon::GridTest(double x, double y, double z,V_POSITION_t& vposVertexContainer,stringstream &sstrErrorMessage) 
+void CPolygon::GridTest(double x, double y, V_POSITION_t& vposVertexContainer,stringstream &sstrErrorMessage)
 {
 #if DEBUG_FLAG==1
     cout << "CPolygon GridTest() Method\n";
@@ -111,7 +110,7 @@ void CPolygon::GridTest(double x, double y, double z,V_POSITION_t& vposVertexCon
 
     }
 
-    bInPolygon = GridPtr->InPolygon(x, y, z, posminBBoxPoint, sstrErrorMessage);
+    bInPolygon = GridPtr->InPolygon(x, y, posminBBoxPoint, sstrErrorMessage);
 
 }
 
@@ -120,7 +119,7 @@ void CPolygon::GridTest(double x, double y, double z,V_POSITION_t& vposVertexCon
 /****************************************************/
 /*        Is it in Polygon using Grid Test            */
 /****************************************************/
-inline bool CPolygon::PointInBoundingBox(double x, double y, double z, stringstream &sstrErrorMessage) {
+inline bool CPolygon::PointInBoundingBox(double x, double y) {
 #if DEBUG_FLAG==1
     cout << "CPolygon PointInBoundingBox() Method\n";
 #endif
@@ -343,7 +342,7 @@ void CPolygon::FindPolygonBoundingBox(V_POSITION_t& vposVertexContainer,stringst
                         //1. check to see if the center of the edge is in the polygon, if is is then not visible
                         // 2. check new edge against all exisitng edges
                         stringstream sstrErrorMessage;
-                        bInsidePolygon = InPolygon(dCenterNorth_m,dCenterEast_m,0.0,vposVertexContainer,sstrErrorMessage);
+                        bInsidePolygon = InPolygon(dCenterNorth_m,dCenterEast_m,vposVertexContainer,sstrErrorMessage);
                         bool bGoodEdge(false);
 
                         if(bInsidePolygon == true)
@@ -387,7 +386,7 @@ CPolygon::enError CPolygon::errFindVisibleEdges(V_POSITION_t& vposVertexContaine
                     bool bInsidePolygon(false);
 
                     stringstream sstrErrorMessage;
-                    bInsidePolygon = InPolygon(dCenterNorth_m,dCenterEast_m,0.0,vposVertexContainer,sstrErrorMessage);
+                    bInsidePolygon = InPolygon(dCenterNorth_m,dCenterEast_m,vposVertexContainer,sstrErrorMessage);
 
                     if(bInsidePolygon != true)
                     {
@@ -426,6 +425,8 @@ CPolygon::enError CPolygon::errFindVisibleEdges(V_POSITION_t& vposVertexContaine
 
 CPolygon::enError CPolygon::errAddExtraVisibleEdges(V_POSITION_t& vposVertexContainer,const V_POLYGON_CONST_IT_t& itPolygonThat,V_EDGE_t& veEdgesVisible)
     {
+        (void)itPolygonThat; // -Wunused-parameter
+
         enError errReturn(errNoError);
 
         errReturn = errFindSelfVisibleEdges(vposVertexContainer);
@@ -445,7 +446,7 @@ CPolygon::enError CPolygon::errAddExtraVisibleEdges(V_POSITION_t& vposVertexCont
                     bool bInsidePolygon(false);
 
                     stringstream sstrErrorMessage;
-                    bInsidePolygon = InPolygon(dCenterNorth_m,dCenterEast_m,0.0,vposVertexContainer,sstrErrorMessage);
+                    bInsidePolygon = InPolygon(dCenterNorth_m,dCenterEast_m,vposVertexContainer,sstrErrorMessage);
 
                     if(bInsidePolygon != true)
                     {

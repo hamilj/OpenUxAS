@@ -89,15 +89,11 @@ private:
 
 	bool configureTask(const pugi::xml_node& serviceXmlNode) override;
 
-	bool processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject) override;
-
-
 public:
 	const double m_defaultElevationLookAngle_rad = 60.0 * n_Const::c_Convert::dDegreesToRadians(); //60 deg down
 
 public: //virtual
 
-	virtual void activeEntityState(const std::shared_ptr<afrl::cmasi::EntityState>& entityState) override;
 	virtual void buildTaskPlanOptions() override;
 	virtual bool isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse, std::shared_ptr<TaskOptionClass>& taskOptionClass,
 		int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route) override;

@@ -11,6 +11,8 @@ if cpp.get_id() == 'msvc'
 else
   cpp_args = [
     '-std=c++11',
+    '-Wall',
+    '-Wextra',
     '-Wno-unused-function',
     '-Wno-unused-variable',
   ]

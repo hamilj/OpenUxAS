@@ -69,8 +69,9 @@ BlockadeTaskService::~BlockadeTaskService()
 
 bool
 BlockadeTaskService::configureTask(const pugi::xml_node& ndComponent)
-
 {
+    (void)ndComponent; // -Wunused-parameter
+
     std::string strBasePath = m_workDirectoryPath;
     std::stringstream sstrErrors;
 

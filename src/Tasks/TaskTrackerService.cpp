@@ -51,6 +51,8 @@ TaskTrackerService::~TaskTrackerService() { };
 bool
 TaskTrackerService::configure(const pugi::xml_node& serviceXmlNode)
 {
+    (void)serviceXmlNode; // -Wunused-parameter
+
     // track all vehicles
     m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::EntityState::Subscription);
     std::vector< std::string > childstates = afrl::cmasi::EntityStateDescendants();

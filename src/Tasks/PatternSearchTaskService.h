@@ -147,14 +147,11 @@ private:
     bool isCalculatePatternScanRoute(std::shared_ptr<TaskOptionClass>& pTaskOptionClass,
                                      const std::unique_ptr<uxas::messages::task::SensorFootprint>& sensorFootprint,
                                      std::shared_ptr<uxas::messages::route::RoutePlanRequest>& routePlanRequest);
-    bool isCalculatePatternScanRoute_Spiral(std::shared_ptr<TaskOptionClass>& pTaskOptionClass,
-                                            const std::unique_ptr<uxas::messages::task::SensorFootprint>& sensorFootprint);
+    bool isCalculatePatternScanRoute_Spiral(std::shared_ptr<TaskOptionClass>& pTaskOptionClass);
     bool isCalculatePatternScanRoute_Sector(std::shared_ptr<TaskOptionClass>& pTaskOptionClass,
                                             const std::unique_ptr<uxas::messages::task::SensorFootprint>& sensorFootprint,
                                             std::shared_ptr<uxas::messages::route::RoutePlanRequest>& routePlanRequest);
-    bool isCalculatePatternScanRoute_Sweep(std::shared_ptr<TaskOptionClass>& pTaskOptionClass,
-                                           const std::unique_ptr<uxas::messages::task::SensorFootprint>& sensorFootprint,
-                                           std::shared_ptr<uxas::messages::route::RoutePlanRequest>& routePlanRequest);
+    bool isCalculatePatternScanRoute_Sweep();
     bool isAddDpssSteering(std::shared_ptr<TaskOptionClass>& pTaskOptionClass, std::vector<Dpss_Data_n::xyPoint>& vxyTrueRoadPoints, std::vector<Dpss_Data_n::xyPoint>& vxyWaypoints);
 private:
 

@@ -47,8 +47,11 @@ public:    //CONSTRUCTOR/DESTRUCTORS/OPERATOR=
     ~CTrajectoryParametersEnd(){};
 
     CTrajectoryParametersEnd(const CTrajectoryParametersEnd& rhs)
+        : CBaseObject(rhs)
     {
-        operator =(rhs);
+        waytypGetFinal() = rhs.waytypGetFinal();
+        vGetHeadingParameters() = rhs.vGetHeadingParameters();
+        dGetStandOffNoHeadings_m() = rhs.dGetStandOffNoHeadings_m();
     }
 
     void operator =(const CTrajectoryParametersEnd& rhs)

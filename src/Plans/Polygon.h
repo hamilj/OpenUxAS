@@ -723,7 +723,7 @@ private:
     *                Private Member Functions        *
     *************************************************/
 private:
-    void GridTest(const double x, const double y,const double z,V_POSITION_t& vposVertexContainer,stringstream &sstrErrorMessage);
+    void GridTest(const double x, const double y,V_POSITION_t& vposVertexContainer,stringstream &sstrErrorMessage);
     // copy constructor - make unusable to prevent bad things from happening
     //CPolygon(const CPolygon& Polygon) {};
     //// assignment operator - make unusable to prevent bad things from happening
@@ -734,14 +734,11 @@ private:
     *                Public Member Functions            *
     *************************************************/
 public:    
-    bool InPolygon(const double x, const double y, 
-        const double z,V_POSITION_t& vposVertexContainer, stringstream &sstrErrorMessage);
+    bool InPolygon(const double x, const double y, V_POSITION_t& vposVertexContainer, stringstream &sstrErrorMessage);
 
     void FindPolygonBoundingBox(V_POSITION_t& vposVertexContainer,stringstream &sstrErrorMessage);
 
-    bool PointInBoundingBox(const double x, const double y, 
-        const double z, stringstream &sstrErrorMessage); 
-
+    bool PointInBoundingBox(const double x, const double y);
 };
 
 

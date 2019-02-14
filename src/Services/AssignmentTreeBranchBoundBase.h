@@ -222,9 +222,18 @@ public: //member functions - prototypes
 protected: //member functions - prototypes
     virtual std::unique_ptr<c_Node_Base> clone();
     virtual void NodeAssignment(std::unique_ptr<c_VehicleAssignmentState>& vehicleAssignmentState, const int64_t& taskOptionId, const int64_t& prerequisiteTaskOptionId);
+
     virtual void calculateAssignmentCost(std::unique_ptr<c_VehicleAssignmentState>& vehicleAssignmentState, const int64_t& taskOptionId,
-                                            const int64_t& taskTime_ms, const int64_t& travelTime_ms,
-                                            int64_t& nodeCost, int64_t& evaluationOrderCost){};
+        const int64_t& taskTime_ms, const int64_t& travelTime_ms, int64_t& nodeCost, int64_t& evaluationOrderCost)
+    {
+        (void)vehicleAssignmentState; // -Wunused-parameter
+        (void)taskOptionId; // -Wunused-parameter
+        (void)taskTime_ms; // -Wunused-parameter
+        (void)travelTime_ms; // -Wunused-parameter
+        (void)nodeCost; // -Wunused-parameter
+        (void)evaluationOrderCost; // -Wunused-parameter
+    }
+
     virtual void calculateFinalAssignment(){};                                        
 
 public: // member functions - prototypes
@@ -353,13 +362,13 @@ protected: //virtual
     
     /** brief Children classes can override this to perform
      * configuration after the base class is configured. */
-    virtual bool configureAssignment(const pugi::xml_node& serviceXmlNode){ return true; };
+    virtual bool configureAssignment(const pugi::xml_node&){ return true; }
     /** brief Children classes can override this to
      * perform start up functions */
     virtual bool isStartAssignment(){return(true);};
     /** brief Children classes can override this to handle
      * messages after they are processed by the base class. */
-    virtual void processReceivedLmcpMessageAssignment(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage){};
+    virtual void processReceivedLmcpMessageAssignment(std::unique_ptr<uxas::communications::data::LmcpMessage>){}
     /** brief this function is called to initialize the algebra functions. */
     virtual bool isInitializeAlgebra(const std::shared_ptr<AssigmentPrerequisites>& assigmentPrerequisites);
     /** brief starts the branch and bound assignment from the base class. */

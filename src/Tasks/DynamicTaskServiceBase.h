@@ -64,10 +64,10 @@ private :
     bool configureTask(const pugi::xml_node& serviceXmlNode) override;
 
     //methods for children to implement
-    virtual std::shared_ptr<afrl::cmasi::Location3D> calculateTargetLocation(const std::shared_ptr<afrl::cmasi::EntityState> entityState) { return nullptr; };
-    virtual bool processRecievedLmcpMessageDynamicTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject) { return false; };
+    virtual std::shared_ptr<afrl::cmasi::Location3D> calculateTargetLocation(const std::shared_ptr<afrl::cmasi::EntityState>) { return nullptr; };
+    virtual bool processRecievedLmcpMessageDynamicTask(std::shared_ptr<avtas::lmcp::Object>&) { return false; };
     virtual void processMissionCommand(std::shared_ptr<afrl::cmasi::MissionCommand>) {};
-    virtual bool configureDynamicTask(const pugi::xml_node& serviceXmlNode) { return true; };
+    virtual bool configureDynamicTask(const pugi::xml_node&) { return true; };
     virtual void buildTaskPlanOptions() override;
 
 

@@ -39,6 +39,8 @@ Test_SimulationTime::~Test_SimulationTime() { };
 bool
 Test_SimulationTime::configure(const pugi::xml_node& serviceXmlNode)
 {
+    (void)serviceXmlNode; // -Wunused-parameter
+
     bool isSuccess{true};
     
     // ENTITY STATES

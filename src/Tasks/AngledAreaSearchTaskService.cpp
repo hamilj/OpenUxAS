@@ -685,6 +685,7 @@ bool AngledAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Tas
 
 void AngledAreaSearchTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::EntityState>& entityState)
 {
+    (void)entityState; // -Wunused-parameter
 
 #ifdef STEVETEST
     n_UxAS_Utilities::CUnitConversions unitConversions;

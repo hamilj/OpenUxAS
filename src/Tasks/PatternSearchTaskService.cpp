@@ -370,7 +370,7 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute(std::shared_ptr<TaskO
     if (m_patternSearchTask->getPattern() == afrl::impact::AreaSearchPattern::Spiral)
     {
         m_isUseDpss = true;
-        isSuccess = isCalculatePatternScanRoute_Spiral(pTaskOptionClass, sensorFootprint);
+        isSuccess = isCalculatePatternScanRoute_Spiral(pTaskOptionClass);
     }
     else if (m_patternSearchTask->getPattern() == afrl::impact::AreaSearchPattern::Sector)
     {
@@ -380,7 +380,7 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute(std::shared_ptr<TaskO
     else if (m_patternSearchTask->getPattern() == afrl::impact::AreaSearchPattern::Sweep)
     {
         m_isUseDpss = false;
-        isSuccess = isCalculatePatternScanRoute_Sweep(pTaskOptionClass, sensorFootprint, routePlanRequest);
+        isSuccess = isCalculatePatternScanRoute_Sweep();
     }
     else
     {
@@ -434,8 +434,7 @@ bool PatternSearchTaskService::isAddDpssSteering(std::shared_ptr<TaskOptionClass
     return (isSuccess);
             }
 
-bool PatternSearchTaskService::isCalculatePatternScanRoute_Spiral(std::shared_ptr<TaskOptionClass>& pTaskOptionClass,
-        const std::unique_ptr<uxas::messages::task::SensorFootprint>& sensorFootprint)
+bool PatternSearchTaskService::isCalculatePatternScanRoute_Spiral(std::shared_ptr<TaskOptionClass>& pTaskOptionClass)
 {
     bool isSuccess(true);
 
@@ -705,9 +704,7 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute_Sector(std::shared_pt
     return (isSuccess);
 }
 
-bool PatternSearchTaskService::isCalculatePatternScanRoute_Sweep(std::shared_ptr<TaskOptionClass>& pTaskOptionClass,
-                                                                 const std::unique_ptr<uxas::messages::task::SensorFootprint>& sensorFootprint,
-                                                                 std::shared_ptr<uxas::messages::route::RoutePlanRequest>& routePlanRequest)
+bool PatternSearchTaskService::isCalculatePatternScanRoute_Sweep()
 {
     bool isSuccess(true);
 
@@ -722,6 +719,9 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute_Sweep(std::shared_ptr
 bool PatternSearchTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse, std::shared_ptr<TaskOptionClass>& taskOptionClass,
         int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route)
 {
+    (void)taskImplementationResponse; // -Wunused-parameter
+    (void)waypointId; // -Wunused-parameter
+    (void)route; // -Wunused-parameter
 
     auto sensorSteeringSegments = m_optionIdVsSensorSteeringSegments.find(taskOptionClass->m_taskOption->getOptionID());
     if (sensorSteeringSegments != m_optionIdVsSensorSteeringSegments.end())

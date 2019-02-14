@@ -84,7 +84,6 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>     //string class
 #include <cassert>    //assertions
 
-#include "boost/geometry.hpp"
 #include "boost/geometry/geometries/point_xy.hpp"
 #include "boost/geometry/geometries/polygon.hpp"
 

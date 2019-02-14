@@ -261,11 +261,11 @@ namespace task
         virtual void terminate() override;
         virtual bool processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage) override;
 
-        virtual bool configureTask(const pugi::xml_node& serviceXmlNode){return(true);};
+        virtual bool configureTask(const pugi::xml_node&){return(true);}
         virtual bool initializeTask(){return(true);};
         virtual bool startTask(){return(true);};
         virtual void terminateTask(){};
-        virtual bool processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject){return(false);};
+        virtual bool processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>&){return(false);}
 
     protected:
 
@@ -287,7 +287,7 @@ namespace task
 
     protected:
 
-        virtual void activeEntityState(const std::shared_ptr<afrl::cmasi::EntityState>& entityState) { };
+        virtual void activeEntityState(const std::shared_ptr<afrl::cmasi::EntityState>&) { }
         
         virtual void taskComplete() { };
 
@@ -296,20 +296,31 @@ namespace task
         /*! \brief user can override this function to provide their own handler for option route responses */
         virtual bool isHandleOptionsRouteResponse(const int64_t& vehicleId, const int64_t& optionId,
                 const int64_t& operatingRegion, std::shared_ptr<uxas::messages::route::RoutePlan>& route) {
+            (void)vehicleId; // -Wunused-parameter
+            (void)optionId; // -Wunused-parameter
+            (void)operatingRegion; // -Wunused-parameter
+            (void)route; // -Wunused-parameter
             return (false);
-        };
+        }
 
         virtual bool isBuildAndSendImplementationRouteRequest(const int64_t& optionId,
                 const std::shared_ptr<uxas::messages::task::TaskImplementationRequest>& taskImplementationRequest,
                 const std::shared_ptr<uxas::messages::task::TaskOption>& taskOption) {
+            (void)optionId; // -Wunused-parameter
+            (void)taskImplementationRequest; // -Wunused-parameter
+            (void)taskOption; // -Wunused-parameter
             return (false);
-        };
+        }
 
         virtual bool isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse,
                 std::shared_ptr<TaskOptionClass>& taskOptionClass,
                 int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route) {
+            (void)taskImplementationResponse; // -Wunused-parameter
+            (void)taskOptionClass; // -Wunused-parameter
+            (void)waypointId; // -Wunused-parameter
+            (void)route; // -Wunused-parameter
             return (false);
-        };
+        }
 
     protected:
         /** \brief Used by children of the base class to perform base class configuration . 

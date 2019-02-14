@@ -124,15 +124,15 @@ private:
     *************************************************/
 private:
     
-    void Setup_Corner_Value(stringstream &sstrErrorMessage);
+    void Setup_Corner_Value();
     
     bool Setup_GridData(Cell &Cur_Cell, double xa, double ya, double xb, double yb, 
-        CPosition &vtxa, CPosition &vtxb, stringstream &sstrErrorMessage);
+        CPosition &vtxa, CPosition &vtxb);
     
     void Print();
     
     // copy constructor - make unusable to prevent bad things from happening
-    CGrid(const CGrid& grid);
+    CGrid(const CGrid& grid) = delete;
     // assignment operator - make unusable to prevent bad things from happening
     CGrid & operator = (const CGrid& grid) = delete;
     
@@ -148,7 +148,7 @@ public:
     
     ~CGrid();                                                //Destructor
     
-    bool InPolygon(double x, double y, double z, const CPosition &min, stringstream &sstrErrorMessage);
+    bool InPolygon(double x, double y, const CPosition &min, stringstream &sstrErrorMessage);
     
     };
 

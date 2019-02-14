@@ -39,6 +39,7 @@
 
 #include <pugixml.hpp>
 
+#include "boost/graph/dijkstra_shortest_paths.hpp"
 
 namespace n_FrameworkLib
 {
@@ -241,9 +242,9 @@ namespace n_FrameworkLib
                         {
                             // check to make sure that the current edge does not overlap a keep-in boundary
                             // check start, end, and middle points to see if they are all in or out of the boundary
-                            bool bOneIn = itPolygonCheck->InPolygon(dX0, dY0, dZ0, vposGetVerticiesBase(), sstrErrorMessage);
-                            bool bTwoIn = itPolygonCheck->InPolygon(dX1, dY1, dZ1, vposGetVerticiesBase(), sstrErrorMessage);
-                            bool bThreeIn = itPolygonCheck->InPolygon(dMid_X, dMid_Y, dMid_Z, vposGetVerticiesBase(), sstrErrorMessage);
+                            bool bOneIn = itPolygonCheck->InPolygon(dX0, dY0, vposGetVerticiesBase(), sstrErrorMessage);
+                            bool bTwoIn = itPolygonCheck->InPolygon(dX1, dY1, vposGetVerticiesBase(), sstrErrorMessage);
+                            bool bThreeIn = itPolygonCheck->InPolygon(dMid_X, dMid_Y, vposGetVerticiesBase(), sstrErrorMessage);
                             if ((bOneIn != bTwoIn) || (bOneIn != bThreeIn))
                             {
                                 bGoodEdge = false;
@@ -634,7 +635,7 @@ namespace n_FrameworkLib
             {
                 if (!itPolygons->plytypGetPolygonType().bGetKeepIn()) // only checking keep-out zones
                 {
-                    bReturn = itPolygons->InPolygon(itWaypoint->m_north_m, itWaypoint->m_east_m, itWaypoint->m_altitude_m, vposGetVerticiesBase(), sstrErrorMessage);
+                    bReturn = itPolygons->InPolygon(itWaypoint->m_north_m, itWaypoint->m_east_m, vposGetVerticiesBase(), sstrErrorMessage);
                     if (bReturn)
                     {
                         double dLatitude_deg(0.0);

@@ -167,7 +167,7 @@ LmcpObjectNetworkSerialBridge::processReceivedSerializedLmcpMessage(std::unique_
                 std::string errorMessage;
                 std::unique_ptr<avtas::lmcp::Object> lmcpServiceStatus = uxas::communications::data::SerialHelper
                         ::createLmcpMessageObjectSerialConnectionFailure(s_typeName(), uxas::communications::data::SerialConnectionAction::WRITE,
-                                                                         m_serialPortAddress, m_serialBaudRate, ex, errorMessage);
+                                                                         m_serialPortAddress, m_serialBaudRate, errorMessage);
                 sendLmcpObjectBroadcastMessage(std::move(lmcpServiceStatus));
                 UXAS_LOG_ERROR(errorMessage, " EXCEPTION: ", ex.what());
             }
@@ -237,7 +237,7 @@ LmcpObjectNetworkSerialBridge::executeSerialReceiveProcessing()
                 //std::string errorMessage;
                 //std::unique_ptr<avtas::lmcp::Object> lmcpServiceStatus = uxas::communications::data::SerialHelper
                 //        ::createLmcpMessageObjectSerialConnectionFailure(s_typeName(), uxas::communications::data::SerialConnectionAction::READ, 
-                //                                                         m_serialPortAddress, m_serialBaudRate, ex2, errorMessage);
+                //                                                         m_serialPortAddress, m_serialBaudRate, errorMessage);
                 //sendLmcpObjectBroadcastMessage(std::move(lmcpServiceStatus));
                 //UXAS_LOG_ERROR(errorMessage, " EXCEPTION: ", ex2.what());
             }

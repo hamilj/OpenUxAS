@@ -51,43 +51,6 @@ namespace n_FrameworkLib
 /****************************************************/
 /*        Constructors                                 */
 /****************************************************/
-CGrid::CGrid(const CGrid& grid) :
-//VGrid(0), 
-//Index(0),
-//UpperBound(0),
-//Polygon_Points (0),
-xdelta(0),
-ydelta(0),
-inv_xdelta(0),
-inv_ydelta(0),
-XGridResolution(0),
-YGridResolution(0),
-TotalCells(0),
-NearEpsilon(1e-9),
-dHUGE(1.797693134862315e+308),
-GC_BL_IN(0x0001),
-GC_BR_IN(0x0002),
-GC_TL_IN(0x0004),
-GC_TR_IN(0x0008),
-GC_L_EDGE_HIT(0x0010),
-GC_R_EDGE_HIT(0x0020),
-GC_B_EDGE_HIT(0x0040),
-GC_T_EDGE_HIT(0x0080),
-GC_B_EDGE_PARITY(0x0100),
-GC_T_EDGE_PARITY(0x0200),
-GC_AIM_L((0<<10)),
-GC_AIM_B((1<<10)),
-GC_AIM_R((2<<10)),
-GC_AIM_T((3<<10)),
-GC_AIM_C((4<<10)),
-GC_AIM(0x1c00),
-GC_L_EDGE_CLEAR(GC_L_EDGE_HIT),
-GC_R_EDGE_CLEAR(GC_R_EDGE_HIT),
-GC_B_EDGE_CLEAR(GC_B_EDGE_HIT),
-GC_T_EDGE_CLEAR(GC_T_EDGE_HIT) 
-{  }
-
-// CONSTRUCTOR we want to use!
 CGrid::CGrid(std::vector<int32_t>& viVerticies,V_POSITION_t& vposVertexContainer, int x_grid_resolution, 
              int y_grid_resolution, CPosition &min, CPosition &max,
              stringstream &sstrErrorMessage):
@@ -295,7 +258,7 @@ TryAgain:
                 cout << " b4 setup grid data \n";
 #endif
                 // check for corner crossing, then mark the cell we're in 
-                if (! Setup_GridData(*p_gc, vx0, vy0, vx1, vy1, *vtxa, *vtxb, sstrErrorMessage)) {
+                if (! Setup_GridData(*p_gc, vx0, vy0, vx1, vy1, *vtxa, *vtxb)) {
                     // warning, danger - we have just crossed a corner.
                     // There are all kinds of topological messiness we could
                     // do to get around this case, but they're a headache.
@@ -387,7 +350,7 @@ TryAgain:
     vtxb = 0;    //we don't own this
 
     // grid is all setup, now set up the inside/outside value of each corner.
-    Setup_Corner_Value(sstrErrorMessage);
+    Setup_Corner_Value();
     
 }
 
@@ -433,13 +396,10 @@ CGrid::~CGrid()
 #endif
 }
 
-void CGrid::Setup_Corner_Value(stringstream &sstrErrorMessage)  {
+void CGrid::Setup_Corner_Value()  {
 #if DEBUG_FLAG==1
     if (METHOD_DEBUG)
         cout << "Cgrid Setup_Corner_Value() Method\n";
-    
-    
-    sstrErrorMessage << "Inside method setup_corner_value \n";
 #endif
     
     // Grid all set up, now set up the inside/outside value of each corner.
@@ -522,10 +482,9 @@ void CGrid::Print() {
     }
 }
 
-bool CGrid::Setup_GridData(Cell &Cur_Cell, double xa, double ya, double xb, double yb, CPosition &vtxa, CPosition &vtxb, stringstream &sstrErrorMessage) {
+bool CGrid::Setup_GridData(Cell &Cur_Cell, double xa, double ya, double xb, double yb, CPosition &vtxa, CPosition &vtxb) {
 #if DEBUG_FLAG==1
     cout << "Cgrid Setup_GRidData() Method\n";
-    sstrErrorMessage << "Inside Method Setup_GridData\n";
 #endif
     
     double slope, inv_slope;
@@ -590,7 +549,7 @@ bool CGrid::Setup_GridData(Cell &Cur_Cell, double xa, double ya, double xb, doub
 }
 
 
-bool CGrid::InPolygon(double x, double y, double z, const CPosition &min, stringstream &sstrErrorMessage) {
+bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &sstrErrorMessage) {
     
 #if DEBUG_FLAG==1
     cout << "Cgrid InPolygon() Method\n";

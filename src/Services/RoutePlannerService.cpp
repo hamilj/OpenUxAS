@@ -54,6 +54,8 @@ RoutePlannerService::~RoutePlannerService()
 bool
 RoutePlannerService::configure(const pugi::xml_node& serviceXmlNode)
 {
+    (void)serviceXmlNode; // -Wunused-parameter
+
     // Need to track:
     //  (1) environment construction (keep-in/keep-out zones and operating region)
     //  (2) current states of entities for non-specified start locations

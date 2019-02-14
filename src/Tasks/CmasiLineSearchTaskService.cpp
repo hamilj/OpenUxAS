@@ -583,6 +583,10 @@ bool CmasiLineSearchTaskService::isCalculateOption(const int64_t& taskId, const 
 bool CmasiLineSearchTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse, std::shared_ptr<TaskOptionClass>& taskOptionClass,
         int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route)
 {
+    (void)taskImplementationResponse; // -Wunused-parameter
+    (void)waypointId; // -Wunused-parameter
+    (void)route; // -Wunused-parameter
+
     auto itDpss = m_optionIdVsDpss.find(taskOptionClass->m_taskOption->getOptionID());
     if (itDpss != m_optionIdVsDpss.end())
     {

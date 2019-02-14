@@ -53,6 +53,8 @@ MustFlyTaskService::~MustFlyTaskService() {}
 
 bool MustFlyTaskService::configureTask(const pugi::xml_node& ndComponent)
 {
+    (void)ndComponent; // -Wunused-parameter
+
     m_mustFlyTask = std::dynamic_pointer_cast<afrl::cmasi::MustFlyTask>(m_task);
     if (!m_mustFlyTask)
     {
@@ -137,6 +139,10 @@ bool MustFlyTaskService::isProcessTaskImplementationRouteResponse(std::shared_pt
     std::shared_ptr<TaskOptionClass>& taskOptionClass,
     int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route)
 {
+    (void)taskOptionClass; // -Wunused-parameter
+    (void)waypointId; // -Wunused-parameter
+    (void)route; // -Wunused-parameter
+
     // make sure altitude matches must fly altitude
     auto mustfly = std::dynamic_pointer_cast<afrl::cmasi::MustFlyTask>(m_task);
     for(auto wp : taskImplementationResponse->getTaskWaypoints())

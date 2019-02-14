@@ -55,6 +55,8 @@ bool
 TaskTemplate::configureTask(const pugi::xml_node& ndComponent)
 
 {
+    (void)ndComponent; // -Wunused-parameter
+
     bool isSuccess(true);
 
 //        if (uxas::project::pisr::isPISR_Task(m_task.get()))
@@ -123,6 +125,8 @@ void TaskTemplate::terminateTask()
 
 bool TaskTemplate::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
 {
+    (void)receivedLmcpObject; // -Wunused-parameter
+
 //    if (afrl::cmasi::isKeyValuePair(receivedLmcpObject))
 //    {
 //        //receive message

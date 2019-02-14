@@ -202,6 +202,8 @@ AssignmentTreeBranchBoundBase::processReceivedLmcpMessage(std::unique_ptr<uxas::
 
 bool AssignmentTreeBranchBoundBase::AssigmentPrerequisites::isAssignmentReady(const bool& isUsingAssignmentTypes)
 {
+    (void)isUsingAssignmentTypes; // -Wunused-parameter
+
     bool isHavePrerequisites(false);
 
     /* 1 - do we have an automation request, cost matrix, task  options, and
@@ -736,6 +738,7 @@ m_isLeafNode(rhs.m_isLeafNode)
 
 void c_Node_Base::printStatus(const std::string& Message)
 {
+    (void)Message; // -Wunused-parameter
     double timeSinceStart_s = static_cast<double> (uxas::common::utilities::c_TimeUtilities::getTimeNow_ms() -
             m_staticAssignmentParameters->m_assignmentStartTime_ms) / 1000.0;
     UXAS_LOG_INFORM(Message
@@ -1068,6 +1071,8 @@ void c_Node_Base::calculateAssignmentCostBase(std::unique_ptr<c_VehicleAssignmen
                                               const int64_t& taskTime_ms, const int64_t& travelTime_ms,
                                               int64_t& nodeCost, int64_t& evaluationOrderCost)
 {
+    (void)taskOptionId; // -Wunused-parameter
+
     nodeCost = MAX_COST_MS;
     evaluationOrderCost = MAX_COST_MS;
 

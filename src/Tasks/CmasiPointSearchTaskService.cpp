@@ -65,8 +65,9 @@ CmasiPointSearchTaskService::~CmasiPointSearchTaskService() {
 
 bool
 CmasiPointSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
-
 {
+    (void)ndComponent; // -Wunused-parameter
+
     m_pointSearchTask = std::dynamic_pointer_cast<afrl::cmasi::PointSearchTask>(m_task);
     if (!m_pointSearchTask)
     {
@@ -296,6 +297,11 @@ bool CmasiPointSearchTaskService::isProcessTaskImplementationRouteResponse(std::
     std::shared_ptr<TaskOptionClass>& taskOptionClass,
     int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route)
 {
+    (void)taskImplementationResponse; // -Wunused-parameter
+    (void)taskOptionClass; // -Wunused-parameter
+    (void)waypointId; // -Wunused-parameter
+    (void)route; // -Wunused-parameter
+
 #ifdef AFRL_INTERNAL_ENABLED
     // override speed as necessary
     if(afrl::famus::isPointSearchTask(m_task.get()))

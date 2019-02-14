@@ -5,9 +5,14 @@ if os == 'linux'
   add_project_arguments('-DLINUX', language: ['c', 'cpp'])
 endif
 
-incs_boost = include_directories(
-  '.'
-)
+# treat as system headers to disable all warnings when included
+cpp = meson.get_compiler('cpp')
+
+if cpp.get_id() == 'msvc'
+  incs_boost = include_directories('.')
+else
+  incs_boost = include_directories('.', is_system : true)
+endif
 
 lib = static_library(
   'boost',

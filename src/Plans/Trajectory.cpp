@@ -158,8 +158,7 @@ double CTrajectory::dMinimumDistanceDubins(CTrajectoryParameters& cTrajectoryPar
                                                 posStandoff,dHeadingFrom_rad,
                                                 cTrajectoryParameters.dGetTurnRadius_m(),
                                                 cTrajectoryParameters.dGetSpeed_mps(),
-                                                cTrajectoryParameters.dGetWaypointSeparationMin_m(),
-                                                itParametersEnd->iGetID());
+                                                cTrajectoryParameters.dGetWaypointSeparationMin_m());
                 }
                 break;
             case CTrajectoryParameters::pathOptimalMAVWind: //Move the Objectives based on wind calculate the path with dubins adapted to Wind
@@ -1054,8 +1053,7 @@ double CTrajectory::dCalculateTrajectoryDubins(CAssignment& assignMinimum,
                                                       const CPosition& pointFinal,double& dHeadingFinal_rad,
                                                       const double& dTurnRadius_m,
                                                       const double& dCommandSpeed_mps,
-                                                      const double& dMinimumWaypointSeparation_m,
-                                                      const double& dObjectID)
+                                                      const double& dMinimumWaypointSeparation_m)
 {
 
     //  This function calculates the minimum path between two points

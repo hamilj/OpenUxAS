@@ -109,8 +109,8 @@ public:
     enTurnDirection_t& turnGetTurnDirection(){return(m_turnDirection);};
     const enTurnDirection_t& turnGetTurnDirection()const{return(m_turnDirection);};
 
-    const double dGetAngle(const CPosition& posPoint)const{return(posPoint.relativeAngle2D_rad(*this));};
-    const double dGetRelativeAngle(const CPosition& posPoint1,const CPosition& posPoint2)const
+    double dGetAngle(const CPosition& posPoint)const{return(posPoint.relativeAngle2D_rad(*this));};
+    double dGetRelativeAngle(const CPosition& posPoint1,const CPosition& posPoint2)const
     {
         // returns relative angle from point1 to point2 using the circle center as the vertex
         double dAngle1 = posPoint1.relativeAngle2D_rad(*this);

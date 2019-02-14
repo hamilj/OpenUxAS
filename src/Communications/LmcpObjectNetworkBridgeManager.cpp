@@ -35,6 +35,8 @@ namespace
 
 std::unique_ptr<uxas::communications::LmcpObjectNetworkBridge> createBridge(const std::string& type, const pugi::xml_node& bridgeXmlNode)
 {
+    (void)type; // -Wunused-parameter
+
     // attempt instantiation of new bridge
     std::unique_ptr<uxas::communications::LmcpObjectNetworkBridge> newBridgeFinal;
     if (uxas::common::StringConstant::Bridge().compare(bridgeXmlNode.name()) == 0)

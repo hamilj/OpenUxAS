@@ -22,11 +22,11 @@ namespace common
 namespace utilities
 {
 
-
-
-
 v_action_t parseTreeNode::nextActions(const v_action_t &executedActions, bool &encounterExecutedOut)
 {
+    (void)executedActions; // -Wunused-parameter
+    (void)encounterExecutedOut; // -Wunused-parameter
+
     v_action_t searchResultThis;
     return searchResultThis;
 }
@@ -50,11 +50,13 @@ void parseTreeNode::deleteTree(void)
 
 parseTreeNode* parseTreeNode::searchAction(action_t actionIDIn)
 {
+    (void)actionIDIn; // -Wunused-parameter
     return NULL;
 }
 
 int parseTreeNode::randomlyShuffleChildren(double shuffleProb)
 {
+    (void)shuffleProb; // -Wunused-parameter
     return 1;
 }
 
@@ -116,6 +118,7 @@ parseTreeNode* actionNode::searchAction(action_t actionIDIn)
 
 int actionNode::randomlyShuffleChildren(double shuffleProb)
 {
+    (void)shuffleProb; // -Wunused-parameter
     return 1; // Just break the recursion
 }
 
@@ -335,6 +338,7 @@ int operatorNode::randomlyShuffleChildren(double shuffleProb)
 
 bool CAlgebraBase::checkFormulaSyntax(const std::string testString)
 {
+    (void)testString; // -Wunused-parameter
     return true;
 }
 

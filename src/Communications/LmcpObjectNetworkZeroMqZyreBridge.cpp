@@ -408,6 +408,8 @@ LmcpObjectNetworkZeroMqZyreBridge::zyreExitMessageHandler(const std::string& zyr
 void
 LmcpObjectNetworkZeroMqZyreBridge::zyreWhisperMessageHandler(const std::string& zyreRemoteUuid, const std::string& messagePayload)
 {
+     (void)zyreRemoteUuid; // -Wunused-parameter
+
     if (!messagePayload.empty())
     {
         // DESIGN dbk, rjt: each Zyre whisper message will contain one (and only one), whole LMCP object

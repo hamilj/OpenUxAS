@@ -168,7 +168,6 @@ private:
     configureTask(const pugi::xml_node& serviceXmlNode) override;
 
 public: //virtual
-    virtual void activeEntityState(const std::shared_ptr<afrl::cmasi::EntityState>& entityState) override;
     virtual void buildTaskPlanOptions() override;
     virtual bool isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse, std::shared_ptr<TaskOptionClass>& taskOptionClass,
                                                           int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route) override;

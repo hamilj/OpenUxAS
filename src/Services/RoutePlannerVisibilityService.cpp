@@ -383,10 +383,8 @@ bool RoutePlannerVisibilityService::bProcessOperatingRegion(const std::shared_pt
 
 bool RoutePlannerVisibilityService::bProcessRouteRequest(const std::shared_ptr<uxas::messages::route::RouteRequest>& routeRequest)
 {
-    bool isSuccess(true);
-
-
-    return (isSuccess);
+    (void)routeRequest; // -Wunused-parameter
+    return true;
 }
 
 bool RoutePlannerVisibilityService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::messages::route::RoutePlanRequest>& routePlanRequest,

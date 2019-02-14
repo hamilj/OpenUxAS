@@ -171,6 +171,7 @@ TimerManager::destroyTimers(std::vector<uint64_t>& timerIds, uint64_t timeOut_ms
                 else
                 {
                     auto itTimer = m_timersById.find(*itTimerId);
+                    (void)itTimer; // -Wunused-but-set-variable
                     UXAS_LOG_WARN(s_typeName(), "::destroyTimers failed to destroy timer in set of ", timerIds.size(), " timers; timer ID ", *itTimerId, " with name ", itTimer->second.m_name, " within ", timeOut_ms, " ms timeout");
                 }
             }

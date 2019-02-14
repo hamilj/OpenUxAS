@@ -168,25 +168,31 @@ public:
         return(true);
     };
 
-    virtual bool openStream(std::string& logFilePath) { return true; };
+    virtual bool openStream(std::string& logFilePath)
+    {
+        (void)logFilePath; // -Wunused-parameter
+        return true;
+    }
 
     virtual bool openStream() { std::string logFilePath; return(openStream(logFilePath)); };
 
     virtual bool closeStream() { return true; };
 
-    virtual bool outputTextToStream(const std::string& text)
+    virtual bool outputTextToStream(const std::string&)
     {
         std::cout << "WARN: LoggerBase::outputTextToStream(string) is invalid method call" << std::endl;
         return false;
-    };
+    }
     
     virtual bool outputTimeTextToStream(const std::string& text, bool isTimeIsolatedLine = true)
     {
+        (void)text; // -Wunused-parameter
+        (void)isTimeIsolatedLine; // -Wunused-parameter
         std::cout << "WARN: LoggerBase::outputTimeTextToStream is invalid method call" << std::endl;
         return false;
     };
     
-    virtual bool outputToStream(HeadLogData& headerAndData)
+    virtual bool outputToStream(HeadLogData&)
     {
         std::cout << "WARN: LoggerBase::outputToStream(HeaderAndData) is invalid method call" << std::endl;
         return false;

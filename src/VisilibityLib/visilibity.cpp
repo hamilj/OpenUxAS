@@ -50,6 +50,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #include <cassert>       //assertions
 #include <iso646.h>      //aliases for boolean operators
 
+#include "boost/geometry.hpp"
 #include "boost/geometry/algorithms/is_valid.hpp"
 #include "boost/geometry/algorithms/validity_failure_type.hpp"
 
@@ -3087,7 +3088,9 @@ namespace VisiLibity
 
   void Visibility_Polygon::chop_spikes(const Point& observer,
                        double epsilon)
-  {    
+  {
+    (void)observer; // -Wunused-parameter
+
     std::set<Point> spike_tips;
     std::vector<Point> vertices_temp;
     //Middle point is potentially the tip of a spike

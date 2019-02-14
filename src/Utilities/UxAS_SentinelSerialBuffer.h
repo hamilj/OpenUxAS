@@ -44,49 +44,49 @@ public:
     static const std::string& 
     getSerialSentinelBeforePayloadSize() { static std::string s_string("+=+=+=+="); return(s_string); };
 
-    static const uint32_t 
+    static uint32_t
     getSerialSentinelBeforePayloadSizeSize() { static const uint32_t s_sz = getSerialSentinelBeforePayloadSize().size(); return(s_sz); };
 
     static const std::string& 
     getSerialSentinelBeforePayloadSizeBase() { static std::string s_string("+="); return(s_string); };
 
-    static const uint32_t 
+    static uint32_t
     getSerialSentinelBeforePayloadSizeBaseSize() { static const uint32_t s_sz = getSerialSentinelBeforePayloadSizeBase().size(); return(s_sz); };
 
     static const std::string& 
     getSerialSentinelAfterPayloadSize() { static std::string s_string("#@#@#@#@"); return(s_string); };
 
-    static const uint32_t 
+    static uint32_t
     getSerialSentinelAfterPayloadSizeSize() { static const uint32_t s_sz = getSerialSentinelAfterPayloadSize().size(); return(s_sz); };
 
     static const std::string& 
     getSerialSentinelAfterPayloadSizeBase() { static std::string s_string("#@"); return(s_string); };
 
-    static const uint32_t 
+    static uint32_t
     getSerialSentinelAfterPayloadSizeBaseSize() { static const uint32_t s_sz = getSerialSentinelAfterPayloadSizeBase().size(); return(s_sz); };
 
     static const std::string& 
     getSerialSentinelBeforeChecksum() { static std::string s_string("!%!%!%!%"); return(s_string); };
 
-    static const uint32_t 
+    static uint32_t
     getSerialSentinelBeforeChecksumSize() { static const uint32_t s_sz = getSerialSentinelBeforeChecksum().size(); return(s_sz); };
 
     static const std::string& 
     getSerialSentinelBeforeChecksumBase() { static std::string s_string("!%"); return(s_string); };
 
-    static const uint32_t 
+    static uint32_t
     getSerialSentinelBeforeChecksumBaseSize() { static const uint32_t s_sz = getSerialSentinelBeforeChecksumBase().size(); return(s_sz); };
 
     static const std::string& 
     getSerialSentinelAfterChecksum() { static std::string s_string("?^?^?^?^"); return(s_string); };
 
-    static const uint32_t 
+    static uint32_t
     getSerialSentinelAfterChecksumSize() { static const uint32_t s_sz = getSerialSentinelAfterChecksum().size(); return(s_sz); };
 
     static const std::string& 
     getSerialSentinelAfterChecksumBase() { static std::string s_string("?^"); return(s_string); };
 
-    static const uint32_t 
+    static uint32_t
     getSerialSentinelAfterChecksumBaseSize() { static const uint32_t s_sz = getSerialSentinelAfterChecksumBase().size(); return(s_sz); };
     
     static const std::string& 

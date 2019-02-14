@@ -63,8 +63,9 @@ CommRelayTaskService::~CommRelayTaskService()
 
 bool
 CommRelayTaskService::configureDynamicTask(const pugi::xml_node& ndComponent)
-
 {
+    (void)ndComponent; // -Wunused-parameter
+
     std::string strBasePath = m_workDirectoryPath;
     std::stringstream sstrErrors;
 

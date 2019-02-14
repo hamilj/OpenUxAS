@@ -73,10 +73,8 @@ namespace n_FrameworkLib
                 const double& dMinimumWaypointSeparation_m = (std::numeric_limits<double>::max)(),
                 const double& dMinimumAssignmentSeparation_m = 0.0,
                 const double& dNewAssignmentOnsetDelay_s = 0.0,
-                const double& dDistanceAllocatedForAssignedTasks_m = 0.0,
                 const int& iMaximumNumberWaypoints = (std::numeric_limits<int>::max)(),
                 const int& iMinimumNumberWaypointsForTurn = 8,
-                const double& dMaximumTimeEndurance_s = (std::numeric_limits<double>::max)(),
                 const double& dDangerDistance = (std::numeric_limits<double>::max)())
         	: m_iWaypointCurrent(-1),
 			  m_iNumberAssignments(0),
@@ -163,7 +161,7 @@ namespace n_FrameworkLib
             iGetLastTaskID() = -1;
         };
 
-        const double dGetCumulativeDistanceCurrent_m(const int& iWaypointLast, const double& dDistanceSinceLastWaypoint) const {
+        double dGetCumulativeDistanceCurrent_m(const int& iWaypointLast, const double& dDistanceSinceLastWaypoint) const {
             double dTotalDistance_m = dDistanceSinceLastWaypoint + dGetDistancePrevious();
 
             if (static_cast<int> (vwayGetWaypoints().size()) > iWaypointLast) {
@@ -179,7 +177,7 @@ namespace n_FrameworkLib
             return (dTotalDistance_m);
         };
 
-        const double dGetDistanceTotal(bool bUseVisibilityGraph = false) const {
+        double dGetDistanceTotal(bool bUseVisibilityGraph = false) const {
             double dTotalDistance_m = 0.0;
             if (!bUseVisibilityGraph) {
                 if (vwayGetWaypoints().size() > 0) {
@@ -205,7 +203,7 @@ namespace n_FrameworkLib
             return (dTotalDistance_m + dGetDistancePrevious() + dGetDistanceTemp());
         };
 
-        const double dGetDistanceFromFirstWaypointToWaypoint_m(const size_t& szWaypointIndex) const {
+        double dGetDistanceFromFirstWaypointToWaypoint_m(const size_t& szWaypointIndex) const {
             double dReturnDistance_m = 0.0;
             assert(szWaypointIndex < vwayGetWaypoints().size());
             if (vwayGetWaypoints().size() > 0) {
@@ -220,11 +218,11 @@ namespace n_FrameworkLib
             return (dReturnDistance_m);
         };
 
-        const double dGetDistanceFromCurrentToEnd_m() const {
+        double dGetDistanceFromCurrentToEnd_m() const {
             return (dGetDistanceFromWaypointToEnd_m(iGetWaypointCurrent()));
         };
 
-        const double dGetDistanceFromWaypointToEnd_m(const size_t& szWaypointIndex = 0) const {
+        double dGetDistanceFromWaypointToEnd_m(const size_t& szWaypointIndex = 0) const {
             double dReturnDistance_m = 0.0;
             assert(szWaypointIndex < vwayGetWaypoints().size());
             if (vwayGetWaypoints().size() > 0) {
@@ -237,7 +235,7 @@ namespace n_FrameworkLib
             return (dReturnDistance_m);
         };
 
-        const double dGetTimeAtWaypoint_s(const size_t& szWaypointIndex) const {
+        double dGetTimeAtWaypoint_s(const size_t& szWaypointIndex) const {
             //ASSUMES: the vehicle flys the commanded speed
             //ASSUMES: the commanded speed is in m/sec
             //TODO:: check for mach flag a convert mach to m/sec

@@ -80,11 +80,9 @@ public:    //constructors
 
     //copy constructor
     CDataPoint(const CDataPoint& rhs)
+        : CPosition(rhs)
     {
         reGetTime() = rhs.reGetTime();
-        m_north_m = rhs.m_north_m;
-        m_east_m = rhs.m_east_m;
-        m_altitude_m = rhs.m_altitude_m;
         reGetPhi() = rhs.reGetPhi();
         reGetTheta() = rhs.reGetTheta();
         reGetPsi() = rhs.reGetPsi();
@@ -94,10 +92,8 @@ public:    //constructors
 public:    //operator overrides
     void operator =(const CDataPoint& rhs)
     {
+        CPosition::operator =(rhs);
         reGetTime() = rhs.reGetTime();
-        m_north_m = rhs.m_north_m;
-        m_east_m = rhs.m_east_m;
-        m_altitude_m = rhs.m_altitude_m;
         reGetPhi() = rhs.reGetPhi();
         reGetTheta() = rhs.reGetTheta();
         reGetPsi() = rhs.reGetPsi();
@@ -431,8 +427,8 @@ public:    //constructors
                     n_enWaypointType_t typeWaypoint=waytypeEnroute,
                     int iObjectiveID=-1,
                     bool bResetVehiclePosition=false,
-                    enSensorStates m_sstateSensorState=sstateFrontCamera,
-                    double m_reSegmentTime_sec=0.0
+                    enSensorStates sstateSensorState=sstateFrontCamera,
+                    double reSegmentTime_sec=0.0
                     ) 
     	:CWaypointSmall(posPosition),
 		 m_iID(-1),
@@ -445,8 +441,8 @@ public:    //constructors
          m_dObjectiveDesiredDirection_rad(0.0),
          m_dObjectiveDesiredStandOff_m(0.0),
          m_bResetVehiclePosition(bResetVehiclePosition),
-         m_sstateSensorState(sstateFrontCamera),
-         m_reSegmentTime_sec(0.0),
+         m_sstateSensorState(sstateSensorState),
+         m_reSegmentTime_sec(reSegmentTime_sec),
          m_tstart(0.0),
          m_tend(0.0),
          m_dLoiterRadius_m(-1.0),    //invalid
@@ -463,9 +459,28 @@ public:    //constructors
     };
 
     CWaypoint(const CWaypoint& rhs)
+        : CWaypointSmall(rhs)
     {
-        operator=(rhs);
-    };
+        circleGetTurn() = rhs.circleGetTurn();
+        dGetSpeed_mps() = rhs.dGetSpeed_mps();
+        bGetMachCommandFlag() = rhs.bGetMachCommandFlag();
+        dGetSegmentLength() = rhs.dGetSegmentLength();
+        typeGetWaypoint() = rhs.typeGetWaypoint();
+        iGetObjectiveID() = rhs.iGetObjectiveID();
+        dGetObjectiveDesiredDirection_rad() = rhs.dGetObjectiveDesiredDirection_rad();
+        dGetObjectiveDesiredStandOff_m() = rhs.dGetObjectiveDesiredStandOff_m();
+        bGetResetVehiclePosition() = rhs.bGetResetVehiclePosition();
+        sstateGetSensorState() = rhs.sstateGetSensorState();
+        reGetSegmentTime() = rhs.reGetSegmentTime();
+        iGetID() = rhs.iGetID();
+        iGetNextWaypointID() = rhs.iGetNextWaypointID();
+        dGetTStart() = rhs.dGetTStart();
+        dGetTEnd() = rhs.dGetTEnd();
+        dGetLoiterRadius_m() = rhs.dGetLoiterRadius_m();
+        iGetLoiterDuration_s() = rhs.iGetLoiterDuration_s();
+        bGetDoNotRemove() = rhs.bGetDoNotRemove();
+        ptr_GetCMASI_Waypoint().reset(rhs.ptr_GetCMASI_Waypoint()->clone());
+    }
 
     void operator=(const CWaypoint& rhs)
     {
@@ -616,7 +631,7 @@ public:    //constructors
         }
     };
 
-    const int64_t dwObjID_IndexToWptID(const int& iObjectiveID, const int& iIndex) const
+    int64_t dwObjID_IndexToWptID(const int& iObjectiveID, const int& iIndex) const
     {
 
         int64_t dwReturn = static_cast<int64_t>((iIndex > 0) ? (iIndex) : (0));

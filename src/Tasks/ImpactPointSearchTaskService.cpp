@@ -57,8 +57,9 @@ ImpactPointSearchTaskService::~ImpactPointSearchTaskService() { };
 
 bool
 ImpactPointSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
-
 {
+    (void)ndComponent; // -Wunused-parameter
+
     std::string strBasePath = m_workDirectoryPath;
     std::stringstream sstrErrors;
 
@@ -382,6 +383,10 @@ bool ImpactPointSearchTaskService::isCalculateOption(const int64_t& taskId, int6
 bool ImpactPointSearchTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse, std::shared_ptr<TaskOptionClass>& taskOptionClass,
                                                                             int64_t& waypointId, std::shared_ptr<uxas::messages::route::RoutePlan>& route)
 {
+    (void)taskOptionClass; // -Wunused-parameter
+    (void)waypointId; // -Wunused-parameter
+    (void)route; // -Wunused-parameter
+
     //add the desired action, if any
     if (!taskImplementationResponse->getTaskWaypoints().empty())
     {
@@ -434,11 +439,6 @@ bool ImpactPointSearchTaskService::isProcessTaskImplementationRouteResponse(std:
     }
     return (false); // want the base class to build the response
 }
-
-void ImpactPointSearchTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::EntityState>& entityState)
-{
-}
-
 
 }; //namespace task
 }; //namespace service
