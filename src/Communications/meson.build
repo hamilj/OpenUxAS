@@ -9,10 +9,6 @@ if cpp.get_id() == 'msvc'
     '-DLIBCZMQ_STATIC',
     '-DLIBZYRE_STATIC',
   ]
-else
-  cpp_args_comms += [
-    '-Wno-unused-function',
-  ]
 endif
 
 inc_dirs = [

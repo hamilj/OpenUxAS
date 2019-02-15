@@ -13,7 +13,6 @@ else
     '-std=c++11',
     '-Wall',
     '-Wextra',
-    '-Wno-unused-function',
   ]
 endif
 

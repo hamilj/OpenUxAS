@@ -19,6 +19,7 @@ srcs_utilities = [
   'UxAS_Time.cpp',
   'UxAS_TimerManager.cpp',
   'UxAS_ZeroMQ.cpp',
+  'UxAS_Zyre.cpp',
 ]
 
 incs_utilities = [
@@ -42,10 +43,12 @@ lib_utilities = static_library(
   dependencies: [
     dep_boost,
     dep_cppzmq,
+    dep_czmq,
     dep_pugixml,
     dep_sqlite3,
     dep_sqlitecpp,
     dep_zeromq,
+    dep_zyre,
   ],
   cpp_args: cpp_args,
   include_directories: incs_utilities,
