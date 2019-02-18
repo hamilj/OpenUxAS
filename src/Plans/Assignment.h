@@ -436,7 +436,6 @@ namespace n_FrameworkLib
             double dFinalHeading_rad(0.0);
             if (vwayGetWaypoints().size() > 1) {
                 if (vwayGetWaypoints().back().circleGetTurn().turnGetTurnDirection() == CCircle::turnNone) {
-#ifndef STEVETEST
                     bool bDone(false);
                     size_t szNumberWaypoints = vwayGetWaypoints().size();
                     while (!bDone) {
@@ -452,10 +451,6 @@ namespace n_FrameworkLib
                     }
                     dGetHeadingFinal() = n_Const::c_Convert::dPiO2() - vwayGetWaypoints().back().relativeAngle2D_rad(vwayGetWaypoints()[szNumberWaypoints]);
                     dFinalHeading_rad = dGetHeadingFinal();
-#else    //#ifdef STEVETEST
-                    V_WAYPOINT_IT_t itWaypoint = vwayGetWaypoints().end() - 2;
-                    dFinalHeading_rad = n_Const::c_Convert::dPiO2() - vwayGetWaypoints().back().relativeAngle2D_rad(*itWaypoint);
-#endif    //#ifdef STEVETEST
                 } else {
                     //ACCOUNT FOR CURVED PATHS
                     //1) find angle of center of turn to end point

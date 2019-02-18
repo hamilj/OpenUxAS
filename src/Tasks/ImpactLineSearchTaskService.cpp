@@ -251,20 +251,6 @@ void ImpactLineSearchTaskService::buildTaskPlanOptions()
     }
 };
 
-
-#ifdef STEVETEST
-//GSD
-rObjParameters_PatrolSegment_DPSS.dGetGroundSampleDistance_m() = dGetGroundSampleDistance_m();
-if (dGetGroundSampleDistance_m() > 0.0)
-{
-    rObjParameters_PatrolSegment_DPSS.bGetUseGroundSampleDistance() = true;
-}
-else
-{
-    rObjParameters_PatrolSegment_DPSS.bGetUseGroundSampleDistance() = false;
-}
-#endif  //STEVETEST
-
 bool ImpactLineSearchTaskService::isCalculateOption(const int64_t& taskId, const std::vector<int64_t>& eligibleEntities,
         const double& nominalAltitude_m, const double& nominalSpeed_mps,
         const double& azimuthLookAngle_rad, const double& elevationLookAngle_rad,

@@ -111,21 +111,7 @@ RoutePlannerVisibilityService::configure(const pugi::xml_node& ndComponent)
         auto start = std::chrono::system_clock::now();
 
         m_osmBaseVisibilityGraph = std::make_shared<n_FrameworkLib::CVisibilityGraph>();
-#ifdef STEVETEST
-        auto errAddPolygon = m_osmBaseVisibilityGraph->errBuildVisibilityGraphWithOsm(osmFileName);
-        if (errAddPolygon == n_FrameworkLib::CVisibilityGraph::errNoError)
-        {
-            errAddPolygon = m_osmBaseVisibilityGraph->errInitializeGraphBase();
-            if (errAddPolygon != n_FrameworkLib::CVisibilityGraph::errNoError)
-            {
-                CERR_FILE_LINE_MSG("Error:: initializing base visibility graph for OSM file[" << osmFileName << "].")
-            } //if(errAddPolygon == errNoError)
-        }
-        else //if(errAddPolygon == errNoError)
-        {
-            CERR_FILE_LINE_MSG("Error:: building base visibility graph for OSM file[" << osmFileName << "].")
-        }
-#endif  //STEVETEST
+
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
         COUT_FILE_LINE_MSG(" **** Finished reading and processing OSM File Elapsed Seconds[" << elapsed_seconds.count() << "] ****");

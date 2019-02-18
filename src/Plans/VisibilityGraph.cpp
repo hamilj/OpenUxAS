@@ -257,15 +257,6 @@ namespace n_FrameworkLib
             } //if(itPolygon->plytypGetPolygonType().bGetKeepInZone())
         } //for(V_POLYGON_IT_t itPolygon=vplygnGetPolygons().begin();itPolygon!=vplygnGetPolygons().end();itPolygon++)
 
-#ifdef STEVETEST
-        // find all the visible edges on non-convex polygons (these may cross other polygons, so need to check them for intersections)
-        for (V_POLYGON_IT_t itPolygon = vplygnGetPolygons().begin(); itPolygon != vplygnGetPolygons().end(); itPolygon++)
-        {
-            itPolygon->errFindSelfVisibleEdges(vposGetVerticiesBase());
-        }
-#endif    //STEVETEST
-
-
         // build a map of distance to the other polygons (store in polygons)
         for (V_POLYGON_IT_t itPolygon = vplygnGetPolygons().begin(); itPolygon != vplygnGetPolygons().end(); itPolygon++)
         {
@@ -1081,128 +1072,6 @@ namespace n_FrameworkLib
         return (isSuccessful);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////        
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
-
-#ifdef STEVETEST
-    CVisibilityGraph::enError CVisibilityGraph::errAddVehicleObjectives(const int& iVehicleID, const CPosition& posVehiclePosition,
-            M_PTR_I_OBJECTIVE_PARAMETERS_BASE_t& m_ptr_i_opGetObjectivesParameters,
-            PTR_M_INT_PTR_M_INT_PATHINFORMATION_t& ptr_mipmipthLinearPathsToObjectives,
-            const bool& bPlanToClosestEdge)
-    {
-        //TODO:: what to do about errors?????
-        enError errReturn(errNoError);
-        PRINT_DEBUG("*DEBUG*")
-
-                // build matrix of distances for this vehicle to all objectives and from each objective to every other objective
-                //I'm assuming that all vehicles and objectives have unique IDs (i.e. no vehicle or objective can have the same ID as any other vehicle or objective)
-
-        (*ptr_mipmipthLinearPathsToObjectives)[iVehicleID] = PTR_M_INT_PATHINFORMATION_t(new M_INT_PATHINFORMATION_t);
-
-        M_INT_PTR_M_INT_PATHINFORMATION_t mipmipthPathsToObjectives;
-
-        for (auto itObjParameters1 = m_ptr_i_opGetObjectivesParameters.begin(); itObjParameters1 != m_ptr_i_opGetObjectivesParameters.end(); itObjParameters1++)
-        {
-            mipmipthPathsToObjectives[itObjParameters1->second->iGetID()] = PTR_M_INT_PATHINFORMATION_t(new M_INT_PATHINFORMATION_t);
-
-            //CCA_CERR_FILE_LINE("iVehicleID[" << iVehicleID << "]")
-            //CCA_CERR_FILE_LINE("itObjParameters1->second->iGetID()[" << itObjParameters1->second->iGetID() << "]")
-            errReturn = errFindShortestPathLinear(posVehiclePosition, itObjParameters1->second->iGetID(), itObjParameters1->second->posGetStart(),
-                                            (*ptr_mipmipthLinearPathsToObjectives)[iVehicleID],mipmipthPathsToObjectives[itObjParameters1->second->iGetID()]);
-            
-//            CCA_CERR_FILE_LINE("iVehicleID[" << iVehicleID << "] itObjParameters1->second->iGetID()[" << itObjParameters1->second->iGetID()
-//                    << "] (*ptr_mipmipthLinearPathsToObjectives)[iVehicleID][iIdEnd].iGetLength()[" 
-//                    << (*(*ptr_mipmipthLinearPathsToObjectives)[iVehicleID])[itObjParameters1->second->iGetID()].iGetLength() 
-//                            << "] posVehiclePosition.m_north_m[" << posVehiclePosition.m_north_m << "] posVehiclePosition.m_east_m[" 
-//                            << posVehiclePosition.m_east_m << "] itObjParameters1->second->posGetStart().m_north_m[" << itObjParameters1->second->posGetStart().m_north_m
-//                            << "] itObjParameters1->second->posGetStart().m_east_m[" << itObjParameters1->second->posGetStart().m_east_m << "]")
-            // find shortest path for objective1 to other objectives
-            for (auto itObjParameters2 = m_ptr_i_opGetObjectivesParameters.begin(); itObjParameters2 != m_ptr_i_opGetObjectivesParameters.end(); itObjParameters2++)
-            {
-                if (itObjParameters1->second->iGetID() != itObjParameters2->second->iGetID())
-                {
-                    // find path for objective1 to objective2
-                    if (ptr_mipmipthLinearPathsToObjectives->find(itObjParameters1->second->iGetID()) == ptr_mipmipthLinearPathsToObjectives->end())
-                    {
-                        (*ptr_mipmipthLinearPathsToObjectives)[itObjParameters1->second->iGetID()] = PTR_M_INT_PATHINFORMATION_t(new M_INT_PATHINFORMATION_t);
-                    }
-                    if (mipmipthPathsToObjectives.find(itObjParameters2->second->iGetID()) == mipmipthPathsToObjectives.end())
-                    {
-                        mipmipthPathsToObjectives[itObjParameters2->second->iGetID()] = PTR_M_INT_PATHINFORMATION_t(new M_INT_PATHINFORMATION_t);
-                    }
-
-                //CCA_CERR_FILE_LINE("itObjParameters2->second->iGetID()[" << itObjParameters2->second->iGetID() << "]")
-                    errReturn = errFindShortestPathLinear(itObjParameters1->second->posGetEnd(), itObjParameters2->second->iGetID(), itObjParameters2->second->posGetStart(),
-                            (*ptr_mipmipthLinearPathsToObjectives)[itObjParameters1->second->iGetID()],
-                            mipmipthPathsToObjectives[itObjParameters2->second->iGetID()]);
-                }
-            }
-        } //for(auto itObjParameters2=m_ptr_i_opGetObjectivesParameters.begin();itObjParameters2!=m_ptr_i_opGetObjectivesParameters.end();itObjParameters2++)
-
-        return (errReturn);
-    }
-#endif  //#ifdef STEVETEST
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////        
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
-
-#ifdef STEVETEST
-    CVisibilityGraph::enError CVisibilityGraph::errAddVehicleObjectivesGround(const int& iVehicleID, const CPosition& posVehiclePosition,
-            M_PTR_I_OBJECTIVE_PARAMETERS_BASE_t& m_ptr_i_opGetObjectivesParameters,
-            PTR_M_INT_PTR_M_INT_PATHINFORMATION_t& ptr_mipmipthLinearPathsToObjectives)
-    {
-        //TODO:: what to do aboout errors?????
-        enError errReturn(errNoError);
-        PRINT_DEBUG("*DEBUG*")
-
-                // build matrix of distances for this vehicle to all objectives and from each objective to every other objective
-                //I'm assuming that all vehicles and objectives have unique IDs (i.e. no vehicle or objective can have the same ID as any other vehicle or objective)
-
-        if (ptr_mipmipthLinearPathsToObjectives->find(iVehicleID) == ptr_mipmipthLinearPathsToObjectives->end())
-        {
-            (*ptr_mipmipthLinearPathsToObjectives)[iVehicleID] = PTR_M_INT_PATHINFORMATION_t(new M_INT_PATHINFORMATION_t);
-        }
-
-        M_INT_PTR_M_INT_PATHINFORMATION_t mipmipthPathsToObjectives;
-
-        for (auto itObjParameters1 = m_ptr_i_opGetObjectivesParameters.begin(); itObjParameters1 != m_ptr_i_opGetObjectivesParameters.end(); itObjParameters1++)
-        {
-            // find shortest path for vehicle to objective1
-            if (mipmipthPathsToObjectives.find(itObjParameters1->second->iGetID()) == mipmipthPathsToObjectives.end())
-            {
-                mipmipthPathsToObjectives[itObjParameters1->second->iGetID()] = PTR_M_INT_PATHINFORMATION_t(new M_INT_PATHINFORMATION_t);
-            }
-
-            errReturn = errFindShortestPathGround(posVehiclePosition, itObjParameters1->second->iGetID(), itObjParameters1->second->posGetStart(),
-                    (*ptr_mipmipthLinearPathsToObjectives)[iVehicleID],
-                    mipmipthPathsToObjectives[itObjParameters1->second->iGetID()]);
-
-            // find shortest path for objective1 to other objectives
-            for (auto itObjParameters2 = m_ptr_i_opGetObjectivesParameters.begin(); itObjParameters2 != m_ptr_i_opGetObjectivesParameters.end(); itObjParameters2++)
-            {
-                if (itObjParameters1->second->iGetID() != itObjParameters2->second->iGetID())
-                {
-                    // find path for objective1 to objective2
-                    if (ptr_mipmipthLinearPathsToObjectives->find(itObjParameters1->second->iGetID()) == ptr_mipmipthLinearPathsToObjectives->end())
-                    {
-                        (*ptr_mipmipthLinearPathsToObjectives)[itObjParameters1->second->iGetID()] = PTR_M_INT_PATHINFORMATION_t(new M_INT_PATHINFORMATION_t);
-                    }
-                    if (mipmipthPathsToObjectives.find(itObjParameters2->second->iGetID()) == mipmipthPathsToObjectives.end())
-                    {
-                        mipmipthPathsToObjectives[itObjParameters2->second->iGetID()] = PTR_M_INT_PATHINFORMATION_t(new M_INT_PATHINFORMATION_t);
-                    }
-
-                    errReturn = errFindShortestPathGround(itObjParameters1->second->posGetEnd(), itObjParameters2->second->iGetID(), itObjParameters2->second->posGetStart(),
-                            (*ptr_mipmipthLinearPathsToObjectives)[itObjParameters1->second->iGetID()],
-                            mipmipthPathsToObjectives[itObjParameters2->second->iGetID()]);
-                }
-            }
-        } //for(auto itObjParameters2=m_ptr_i_opGetObjectivesParameters.begin();itObjParameters2!=m_ptr_i_opGetObjectivesParameters.end();itObjParameters2++)
-
-        return (errReturn);
-    }
-#endif  //#ifdef STEVETEST
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1266,40 +1135,6 @@ namespace n_FrameworkLib
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef STEVETEST
-    CVisibilityGraph::enError CVisibilityGraph::errGenerateWaypoints(c_VehicleBase& cvbVehicle, c_ObjectiveParametersBase& cObjectiveParametersBase,
-            PTR_M_INT_PTR_M_INT_PATHINFORMATION_t& ptr_mipmipthDistanceBasedOnLineSegments,
-            const CTrajectoryParameters::enPathType_t enpathType, const bool bFirstObjective)
-    {
-        //CCA_CERR_FILE_LINE("FromTaskId[" << cvbVehicle.iGetLastTaskID() << "] ToTaskId[" << cObjectiveParametersBase.iGetID() << "]")
-        enError errReturn(errNoError);
-        if (ptr_mipmipthDistanceBasedOnLineSegments->find(cvbVehicle.iGetLastTaskID()) != ptr_mipmipthDistanceBasedOnLineSegments->end())
-        {
-            if (ptr_mipmipthDistanceBasedOnLineSegments->operator[](cvbVehicle.iGetLastTaskID())->find(cObjectiveParametersBase.iGetID()) != ptr_mipmipthDistanceBasedOnLineSegments->operator[](cvbVehicle.iGetLastTaskID())->end())
-            {
-                CPathInformation& pthifPath = (*ptr_mipmipthDistanceBasedOnLineSegments->operator[](cvbVehicle.iGetLastTaskID()))[cObjectiveParametersBase.iGetID()];
-                errReturn = errGenerateWaypoints(cvbVehicle,cObjectiveParametersBase,pthifPath,enpathType,bFirstObjective);
-            }
-            else
-            {
-                CCA_CERR_FILE_LINE("ERRO::errGenerateWaypoints:: did not find the objective ID[" << cObjectiveParametersBase.iGetID() <<"] in the path information map");
-                errReturn = errPathConstruction;
-            }
-        }
-        else
-        {
-            //did not find the vehicle's last task ID position in the map
-            CCA_CERR_FILE_LINE("ERRO::errGenerateWaypoints:: did not find vehicle's last task ID[" << cvbVehicle.iGetLastTaskID() <<"] in the path information map");
-            errReturn = errPathConstruction;
-        }
-        
-        return(errReturn);
-    }
-#endif  //#ifdef STEVETEST
-        
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
     CVisibilityGraph::enError CVisibilityGraph::errGenerateWaypoints(const PlanningParameters& planningParameters,const CPathInformation& pthifPath,std::vector<CWaypoint>& waypoints)
     {
         //CCA_CERR_FILE_LINE("FromTaskId[" << cvbVehicle.iGetLastTaskID() << "] ToTaskId[" << cObjectiveParametersBase.iGetID() << "]")
@@ -1358,7 +1193,6 @@ namespace n_FrameworkLib
 
             CAssignment assignNew; //this is where the new path is stored
             double dHeadingInitial_rad(0.0);
-            bool bUseInitialHeading(false);
             
             //////////////////////////////////////////////////////
             // calculate a path from vehicle to the graph
@@ -1367,13 +1201,7 @@ namespace n_FrameworkLib
             cTrajectoryParameters.trjGetParametersEnd().iGetID() = 0;
             cTrajectoryParameters.trjGetParametersEnd().m_north_m = vposGetVerticiesBase()[pthifPath.iGetIndexBaseBegin()].m_north_m;
             cTrajectoryParameters.trjGetParametersEnd().m_east_m = vposGetVerticiesBase()[pthifPath.iGetIndexBaseBegin()].m_east_m;
-            if(bUseInitialHeading)
-            {
-#ifdef STEVETEST
-                cTrajectoryParameters.trjGetParametersEnd().vGetHeadingParameters().push_back(CHeadingParameters(dHeadingInitial_rad,0.0,0.0));
-                cTrajectoryParameters.trjGetParametersEnd().vGetHeadingParameters().push_back(CHeadingParameters((dHeadingInitial_rad+n_Const::c_Convert::dPi()),0.0,0.0));
-#endif  //STEVETEST
-            }
+
             //cTrajectoryParameters.dGetMinimumTime_s() = (planningParameters.m_speed_mps <= 0.0) ? (0.0) : (0.0 / planningParameters.m_speed_mps);
             cTrajectoryParameters.dGetWaypointSeparationMin_m() = planningParameters.m_waypointSeparationMin_m;
 
@@ -1481,7 +1309,6 @@ namespace n_FrameworkLib
             {
                 errReturn = errSmoothPath(dposPathPositions, planningParameters.m_turnRadius_m,
                         dHeadingInitial_rad,dHeadingAfterSmoothing, assignNew.vwayGetWaypoints());
-                bUseInitialHeading = true;
             } //if(enpathType==pathEuclidean)
             
             

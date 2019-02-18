@@ -149,32 +149,12 @@ namespace n_FrameworkLib
         
 
         bool isFindPath(std::shared_ptr<CPathInformation>& pathInformation);
-#ifdef STEVETEST
-        enError errAddVehicleObjectives(const int& iVehicleID, const CPosition& posVehiclePosition, M_PTR_I_OBJECTIVE_PARAMETERS_BASE_t& ptr_miopObjectives,
-                PTR_M_INT_PTR_M_INT_PATHINFORMATION_t& mipmipthDistanceBasedOnLineSegments, const bool& bPlanToClosestEdge = false);
-        enError errAddVehicleObjectivesGround(const int& iVehicleID, const CPosition& posVehiclePosition, M_PTR_I_OBJECTIVE_PARAMETERS_BASE_t& ptr_miopObjectives,
-                PTR_M_INT_PTR_M_INT_PATHINFORMATION_t& mipmipthDistanceBasedOnLineSegments);
-#endif  //STEVETEST
-#ifdef STEVETEST
-        enError errFindShortestPath(const int& iStartID, const int& iEndID,
-                M_INT_PTR_M_INT_PATHINFORMATION_t& mipmipthDistanceBasedOnLineSegments,
-                D_POSITION_t& dposPathPositions,
-                stringstream& sstrErrorMessage);
-#endif  //STEVETEST
-
         
         enError errInitializeGraphBase();
         bool bBoundaryViolationExists(const V_WAYPOINT_t& vWaypoints, stringstream& sstrErrorMessage);
 
         enError errSmoothPath(D_POSITION_t& dposPath, const double& dTurnRadius_m,
                 double& dHeadingInitial_rad, double& dHeadingFinal_rad, V_WAYPOINT_t& vwayWaypoints);
-
-#ifdef STEVETEST
-        enError errGenerateWaypoints(c_VehicleBase& cvbVehicle, c_ObjectiveParametersBase& cObjectiveParametersBase,
-                PTR_M_INT_PTR_M_INT_PATHINFORMATION_t& mipmipthDistanceBasedOnLineSegments,
-                CTrajectoryParameters::enPathType_t enpathType = CTrajectoryParameters::pathTurnStraightTurn,
-                const bool bFirstObjective = false);
-#endif  //#ifdef STEVETEST
 
         enError errGenerateWaypoints(const PlanningParameters& planningParameters,const CPathInformation& pthifPath,std::vector<CWaypoint>& waypoints);
     
@@ -400,7 +380,6 @@ namespace n_FrameworkLib
             //    if( ql < 1e-10 ) return ql;
             //    if( rl < 1e-10 ) return ql;
             //    return( (r.x*q.y - q.x*r.y)/(ql*rl) );
-#ifndef STEVETEST
             double x1(posEndA.m_north_m);
             double y1(posEndA.m_east_m);
             double x2(posEndB.m_north_m);
@@ -437,32 +416,6 @@ namespace n_FrameworkLib
 
             //returning shortest distance
             dDistanceToSegment = sqrt(diffX * diffX + diffY * diffY);
-
-#else   //#ifdef STEVETEST
-
-
-            if (dLengthSegment_m < 1.0e-10) {
-                dDistanceToSegment = posEndA.relativeDistance2D_m(posPoint);
-            } else {
-                double dDistanceEndAToPoint = posEndA.relativeDistance2D_m(posPoint);
-                if (dDistanceEndAToPoint < 1.0e-10) {
-                    dDistanceToSegment = dDistanceEndAToPoint;
-                } else {
-#ifndef STEVETEST
-                    double dDistanceEndBToPoint = posEndB.relativeDistance2D_m(posPoint);
-                    //dDistanceToSegment = (dDistanceEndAToPoint + dDistanceEndBToPoint)/(dLengthSegment_m);
-                    dDistanceToSegment = (dDistanceEndAToPoint + dDistanceEndBToPoint) / (2.0);
-#else   //#ifdef STEVETEST
-                    CPosition posQ(posPoint);
-                    posQ -= posEndA;
-                    CPosition posR(posEndB);
-                    posR -= posEndA;
-
-                    dDistanceToSegment = fabs(((posR.m_north_m * posQ.m_east_m) - (posQ.m_north_m * posR.m_east_m)) / (dDistanceEndAToPoint * dLengthSegment_m));
-#endif  //STEVETEST
-                }
-            }
-#endif  //STEVETEST
 
             return (dDistanceToSegment);
         }

@@ -467,16 +467,7 @@ parseTreeNode *CAlgebraBase::parseFormula(const std::string formulaIn)
                             if ((formula[iEnd] == ')') || (formula[iEnd] == ' '))
                                 break;
                         }
-#ifdef STEVE_FIX
-                        parseTreeNode * pTreeNode = parseFormula(formula.substr(i, iEnd - i + 1));
-                        if (pTreeNode != 0)
-                        {
-                            operatorNodeTmp->addNode(pTreeNode);
-                        }
-                        pTreeNode = 0;
-#else //STEVE_FIX
                         operatorNodeTmp->addNode(parseFormula(formula.substr(i, iEnd - i + 1)));
-#endif //STEVE_FIX
                     }
                     break;
 

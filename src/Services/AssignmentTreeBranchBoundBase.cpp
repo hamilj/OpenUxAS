@@ -794,27 +794,11 @@ void c_Node_Base::ExpandNode()
             //////////////////////////////////////////////////////////////////////////////////
             //expand the children
             //////////////////////////////////////////////////////////////////////////////////
-#ifdef STEVETEST
-            std::cout << std::endl << "<>AssignmentTreeBB:m_costVsChildren [" << m_costVsChildren.size() << "] # Previous Assignments[" << m_viObjectiveIDs_Assigned.size() << "]";
-#endif  //#ifdef STEVETEST
-#ifdef STEVETEST
-            for (auto& itChild : m_costVsChildren)
-            {
-                std::cout << " (" << itChild.second->m_vehicleID << ", " << itChild.second->m_taskOptionID << ", " << itChild.first << ")";
-            }
-            std::cout << "]" << std::endl;
-            std::cout.flush();
-#endif  //#ifdef STEVETEST
-
             for (auto itChild = m_costVsChildren.begin(); itChild != m_costVsChildren.end(); itChild++)
             {
                 // other children may have found lower costs or a stop condition
                 if ((itChild->second->m_nodeCost < m_staticAssignmentParameters->m_minimumAssignmentCostCandidate) && !m_staticAssignmentParameters->m_isStopCondition)
                 {
-#ifdef STEVETEST
-                    std::cout << "  #Prev[" << m_viObjectiveIDs_Assigned.size() << "](" << itChild->second->m_vehicleID << ", "
-                            << itChild->second->m_taskOptionID << ", " << itChild->first << ", " << itChild->second->m_nodeCost << ")";
-#endif  //#ifdef STEVETEST
                     itChild->second->ExpandNode();
                 }
                 else

@@ -68,9 +68,8 @@ bool CPolygon::InPolygon(double x, double y, V_POSITION_t& vposVertexContainer, 
 #if DEBUG_FLAG==1
             cout << "InPolygon:: bInPolygon[" <<  bInPolygon << "]\n";
 #endif
-#ifndef STEVETEST
             SelectedTest = GRID;
-#endif    //STEVETEST
+
             switch (SelectedTest) 
             {
             case GRID:
@@ -101,11 +100,8 @@ void CPolygon::GridTest(double x, double y, V_POSITION_t& vposVertexContainer,st
     if ((!GridPtr) || (GridUpdateNeeded)) {
         if (GridPtr)
             delete GridPtr;
-#ifdef STEVETEST
-        GridPtr = new CGrid(viGetVerticies(),vposVertexContainer, 1, 1, posminBBoxPoint,posmaxBBoxPoint, sstrErrorMessage);
-#else    //STEVETEST
+
         GridPtr = new CGrid(viGetVerticies(),vposVertexContainer, 5, 5, posminBBoxPoint,posmaxBBoxPoint, sstrErrorMessage);
-#endif    //STEVETEST
         GridUpdateNeeded = false;
 
     }

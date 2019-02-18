@@ -248,19 +248,6 @@ WaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::com
     {
         //TODO:: send out to vehicle
     }
-#ifdef STEVETEST
-    else if (receivedLmcpMessage->m_object->getLmcpTypeName() == "IncrementWaypoint")
-    {
-        uxas::messages::uxnative::IncrementWaypoint* incrementWaypoint = static_cast<uxas::messages::uxnative::IncrementWaypoint*> (receivedLmcpMessage->m_object.get());
-
-        if (incrementWaypoint->getEntityID() == m_vehicleID)
-        {
-            CERR_FILE_LINE_MSG("Received IncrementWaypoint!!!!!")
-            m_isMoveToNextWaypoint = true;
-        }
-        incrementWaypoint = nullptr; //don't own this
-    }
-#endif  //STEVETEST
     else
     {
         //CERR_FILE_LINE_MSG("WARNING:: Unknown message encountered: [" << receivedLmcpMessage->m_object->getLmcpTypeName() << "]")
@@ -366,19 +353,7 @@ bool WaypointPlanManagerService::isInitializePlan(std::shared_ptr<afrl::cmasi::M
             }
             if (!m_missionSegments.empty())
             {
-#ifdef STEVETEST
-                // disassociate the last waypoint in the mission from the tasks, allows tasks to complete
-                afrl::cmasi::Waypoint* waypointCurrent = m_missionSegments.back()->getWaypointList().back()->clone();
-                auto newNumber = waypointCurrent->getNumber() + 1;
-                waypointCurrent->setNumber(newNumber);
-                waypointCurrent->setNextWaypoint(newNumber);
-                m_missionSegments.back()->getWaypointList().back()->setNextWaypoint(newNumber);
-                waypointCurrent->getAssociatedTasks().clear();
-
-                m_missionSegments.back()->getWaypointList().push_back(waypointLast);
-#else
                 afrl::cmasi::Waypoint* waypointLast = m_missionSegments.back()->getWaypointList().back();
-#endif  //#endif  //STEVETEST
 
                 if (m_isAddLoiterToEndOfMission)
                 {
