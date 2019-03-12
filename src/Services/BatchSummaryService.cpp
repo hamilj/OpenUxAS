@@ -95,9 +95,9 @@ bool BatchSummaryService::processReceivedLmcpMessage(std::unique_ptr<uxas::commu
     {
         HandleBatchSummaryRequest(std::static_pointer_cast<afrl::impact::BatchSummaryRequest>(receivedLmcpMessage->m_object));
     }
-    else if (std::dynamic_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object))
+    else if (afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
-        auto config = std::dynamic_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        auto config = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         int64_t id = config->getID();
         m_entityConfigs[id] = config;
 
@@ -105,19 +105,19 @@ bool BatchSummaryService::processReceivedLmcpMessage(std::unique_ptr<uxas::commu
         {
             auto rconfig = std::static_pointer_cast<afrl::impact::RadioTowerConfiguration>(receivedLmcpMessage->m_object);
             int64_t id = rconfig->getID();
-            m_towerLocations[id] = std::shared_ptr<afrl::cmasi::Location3D>(rconfig->getPosition()->clone());
+            m_towerLocations[id].reset(rconfig->getPosition()->clone());
             m_towerRanges[id] = std::make_pair(rconfig->getRange(), rconfig->getEnabled());
         }
     }
-    else if (std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object))
+    else if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
-        auto state = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        auto state = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         int64_t id = state->getID();
         m_entityStates[id] = state;
 
    if (afrl::impact::isRadioTowerState(receivedLmcpMessage->m_object.get()))
    {
-       m_towerLocations[id] = std::shared_ptr<afrl::cmasi::Location3D>(state->getLocation()->clone());
+       m_towerLocations[id].reset(state->getLocation()->clone());
        auto rs = std::static_pointer_cast<afrl::impact::RadioTowerState>(receivedLmcpMessage->m_object);
        if (m_towerRanges.find(id) != m_towerRanges.end())
        {
@@ -217,7 +217,7 @@ void BatchSummaryService::HandleBatchSummaryRequest(std::shared_ptr<afrl::impact
     int64_t responseId = m_responseId;
     m_responseId++;
 
-    m_workingResponse[responseId].reset(new afrl::impact::BatchSummaryResponse);
+    m_workingResponse[responseId] = std::make_shared<afrl::impact::BatchSummaryResponse>();
     m_workingResponse[responseId]->setResponseID(request->getRequestID());
 
     m_workingRequests[responseId] = request;
@@ -324,10 +324,9 @@ void BatchSummaryService::HandleBatchSummaryRequest(std::shared_ptr<afrl::impact
         m_taskAutomationRequestId++;
         taskAutomationRequest->setOriginalRequest(requestToSend->clone());
 
-        std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(taskAutomationRequest);
         m_pendingTaskAutomationRequests[taskAutomationRequest->getRequestID()] = taskAutomationRequest;
         m_batchSummaryRequestVsTaskAutomation[responseId].push_back(taskAutomationRequest->getRequestID());
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pRequest);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskAutomationRequest);
     }
     IMPACT_INFORM("received batch request ", request->getRequestID(), ". split into ", requests.size(), " internal task Automation Requests");
     if (requests.empty())
@@ -452,7 +451,7 @@ void BatchSummaryService::UpdateVehicleSummary(afrl::impact::VehicleSummary * ve
         {
             if (afrl::cmasi::isLoiterAction(action))
             {
-                afrl::cmasi::LoiterAction* loiter = dynamic_cast<afrl::cmasi::LoiterAction*>(action);
+                auto loiter = static_cast<afrl::cmasi::LoiterAction*>(action);
                 VisiLibity::Point p;
                 unitConversions.ConvertLatLong_degToNorthEast_m(loiter->getLocation()->getLatitude(), loiter->getLocation()->getLongitude(), north, east);
                 auto length = loiter->getRadius();
@@ -577,7 +576,7 @@ bool BatchSummaryService::LinearizeBoundary(afrl::cmasi::AbstractGeometry* bound
 
     if (afrl::cmasi::isPolygon(boundary))
     {
-        afrl::cmasi::Polygon* boundaryPolygon = (afrl::cmasi::Polygon*) boundary;
+        auto boundaryPolygon = static_cast<afrl::cmasi::Polygon*>(boundary);
         for (unsigned int k = 0; k < boundaryPolygon->getBoundaryPoints().size(); k++)
         {
             VisiLibity::Point pt;
@@ -591,7 +590,7 @@ bool BatchSummaryService::LinearizeBoundary(afrl::cmasi::AbstractGeometry* bound
     }
     else if (afrl::cmasi::isRectangle(boundary))
     {
-        afrl::cmasi::Rectangle* rectangle = (afrl::cmasi::Rectangle*) boundary;
+        auto rectangle = static_cast<afrl::cmasi::Rectangle*>(boundary);
         VisiLibity::Point c;
         double north, east;
         flatEarth.ConvertLatLong_degToNorthEast_m(rectangle->getCenterPoint()->getLatitude(), rectangle->getCenterPoint()->getLongitude(), north, east);
@@ -613,7 +612,7 @@ bool BatchSummaryService::LinearizeBoundary(afrl::cmasi::AbstractGeometry* bound
     }
     else if (afrl::cmasi::isCircle(boundary))
     {
-        afrl::cmasi::Circle* circle = (afrl::cmasi::Circle*) boundary;
+        auto circle = static_cast<afrl::cmasi::Circle*>(boundary);
         VisiLibity::Point c;
         double north, east;
         flatEarth.ConvertLatLong_degToNorthEast_m(circle->getCenterPoint()->getLatitude(), circle->getCenterPoint()->getLongitude(), north, east);
@@ -638,7 +637,7 @@ bool BatchSummaryService::LinearizeBoundary(afrl::cmasi::AbstractGeometry* bound
 
 std::shared_ptr<VisiLibity::Polygon> BatchSummaryService::FromAbstractGeometry(afrl::cmasi::AbstractGeometry *geom)
 {
-    auto poly = std::shared_ptr<VisiLibity::Polygon>(new VisiLibity::Polygon);
+    auto poly = std::make_shared<VisiLibity::Polygon>();
     LinearizeBoundary(geom, poly);
     poly->eliminate_redundant_vertices(1.0);
     if (poly->area() < 0)

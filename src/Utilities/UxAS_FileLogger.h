@@ -12,6 +12,8 @@
 
 #include "UxAS_LoggerBase.h"
 
+#include "stdUniquePtr.h"
+
 #include <fstream>
 #include <memory>
 #include <string>
@@ -34,10 +36,10 @@ public:
     s_typeName() { static std::string s_string("FileLogger"); return (s_string); };
 
     static
-    LoggerBase*
+    std::unique_ptr<LoggerBase>
     create()
     {
-        return new FileLogger;
+        return uxas::stduxas::make_unique<FileLogger>();
     };
 
     FileLogger();

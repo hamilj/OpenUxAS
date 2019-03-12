@@ -46,10 +46,10 @@ Dpss::~Dpss()
 void Dpss::SmoothPath(DpssWaypoint pathPoints[], int numPoints, SmoothPathInput* spi, DpssWaypoint* outputPoints, int* numOutputPoints)
 {
     // handle nonsense input
-    if( pathPoints == NULL ) return;
-    if( spi == NULL) return;
-    if( outputPoints == NULL ) return;
-    if( numOutputPoints == NULL ) return;
+    if( !pathPoints ) return;
+    if( !spi ) return;
+    if( !outputPoints ) return;
+    if( !numOutputPoints ) return;
     if( numPoints <= 0 ) return;
     if( (spi->maxWaypoints) <= 0 ) return;
 
@@ -108,11 +108,11 @@ void Dpss::SetObjective(DpssWaypoint pathPoints[], int numPathPoints,
     int k;
  
     // handle nonsense input
-    if( pathPoints == NULL ) return;
+    if( !pathPoints ) return;
     if( numPathPoints <= 0 ) return;
-    if( planPoints == NULL ) return;
+    if( !planPoints ) return;
     if( numPlanPoints <= 0 ) return;
-    if( op == NULL ) return;
+    if( !op ) return;
     
     // update paramters
     m_LreLatitudeInRadians = op->lreLatitudeInRadians;
@@ -168,7 +168,7 @@ void Dpss::SetObjective(std::vector<xyPoint>& path, std::vector<xyPoint>& plan, 
     // handle nonsense input
     if( path.empty() ) return;
     if( plan.empty() ) return;
-    if( op == NULL ) return;
+    if( !op ) return;
     
     // update paramters
     m_LreLatitudeInRadians = op->lreLatitudeInRadians;
@@ -272,12 +272,12 @@ void Dpss::UpdateDpss(VehiclePoint sensorPoints[], int* numSensorPoints,
                       VehiclePoint turnPoints[], int* numTurnPoints)
 {
     // handle nonsense input
-    if( sensorPoints == NULL ) return;
-    if( vehicleGotoPoints == NULL) return;
-    if( turnPoints == NULL) return;
-    if( numSensorPoints == NULL ) return;
-    if( numGotoPoints == NULL ) return;
-    if( numTurnPoints == NULL ) return;
+    if( !sensorPoints ) return;
+    if( !vehicleGotoPoints ) return;
+    if( !turnPoints ) return;
+    if( !numSensorPoints ) return;
+    if( !numGotoPoints ) return;
+    if( !numTurnPoints ) return;
 
     if( (*numSensorPoints) < (int)m_TeamList.size() ) return;
     if( (*numGotoPoints) < (int)m_TeamList.size() ) return;

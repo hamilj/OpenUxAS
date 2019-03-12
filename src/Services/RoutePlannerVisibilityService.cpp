@@ -170,17 +170,15 @@ bool
 RoutePlannerVisibilityService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 //example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
-    auto entityConfig = std::dynamic_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-    
-    if (entityConfig)
+    if (afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
-        auto entityConfiguration = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        auto entityConfig = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         m_idVsEntityConfiguration[entityConfig->getID()] = entityConfig;
         calculatePlannerParameters(entityConfig);
     }
-    else if (entityState)
+    else if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_idVsEntityState[entityState->getID()] = entityState;
     }
     else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object.get()))
@@ -204,20 +202,19 @@ RoutePlannerVisibilityService::processReceivedLmcpMessage(std::unique_ptr<uxas::
         auto request = std::static_pointer_cast<uxas::messages::route::RoutePlanRequest>(receivedLmcpMessage->m_object);
         auto itEntityConfiguration = m_idVsEntityConfiguration.find(request->getVehicleID());
         if (itEntityConfiguration != m_idVsEntityConfiguration.end() &&
-                (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(itEntityConfiguration->second) ||
-                std::dynamic_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(itEntityConfiguration->second)))
+                (afrl::cmasi::isAirVehicleConfiguration(itEntityConfiguration->second.get()) ||
+                afrl::vehicles::isSurfaceVehicleConfiguration(itEntityConfiguration->second.get())))
         {
             auto routePlanResponse = std::make_shared<uxas::messages::route::RoutePlanResponse>();
             if (bProcessRoutePlanRequest(request, routePlanResponse))
             {
-                auto message = std::static_pointer_cast<avtas::lmcp::Object>(routePlanResponse);
                 // always limited-cast route plan responses
                 m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(
                         uxas::communications::getNetworkClientUnicastAddress(
                             receivedLmcpMessage->m_attributes->getSourceEntityId(),
                             receivedLmcpMessage->m_attributes->getSourceServiceId()
                         ),
-                        message);
+                        routePlanResponse);
             }
             else
             {
@@ -250,8 +247,7 @@ bool RoutePlannerVisibilityService::bProcessZone(const std::shared_ptr<afrl::cma
     if (isSuccess)
     {
         // add new boundary to the boundary list
-        m_idVsBoundary[abstractZone->getZoneID()] =
-                n_FrameworkLib::PTR_BOUNDARY_t(new n_FrameworkLib::CBoundary(abstractZone->getZoneID(), isKeepIn, vposBoundaryPoints, *abstractZone));
+        m_idVsBoundary[abstractZone->getZoneID()] = std::make_shared<n_FrameworkLib::CBoundary>(abstractZone->getZoneID(), isKeepIn, vposBoundaryPoints, *abstractZone);
     }
 
     return (isSuccess);
@@ -460,7 +456,7 @@ bool RoutePlannerVisibilityService::bFindPointsForAbstractGeometry(afrl::cmasi::
     {
         case afrl::cmasi::CMASIEnum::CIRCLE:
         {
-            afrl::cmasi::Circle* pCircle = static_cast<afrl::cmasi::Circle*> (pAbstractGeometry);
+            auto pCircle = static_cast<afrl::cmasi::Circle*> (pAbstractGeometry);
             double dCenterNorth_m(0.0);
             double dCenterEast_m(0.0);
             unitConversions.ConvertLatLong_degToNorthEast_m(
@@ -480,7 +476,7 @@ bool RoutePlannerVisibilityService::bFindPointsForAbstractGeometry(afrl::cmasi::
             break;
         case afrl::cmasi::CMASIEnum::POLYGON:
         {
-            afrl::cmasi::Polygon* pplyBoundaryPolygon = static_cast<afrl::cmasi::Polygon*> (pAbstractGeometry);
+            auto pplyBoundaryPolygon = static_cast<afrl::cmasi::Polygon*> (pAbstractGeometry);
             for (auto itPoint = pplyBoundaryPolygon->getBoundaryPoints().begin();
                     itPoint != pplyBoundaryPolygon->getBoundaryPoints().end();
                     itPoint++)
@@ -494,7 +490,7 @@ bool RoutePlannerVisibilityService::bFindPointsForAbstractGeometry(afrl::cmasi::
             break;
         case afrl::cmasi::CMASIEnum::RECTANGLE:
         {
-            afrl::cmasi::Rectangle* pRectangle = static_cast<afrl::cmasi::Rectangle*> (pAbstractGeometry);
+            auto pRectangle = static_cast<afrl::cmasi::Rectangle*> (pAbstractGeometry);
             double dCenterNorth_m(0.0);
             double dCenterEast_m(0.0);
             unitConversions.ConvertLatLong_degToNorthEast_m(
@@ -559,12 +555,12 @@ bool RoutePlannerVisibilityService::isCalculateWaypoints(const n_FrameworkLib::P
     return (isSuccessful);
 }
 
-void RoutePlannerVisibilityService::calculatePlannerParameters(const std::shared_ptr<afrl::cmasi::EntityConfiguration>& enityConfiguration)
+void RoutePlannerVisibilityService::calculatePlannerParameters(const std::shared_ptr<afrl::cmasi::EntityConfiguration>& entityConfiguration)
 {
     auto plannerParameters = std::make_shared<s_PlannerParameters>();
-    if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(enityConfiguration))
+    if (afrl::cmasi::isAirVehicleConfiguration(entityConfiguration.get()))
     {
-        auto airVehicleConfiguration = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(enityConfiguration);
+        auto airVehicleConfiguration = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(entityConfiguration);
 
         // compute turn radius for a "level turn" r = V^2/(g*tan(phi_max))
         double nominalMaxBankAngle_rad = n_Const::c_Convert::toRadians(airVehicleConfiguration->getNominalFlightProfile()->getMaxBankAngle());
@@ -577,9 +573,9 @@ void RoutePlannerVisibilityService::calculatePlannerParameters(const std::shared
         plannerParameters->turnRadius_m = turnRadius_m;
         plannerParameters->nominalSpeed_mps = nominalSpeed_mps;
 
-        COUT_INFO_MSG("Vehicle Id [" << enityConfiguration->getID() << "] turnRadius_m[" << turnRadius_m << "] nominalMaxBankAngle (deg) [" << airVehicleConfiguration->getNominalFlightProfile()->getMaxBankAngle() << "] nominalSpeed_mps[" << nominalSpeed_mps << "]")
+        COUT_INFO_MSG("Vehicle Id [" << entityConfiguration->getID() << "] turnRadius_m[" << turnRadius_m << "] nominalMaxBankAngle (deg) [" << airVehicleConfiguration->getNominalFlightProfile()->getMaxBankAngle() << "] nominalSpeed_mps[" << nominalSpeed_mps << "]")
     }
-    m_idVsPlannerParameters[enityConfiguration->getID()] = plannerParameters;
+    m_idVsPlannerParameters[entityConfiguration->getID()] = plannerParameters;
 }
 
 

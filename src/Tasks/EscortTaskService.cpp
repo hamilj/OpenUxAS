@@ -115,9 +115,9 @@ EscortTaskService::configureDynamicTask(const pugi::xml_node& ndComponent)
 bool EscortTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
 //example: if (afrl::cmasi::isServiceStatus(receivedLmcpObject))
 {
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpObject))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
         if (entityState->getID() == m_escortTask->getSupportedEntityID())
         {
             m_supportedEntityStateLast = entityState;
@@ -128,7 +128,7 @@ bool EscortTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<av
         auto ares = std::static_pointer_cast<afrl::cmasi::AutomationResponse>(receivedLmcpObject);
         for (auto v : ares->getMissionCommandList())
         {
-            m_currentMissions[v->getVehicleID()] = std::shared_ptr<afrl::cmasi::MissionCommand>(v->clone());
+            m_currentMissions[v->getVehicleID()].reset(v->clone());
         }
     }
     else if (afrl::cmasi::isMissionCommand(receivedLmcpObject))
@@ -139,7 +139,7 @@ bool EscortTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<av
     else if (afrl::cmasi::isFollowPathCommand(receivedLmcpObject))
     {
         auto fpc = std::static_pointer_cast<afrl::cmasi::FollowPathCommand>(receivedLmcpObject);
-        auto path = std::shared_ptr<afrl::cmasi::MissionCommand>(new afrl::cmasi::MissionCommand);
+        auto path = std::make_shared<afrl::cmasi::MissionCommand>();
         for (auto wp : fpc->getWaypointList())
         {
             path->getWaypointList().push_back(wp->clone());

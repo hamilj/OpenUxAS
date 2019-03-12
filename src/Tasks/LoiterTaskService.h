@@ -63,10 +63,10 @@ public:
 		return (s_string);
 	};
 
-	static ServiceBase*
-		create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+	static std::unique_ptr<ServiceBase>
+	create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
 	{
-		return new LoiterTaskService(pLmcpObjectNetworkClient);
+		return uxas::stduxas::make_unique<LoiterTaskService>(pLmcpObjectNetworkClient);
 	};
 
 	explicit LoiterTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

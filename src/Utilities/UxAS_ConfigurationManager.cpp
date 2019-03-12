@@ -65,7 +65,7 @@ ConfigurationManager&
 ConfigurationManager::getInstance()
 {
     // first time/one time creation
-    if (ConfigurationManager::s_instance == nullptr)
+    if (!ConfigurationManager::s_instance)
     {
         s_instance.reset(new ConfigurationManager);
         s_entityStartTimeSinceEpoch_ms = Time::getInstance().getUtcTimeSinceEpoch_ms();

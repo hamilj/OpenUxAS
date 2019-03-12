@@ -32,7 +32,7 @@ LogManager&
 LogManager::getInstance()
 {
     // first time/one time creation
-    if (LogManager::s_instance == nullptr)
+    if (!LogManager::s_instance)
     {
         // force initialization of classes and their static class members
         // <editor-fold defaultstate="collapsed" desc="trigger static LoggerBase subclass initialization">

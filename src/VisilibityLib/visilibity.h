@@ -70,6 +70,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #include <iso646.h>   //aliases for boolean operators
 
 #include <cmath>      //math functions in std namespace
+#include <array>
 #include <vector>
 #include <queue>      //queue and priority_queue.
 #include <set>        //priority queues with iteration, 
@@ -712,7 +713,7 @@ namespace VisiLibity
     virtual ~Line_Segment();
   protected:
     //Pointer to dynamic array of endpoints.
-    Point *endpoints_;
+    std::array<Point, 2> endpoints_;
     //See size() comments.
     unsigned    size_;
   };
@@ -2128,7 +2129,7 @@ namespace VisiLibity
   public:
     //Constructors
     /// default to empty 
-    Visibility_Graph() { n_=0; adjacency_matrix_ = NULL; }
+    Visibility_Graph() { n_=0; adjacency_matrix_ = nullptr; }
     /// copy 
     Visibility_Graph( const Visibility_Graph& vg2 );
     /** \brief  construct the visibility graph of Environment vertices

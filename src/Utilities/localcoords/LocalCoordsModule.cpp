@@ -1,8 +1,9 @@
 #include <Python.h>
 #include "../UnitConversions.h"
+#include "stdUniquePtr.h"
 #include <iostream>
 
-uxas::common::utilities::CUnitConversions* flatEarth = new uxas::common::utilities::CUnitConversions();
+auto flatEarth = uxas::stduxas::make_unique<uxas::common::utilities::CUnitConversions>();
 
 static PyObject *
 LatLong_degToNorthEast_m(PyObject *self, PyObject *args)
@@ -65,7 +66,7 @@ static PyMethodDef LocalCoordsMethods[] = {
      "calculate distance, in meters, between two locations specified in lat long degrees\n@params distance: all double (float)"},
     {"Initialize_deg",  Initialize_deg, METH_VARARGS,
      "Sets the linearization point\n@params latitude, longitude degrees: all double (float)"},
-    {NULL, NULL, 0, NULL}        /* Sentinel */
+    {nullptr, nullptr, 0, nullptr}        /* Sentinel */
 };
 
 static struct PyModuleDef lcmodule = {

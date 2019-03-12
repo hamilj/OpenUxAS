@@ -56,7 +56,7 @@ s_sleep(int msecs) {
     struct timespec t;
     t.tv_sec = msecs / 1000;
     t.tv_nsec = (msecs % 1000) * 1000000;
-    nanosleep(&t, NULL);
+    nanosleep(&t, nullptr);
 #endif
 }
 

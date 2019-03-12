@@ -177,7 +177,7 @@ ZeroMqZyreBridge::terminateZyreNodeAndThread()
 {
     try
     {
-        if (m_zyreNode != nullptr)
+        if (m_zyreNode)
         {
             zyre_destroy(&m_zyreNode);
             m_zyreNode = nullptr;
@@ -206,7 +206,7 @@ ZeroMqZyreBridge::executeZyreEventProcessing()
     try
     {
         // create a poller and add Zyre node reader
-        zpoller_t *poller = zpoller_new(zyre_socket(m_zyreNode), NULL);
+        zpoller_t *poller = zpoller_new(zyre_socket(m_zyreNode), nullptr);
         assert(poller);
 
         while (!m_isTerminate)
@@ -215,7 +215,7 @@ ZeroMqZyreBridge::executeZyreEventProcessing()
             if (m_isStarted)
             {
                 // wait indefinitely for the next input on returned reader
-                zsock_t *readerWithNextInput = (zsock_t *) zpoller_wait(poller, uxas::common::ConfigurationManager::getZeroMqReceiveSocketPollWaitTime_ms());
+                zsock_t *readerWithNextInput = static_cast<zsock_t *>(zpoller_wait(poller, uxas::common::ConfigurationManager::getZeroMqReceiveSocketPollWaitTime_ms()));
 
                 // affirm reader input is Zyre node reader and process
                 if (readerWithNextInput == zyre_socket(m_zyreNode))

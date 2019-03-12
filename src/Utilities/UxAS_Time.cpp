@@ -30,12 +30,12 @@ Time&
 Time::getInstance()
 {
     // first time/one time creation
-    if ((Time::s_instance == nullptr) || (m_currentMode != m_desiredMode))
+    if (!Time::s_instance || (m_currentMode != m_desiredMode))
     {
         switch (m_desiredMode)
         {
             case Time::DISCRETE_TIME:
-                s_instance.reset(new DiscreteTime);
+                s_instance = uxas::stduxas::make_unique<DiscreteTime>();
                 break;
             default:
             case Time::REAL_TIME:

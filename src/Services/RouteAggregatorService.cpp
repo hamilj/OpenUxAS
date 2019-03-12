@@ -119,7 +119,7 @@ RouteAggregatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communi
         auto rreq = std::static_pointer_cast<uxas::messages::route::RouteRequest>(receivedLmcpMessage->m_object);
         HandleRouteRequest(rreq);
     }
-    else if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object))
+    else if (afrl::cmasi::isAirVehicleState(receivedLmcpMessage->m_object))
     {
         int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
         m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
@@ -137,7 +137,7 @@ RouteAggregatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communi
         m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_surfaceVehicles.insert(id);
     }
-    else if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(receivedLmcpMessage->m_object))
+    else if (afrl::cmasi::isAirVehicleConfiguration(receivedLmcpMessage->m_object))
     {
         int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
         m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
@@ -165,10 +165,10 @@ RouteAggregatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communi
     else if (afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object.get()))
     {
         auto sreq = std::static_pointer_cast<afrl::impact::ImpactAutomationRequest>(receivedLmcpMessage->m_object);
-        auto areq = std::shared_ptr<uxas::messages::task::UniqueAutomationRequest>();
+        auto areq = std::make_shared<uxas::messages::task::UniqueAutomationRequest>();
         areq->setOriginalRequest(sreq->getTrialRequest()->clone());
-        m_uniqueAutomationRequests[m_autoRequestId++] = areq;
         areq->setRequestID(m_autoRequestId);
+        m_uniqueAutomationRequests[m_autoRequestId++] = areq;
         //ResetTaskOptions(areq); // clear m_taskOptions and wait for refresh from tasks
         CheckAllTaskOptionsReceived();
     }
@@ -246,7 +246,7 @@ void RouteAggregatorService::BuildMatrixRequests(int64_t reqId, const std::share
         auto vehicle = m_entityStates.find(vehicleId);
 
         float startHeading_deg{0.0};
-        auto startLocation = std::shared_ptr<afrl::cmasi::Location3D>();
+        std::unique_ptr<afrl::cmasi::Location3D> startLocation(nullptr);
         bool isFoundPlannningState{false};
         for (auto& planningState : areq->getPlanningStates())
         {
@@ -285,7 +285,7 @@ void RouteAggregatorService::BuildMatrixRequests(int64_t reqId, const std::share
             }
 
             // create a new route plan request
-            std::shared_ptr<uxas::messages::route::RoutePlanRequest> planRequest(new uxas::messages::route::RoutePlanRequest);
+            auto planRequest = std::make_shared<uxas::messages::route::RoutePlanRequest>();
             planRequest->setAssociatedTaskID(0); // mapping from routeID to proper task
             planRequest->setIsCostOnlyRequest(false);  // request full path for more accurate timing information
             planRequest->setOperatingRegion(areq->getOriginalRequest()->getOperatingRegion());
@@ -306,16 +306,15 @@ void RouteAggregatorService::BuildMatrixRequests(int64_t reqId, const std::share
                 auto option = taskOptionList.at(t);
 
                 // build map from request to full task/option information
-                AggregatorTaskOptionPair* top = new AggregatorTaskOptionPair(vehicleId, 0, 0, option->getTaskID(), option->getOptionID());
-                m_routeTaskPairing[m_routeId] = std::shared_ptr<AggregatorTaskOptionPair>(top);
+                m_routeTaskPairing[m_routeId] = std::make_shared<AggregatorTaskOptionPair>(vehicleId, 0, 0, option->getTaskID(), option->getOptionID());
 
-                uxas::messages::route::RouteConstraints* r = new uxas::messages::route::RouteConstraints;
+                auto r = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
                 r->setStartLocation(startLocation->clone());
                 r->setStartHeading(startHeading_deg);
                 r->setEndLocation(option->getStartLocation()->clone());
                 r->setEndHeading(option->getStartHeading());
                 r->setRouteID(m_routeId);
-                planRequest->getRouteRequests().push_back(r);
+                planRequest->getRouteRequests().push_back(r.release());
                 m_pendingAutoReq[reqId].insert(m_routeId);
                 m_routeId++;
             }
@@ -331,16 +330,15 @@ void RouteAggregatorService::BuildMatrixRequests(int64_t reqId, const std::share
                         auto option2 = taskOptionList.at(t2);
 
                         // build map from request to full task/option information
-                        AggregatorTaskOptionPair* top = new AggregatorTaskOptionPair(vehicleId, option1->getTaskID(), option1->getOptionID(), option2->getTaskID(), option2->getOptionID());
-                        m_routeTaskPairing[m_routeId] = std::shared_ptr<AggregatorTaskOptionPair>(top);
+                        m_routeTaskPairing[m_routeId] = std::make_shared<AggregatorTaskOptionPair>(vehicleId, option1->getTaskID(), option1->getOptionID(), option2->getTaskID(), option2->getOptionID());
 
-                        uxas::messages::route::RouteConstraints* r = new uxas::messages::route::RouteConstraints;
+                        auto r = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
                         r->setStartLocation(option1->getEndLocation()->clone());
                         r->setStartHeading(option1->getEndHeading());
                         r->setEndLocation(option2->getStartLocation()->clone());
                         r->setEndHeading(option2->getStartHeading());
                         r->setRouteID(m_routeId);
-                        planRequest->getRouteRequests().push_back(r);
+                        planRequest->getRouteRequests().push_back(r.release());
                         m_pendingAutoReq[reqId].insert(m_routeId);
                         m_routeId++;
                     }
@@ -362,14 +360,12 @@ void RouteAggregatorService::BuildMatrixRequests(int64_t reqId, const std::share
     // send all requests for aircraft plans
     for (size_t k = 0; k < sendAirPlanRequest.size(); k++)
     {
-        std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(sendAirPlanRequest.at(k));
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), pRequest);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), sendAirPlanRequest.at(k));
     }
 
     // send all requests for ground plans
     for (size_t k = 0; k < sendGroundPlanRequest.size(); k++)
     {
-        std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(sendGroundPlanRequest.at(k));
         if (m_fastPlan)
         {
             // short-circuit and just plan with straight line planner
@@ -378,7 +374,7 @@ void RouteAggregatorService::BuildMatrixRequests(int64_t reqId, const std::share
         else
         {
             // send externally
-            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), pRequest);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), sendGroundPlanRequest.at(k));
         }
     }
 
@@ -403,7 +399,7 @@ void RouteAggregatorService::HandleRouteRequest(std::shared_ptr<uxas::messages::
     for (const int64_t& vehicleId : request->getVehicleID())
     {
         // create a new route plan request
-        std::shared_ptr<uxas::messages::route::RoutePlanRequest> planRequest(new uxas::messages::route::RoutePlanRequest);
+        auto planRequest = std::make_shared<uxas::messages::route::RoutePlanRequest>();
         planRequest->setAssociatedTaskID(request->getAssociatedTaskID());
         planRequest->setIsCostOnlyRequest(request->getIsCostOnlyRequest());
         planRequest->setOperatingRegion(request->getOperatingRegion());
@@ -418,8 +414,6 @@ void RouteAggregatorService::HandleRouteRequest(std::shared_ptr<uxas::messages::
             planRequest->getRouteRequests().push_back(r->clone());
         }
 
-
-        std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(planRequest);
         if (m_groundVehicles.find(vehicleId) != m_groundVehicles.end())
         {
             if (m_fastPlan)
@@ -430,13 +424,13 @@ void RouteAggregatorService::HandleRouteRequest(std::shared_ptr<uxas::messages::
             else
             {
                 // send externally
-                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), pRequest);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::GroundPathPlanner(), planRequest);
             }
         }
         else
         {
             // send to aircraft planner
-            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), pRequest);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(uxas::common::MessageGroup::AircraftPathPlanner(), planRequest);
         }
     }
 
@@ -504,7 +498,7 @@ void RouteAggregatorService::CheckAllRoutePlans()
 
 void RouteAggregatorService::SendRouteResponse(int64_t routeKey)
 {
-    auto response = std::shared_ptr<uxas::messages::route::RouteResponse>(new uxas::messages::route::RouteResponse);
+    auto response = std::make_shared<uxas::messages::route::RouteResponse>();
     response->setResponseID(routeKey);
     response->getRoutes().reserve(m_pendingRoute[routeKey].size());
     for (auto& rId : m_pendingRoute[routeKey])
@@ -524,13 +518,12 @@ void RouteAggregatorService::SendRouteResponse(int64_t routeKey)
     }
 
     // send the results of the query
-    std::shared_ptr<avtas::lmcp::Object> pResponse = std::static_pointer_cast<avtas::lmcp::Object>(response);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(response);
 }
 
 void RouteAggregatorService::SendMatrix(int64_t autoKey)
 {
-    auto matrix = std::shared_ptr<uxas::messages::task::AssignmentCostMatrix>(new uxas::messages::task::AssignmentCostMatrix);
+    auto matrix = std::make_shared<uxas::messages::task::AssignmentCostMatrix>();
     auto& areq = m_uniqueAutomationRequests[autoKey];
     matrix->setCorrespondingAutomationRequestID(areq->getRequestID());
     matrix->setOperatingRegion(areq->getOriginalRequest()->getOperatingRegion());
@@ -550,14 +543,14 @@ void RouteAggregatorService::SendMatrix(int64_t autoKey)
                 {
                     routesNotFound << "V[" << taskpair->second->vehicleId << "](" << taskpair->second->prevTaskId << "," << taskpair->second->prevTaskOption << ")-(" << taskpair->second->taskId << "," << taskpair->second->taskOption << ")" << std::endl;
                 }
-                auto toc = new uxas::messages::task::TaskOptionCost;
+                auto toc = uxas::stduxas::make_unique<uxas::messages::task::TaskOptionCost>();
                 toc->setDestinationTaskID(taskpair->second->taskId);
                 toc->setDestinationTaskOption(taskpair->second->taskOption);
                 toc->setIntialTaskID(taskpair->second->prevTaskId);
                 toc->setIntialTaskOption(taskpair->second->prevTaskOption);
                 toc->setTimeToGo(plan->second.second->getRouteCost());
                 toc->setVehicleID(taskpair->second->vehicleId);
-                matrix->getCostMatrix().push_back(toc);
+                matrix->getCostMatrix().push_back(toc.release());
                 m_routeTaskPairing.erase(taskpair);
             }
 
@@ -568,8 +561,7 @@ void RouteAggregatorService::SendMatrix(int64_t autoKey)
     }
 
     // send the total cost matrix
-    std::shared_ptr<avtas::lmcp::Object> pResponse = std::static_pointer_cast<avtas::lmcp::Object>(matrix);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(matrix);
 
     // clear out old options
     m_taskOptions.clear();
@@ -578,11 +570,10 @@ void RouteAggregatorService::SendMatrix(int64_t autoKey)
     {
         auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
         serviceStatus->setStatusType(afrl::cmasi::ServiceStatusType::Information);
-        auto keyValuePair = new afrl::cmasi::KeyValuePair;
+        auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
         keyValuePair->setKey(std::string("RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId)"));
         keyValuePair->setValue(routesNotFound.str());
-        serviceStatus->getInfo().push_back(keyValuePair);
-        keyValuePair = nullptr;
+        serviceStatus->getInfo().push_back(keyValuePair.release());
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
         std::cout << "RoutesNotFound - [VehicleId](StartTaskId,StartOptionId)-(EndTaskId,EndOptionId) :: " << std::endl << routesNotFound.str() << std::endl << std::endl;
     }
@@ -590,10 +581,9 @@ void RouteAggregatorService::SendMatrix(int64_t autoKey)
     {
         auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
         serviceStatus->setStatusType(afrl::cmasi::ServiceStatusType::Information);
-        auto keyValuePair = new afrl::cmasi::KeyValuePair;
+        auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
         keyValuePair->setKey(std::string("AssignmentMatrix - full"));
-        serviceStatus->getInfo().push_back(keyValuePair);
-        keyValuePair = nullptr;
+        serviceStatus->getInfo().push_back(keyValuePair.release());
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
     }
 
@@ -617,7 +607,7 @@ void RouteAggregatorService::EuclideanPlan(std::shared_ptr<uxas::messages::route
         }
     }
 
-    auto response = std::shared_ptr<uxas::messages::route::RoutePlanResponse>(new uxas::messages::route::RoutePlanResponse);
+    auto response = std::make_shared<uxas::messages::route::RoutePlanResponse>();
     response->setAssociatedTaskID(taskId);
     response->setOperatingRegion(regionId);
     response->setVehicleID(vehicleId);
@@ -630,7 +620,7 @@ void RouteAggregatorService::EuclideanPlan(std::shared_ptr<uxas::messages::route
         VisiLibity::Point startPt, endPt;
         double north, east;
 
-        uxas::messages::route::RoutePlan* plan = new uxas::messages::route::RoutePlan;
+        auto plan = std::make_shared<uxas::messages::route::RoutePlan>();
         plan->setRouteID(routeId);
 
         flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude(), routeRequest->getStartLocation()->getLongitude(), north, east);
@@ -643,7 +633,7 @@ void RouteAggregatorService::EuclideanPlan(std::shared_ptr<uxas::messages::route
 
         double linedist = VisiLibity::distance(startPt, endPt);
         plan->setRouteCost(linedist / speed * 1000); // milliseconds to arrive
-        m_routePlans[routeId] = std::make_pair(request->getRequestID(), std::shared_ptr<uxas::messages::route::RoutePlan>(plan));
+        m_routePlans[routeId] = std::make_pair(request->getRequestID(), plan);
     }
     m_routePlanResponses[response->getResponseID()] = response;
 }

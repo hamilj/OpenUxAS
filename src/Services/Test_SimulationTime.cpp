@@ -67,13 +67,12 @@ Test_SimulationTime::initialize()
 bool
 Test_SimulationTime::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
-    bool isFinished(false);
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         uxas::common::Time::getInstance().setDiscreteTime_ms(entityState->getTime());
     }
-    return (isFinished);
+    return false;
 };
 
 

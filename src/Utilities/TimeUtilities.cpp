@@ -15,6 +15,9 @@
  */
 
 #include "TimeUtilities.h"
+
+#include "stdUniquePtr.h"
+
 #include <mutex>
 
 
@@ -48,7 +51,7 @@ uxas::common::utilities::c_TimeUtilities::c_TimeUtilities()
 
 void uxas::common::utilities::c_TimeUtilities::SetTimeCorrection_tmdrtn(n_POSIX_TIME::time_duration& tmdrtnTimeCorrection)
 {
-    std::lock_guard<std::mutex> lock(*(reinterpret_cast<std::mutex*>(pmtxGetTimeSyncMutex())));
+    std::lock_guard<std::mutex> lock(*m_pmtxTimeSyncMutex);
     m_tmdrtnTimeCorrection = tmdrtnTimeCorrection;
 //    if(!bGetTimeCorrected())
 //    {
@@ -57,7 +60,7 @@ void uxas::common::utilities::c_TimeUtilities::SetTimeCorrection_tmdrtn(n_POSIX_
     bSetTimeCorrected_b(true);
 };
 
-uxas::common::utilities::mutex* uxas::common::utilities::c_TimeUtilities::m_pmtxTimeSyncMutex = reinterpret_cast<uxas::common::utilities::mutex*>(new std::mutex);
+std::unique_ptr<std::mutex> uxas::common::utilities::c_TimeUtilities::m_pmtxTimeSyncMutex = uxas::stduxas::make_unique<std::mutex>();
 
     uint32_t uxas::common::utilities::c_TimeUtilities::uiGetTime2030_s()
     {
@@ -135,11 +138,11 @@ uxas::common::utilities::mutex* uxas::common::utilities::c_TimeUtilities::m_pmtx
     
     std::string uxas::common::utilities::c_TimeUtilities::strGetTimeNow()
     {
-        boost::posix_time::time_facet *output_facet = new boost::posix_time::time_facet();
+        auto output_facet = uxas::stduxas::make_unique<boost::posix_time::time_facet>();
         std::stringstream sstrTimeString;
-        sstrTimeString.imbue(std::locale(sstrTimeString.getloc(), output_facet));
         output_facet->format("%Y_%m_%d__%H_%M_%S%F");    // eg. 2014_01_16__18_36_45.893911
 //        output_facet->format("%Y-%m-%d_%H-%M-%S");    // eg. 2014-01-16_18-36-45
+        sstrTimeString.imbue(std::locale(sstrTimeString.getloc(), output_facet.release()));
         sstrTimeString << ptGetTimeNow();
         return(sstrTimeString.str());
     }

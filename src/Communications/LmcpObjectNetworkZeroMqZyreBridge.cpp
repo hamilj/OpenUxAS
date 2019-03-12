@@ -342,7 +342,7 @@ LmcpObjectNetworkZeroMqZyreBridge::zyreEnterMessageHandler(const std::string& zy
 
     // broadcast entity join message
     UXAS_LOG_INFORM_ASSIGNMENT(s_typeName(), "::zyreEnterMessageHandler broadcasting EntityJoin for type [", entityTypeKvPairIt->second, "] ID [", entityIdKvPairIt->second, "]");
-    std::unique_ptr<uxas::messages::uxnative::EntityJoin> entityJoin = uxas::stduxas::make_unique<uxas::messages::uxnative::EntityJoin>();
+    auto entityJoin = uxas::stduxas::make_unique<uxas::messages::uxnative::EntityJoin>();
     entityJoin->setEntityID(std::stoull(entityIdKvPairIt->second));
     entityJoin->setLabel(entityTypeKvPairIt->second);
     sendLmcpObjectBroadcastMessage(std::move(entityJoin));
@@ -390,7 +390,7 @@ LmcpObjectNetworkZeroMqZyreBridge::zyreExitMessageHandler(const std::string& zyr
     {
         // broadcast entity exit message
         UXAS_LOG_INFORM(s_typeName(), "::zyreEnterMessageHandler broadcasting EntityExit for type [", uuidEntityTypeIdPairIt->second.first, "] ID [", uuidEntityTypeIdPairIt->second.second, "]");
-        std::unique_ptr<uxas::messages::uxnative::EntityExit> entityExit = uxas::stduxas::make_unique<uxas::messages::uxnative::EntityExit>();
+        auto entityExit = uxas::stduxas::make_unique<uxas::messages::uxnative::EntityExit>();
         entityExit->setEntityID(std::stoi(uuidEntityTypeIdPairIt->second.second));
         entityExit->setLabel(uuidEntityTypeIdPairIt->second.first);
         sendLmcpObjectBroadcastMessage(std::move(entityExit));
@@ -419,8 +419,7 @@ LmcpObjectNetworkZeroMqZyreBridge::zyreWhisperMessageHandler(const std::string& 
         if (!recvdZyreDataSegment.empty())
         {
             UXAS_LOG_DEBUG_VERBOSE(s_typeName(), "::zyreWhisperMessageHandler processing received Zyre data string segment");
-            std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> recvdAddAttMsg
-                    = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
+            auto recvdAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
             if (recvdAddAttMsg->setAddressAttributesAndPayloadFromDelimitedString(std::move(recvdZyreDataSegment)))
             {
                 UXAS_LOG_INFORM(s_typeName(), "::zyreWhisperMessageHandler processing ", recvdAddAttMsg->getMessageAttributesReference()->getDescriptor(),

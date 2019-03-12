@@ -111,11 +111,9 @@ bool
 BlockadeTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
 //example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
-    std::stringstream sstrError;
-
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpObject))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
         if (entityState->getID() == m_blockadeTask->getBlockedEntityID())
         {
             m_blockedEntityStateLast = entityState;
@@ -172,8 +170,7 @@ void BlockadeTaskService::buildTaskPlanOptions()
     // send out the options
     if (isSuccessful)
     {
-        auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
     }
 };
 
@@ -183,7 +180,7 @@ bool BlockadeTaskService::isCalculateOption(const int64_t& taskId, int64_t & opt
 
     if (m_blockedEntityStateLast)
     {
-        auto taskOption = new uxas::messages::task::TaskOption;
+        auto taskOption = std::make_shared<uxas::messages::task::TaskOption>();
         taskOption->getEligibleEntities().push_back(optionId); // note: this task enforces optionId == entityId
         taskOption->setTaskID(taskId);
         taskOption->setOptionID(optionId);
@@ -191,10 +188,8 @@ bool BlockadeTaskService::isCalculateOption(const int64_t& taskId, int64_t & opt
         taskOption->setStartHeading(m_blockedEntityStateLast->getHeading());
         taskOption->setEndLocation(m_blockedEntityStateLast->getLocation()->clone());
         taskOption->setEndHeading(m_blockedEntityStateLast->getHeading());
-        auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(pTaskOption)));
-        m_taskPlanOptions->getOptions().push_back(taskOption);
-        taskOption = nullptr; //just gave up ownership
+        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(taskOption)));
+        m_taskPlanOptions->getOptions().push_back(taskOption->clone());
     }
     else
     {
@@ -224,8 +219,8 @@ void BlockadeTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::E
             speed = m_entityConfigurations[entityState->getID()]->getNominalSpeed();
         }
 
-        auto stareLocation = std::shared_ptr<afrl::cmasi::Location3D>(m_blockedEntityStateLast->getLocation()->clone());
-        auto targetLocation = std::shared_ptr<afrl::cmasi::Location3D>(m_blockedEntityStateLast->getLocation()->clone());
+        std::shared_ptr<afrl::cmasi::Location3D> stareLocation(m_blockedEntityStateLast->getLocation()->clone());
+        std::shared_ptr<afrl::cmasi::Location3D> targetLocation(m_blockedEntityStateLast->getLocation()->clone());
         double enemyHeading = CalculateCenterBlockingPosition(entityState->getLocation(), targetLocation, m_blockadeTask);
 
         // calculate blocking assignment on wall (ordered by ID)
@@ -253,11 +248,11 @@ void BlockadeTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::E
         auto actionCommand = CalculateGimbalActions(entityState, lat, lon);
 
         // build mini-mission of two waypoint with hover action at end
-        auto missionCommand = new afrl::cmasi::MissionCommand;
+        auto missionCommand = std::make_shared<afrl::cmasi::MissionCommand>();
         missionCommand->setCommandID(uxas::communications::getUniqueEntitySendMessageId());
         missionCommand->setFirstWaypoint(1);
         missionCommand->setVehicleID(entityState->getID());
-        auto wp = new afrl::cmasi::Waypoint;
+        auto wp = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
         wp->setAltitude(entityState->getLocation()->getAltitude());
         wp->setAltitudeType(entityState->getLocation()->getAltitudeType());
         wp->setLatitude(lat);
@@ -267,9 +262,8 @@ void BlockadeTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::E
         wp->setSpeed(speed);
         wp->setTurnType(afrl::cmasi::TurnType::TurnShort);
         wp->getAssociatedTasks().push_back(m_task->getTaskID());
-        missionCommand->getWaypointList().push_back(wp);
+        missionCommand->getWaypointList().push_back(wp->clone());
 
-        wp = wp->clone();
         wp->setNumber(2);
 
         for (size_t a = 0; a < actionCommand->getVehicleActionList().size(); a++)
@@ -277,11 +271,9 @@ void BlockadeTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::E
             auto act = actionCommand->getVehicleActionList().at(a);
             wp->getVehicleActionList().push_back(act->clone());
         }
-        missionCommand->getWaypointList().push_back(wp);
+        missionCommand->getWaypointList().push_back(wp.release());
 
-        //auto pResponse = std::static_pointer_cast<avtas::lmcp::Object>(actionCommand);
-        auto pResponse = std::shared_ptr<avtas::lmcp::Object>(missionCommand);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(missionCommand);
     }
     else
     {
@@ -291,7 +283,7 @@ void BlockadeTaskService::activeEntityState(const std::shared_ptr<afrl::cmasi::E
 
 std::shared_ptr<afrl::cmasi::VehicleActionCommand> BlockadeTaskService::CalculateGimbalActions(const std::shared_ptr<afrl::cmasi::EntityState>& entityState, double lat, double lon)
 {
-    std::shared_ptr<afrl::cmasi::VehicleActionCommand> caction(new afrl::cmasi::VehicleActionCommand);
+    auto caction = std::make_shared<afrl::cmasi::VehicleActionCommand>();
 
     double surveyRadius = 100.0; // default 100 meters, circular
     double surveySpeed = entityState->getGroundspeed();
@@ -333,8 +325,9 @@ std::shared_ptr<afrl::cmasi::VehicleActionCommand> BlockadeTaskService::Calculat
         }
     }
 
-    afrl::cmasi::LoiterAction* surveyAction = new afrl::cmasi::LoiterAction;
-    surveyAction->setLocation(new afrl::cmasi::Location3D());
+    auto surveyAction = uxas::stduxas::make_unique<afrl::cmasi::LoiterAction>();
+    auto loc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
+    surveyAction->setLocation(loc.release());
     surveyAction->getLocation()->setLatitude(lat);
     surveyAction->getLocation()->setLongitude(lon);
     surveyAction->getLocation()->setAltitude(entityState->getLocation()->getAltitude());
@@ -345,17 +338,17 @@ std::shared_ptr<afrl::cmasi::VehicleActionCommand> BlockadeTaskService::Calculat
     surveyAction->setDuration(-1);
     surveyAction->setLoiterType(surveyType);
     surveyAction->getAssociatedTaskList().push_back(m_task->getTaskID());
-    caction->getVehicleActionList().push_back(surveyAction);
+    caction->getVehicleActionList().push_back(surveyAction.release());
 
     // steer all gimbals
     for (size_t g = 0; g < gimbalId.size(); g++)
     {
-        afrl::cmasi::GimbalStareAction* gimbalAction = new afrl::cmasi::GimbalStareAction;
+        auto gimbalAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalStareAction>();
         gimbalAction->setDuration(-1);
         gimbalAction->setPayloadID(gimbalId.at(g));
         gimbalAction->setStarepoint(m_blockedEntityStateLast->getLocation()->clone());
         gimbalAction->getAssociatedTaskList().push_back(m_task->getTaskID());
-        caction->getVehicleActionList().push_back(gimbalAction->clone());
+        caction->getVehicleActionList().push_back(gimbalAction.release());
     }
 
     return caction;
@@ -369,7 +362,7 @@ double BlockadeTaskService::CalculateCenterBlockingPosition(afrl::cmasi::Locatio
     uxas::common::utilities::CUnitConversions flatEarth;
     double north, east;
 
-    if (task->getProtectedLocation() == nullptr)
+    if (!task->getProtectedLocation())
     {
         flatEarth.ConvertLatLong_degToNorthEast_m(targetLocation->getLatitude(), targetLocation->getLongitude(), north, east);
         east -= 100.0; // assume heading west
@@ -389,7 +382,7 @@ double BlockadeTaskService::CalculateCenterBlockingPosition(afrl::cmasi::Locatio
     enemyDirection = (n_Const::c_Convert::dPiO2() - atan2(enemy.y, enemy.x)) * n_Const::c_Convert::dRadiansToDegrees();
 
     double blockDist = 0.0;
-    if (vloc == nullptr)
+    if (!vloc)
     {
         // just go 3/4 of the way
         blockDist = 0.75;

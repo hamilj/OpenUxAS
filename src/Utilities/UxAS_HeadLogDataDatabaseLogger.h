@@ -13,6 +13,8 @@
 #include "UxAS_LoggerBase.h"
 #include "UxAS_DatabaseLoggerHelper.h"
 
+#include "stdUniquePtr.h"
+
 #include <memory>
 #include <string>
 
@@ -34,10 +36,10 @@ public:
     s_typeName() { static std::string s_string("HeadLogDataDatabaseLogger"); return (s_string); };
 
     static
-    LoggerBase*
+    std::unique_ptr<LoggerBase>
     create()
     {
-        return new HeadLogDataDatabaseLogger;
+        return uxas::stduxas::make_unique<HeadLogDataDatabaseLogger>();
     };
 
     HeadLogDataDatabaseLogger();

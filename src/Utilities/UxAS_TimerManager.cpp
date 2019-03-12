@@ -22,7 +22,7 @@ TimerManager&
 TimerManager::getInstance()
 {
     // first time/one time creation
-    if (TimerManager::s_instance == nullptr)
+    if (!TimerManager::s_instance)
     {
         s_instance.reset(new TimerManager);
         s_instance->initialize();

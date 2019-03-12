@@ -84,7 +84,7 @@ PatternSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
             m_patternSearchTask = std::static_pointer_cast<afrl::impact::PatternSearchTask>(m_task);
             if (m_patternSearchTask->getSearchLocationID() == 0)
             {
-                if (m_patternSearchTask->getSearchLocation() != nullptr)
+                if (m_patternSearchTask->getSearchLocation())
                 {
                     m_patternSearchTask->setSearchLocation(m_patternSearchTask->getSearchLocation()->clone());
                 }
@@ -215,7 +215,7 @@ PatternSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::
                     routePlanRequest->setOperatingRegion(currentAutomationRequest->getOriginalRequest()->getOperatingRegion());
                     routePlanRequest->setVehicleID((*itFootprint)->getVehicleID());
 
-                    auto footprint = std::unique_ptr<uxas::messages::task::SensorFootprint>((*itFootprint)->clone());
+                    std::unique_ptr<uxas::messages::task::SensorFootprint> footprint((*itFootprint)->clone());
                     auto itTaskOptionClass = m_optionIdVsTaskOptionClass.find(footprint->getFootprintResponseID());
                     if (itTaskOptionClass != m_optionIdVsTaskOptionClass.end())
                     {
@@ -228,8 +228,7 @@ PatternSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::
                                 if (!routePlanRequest->getRouteRequests().empty())
                                 {
                                     m_pendingOptionRouteRequests.insert(routePlanRequest->getRequestID());
-                                    auto objectRouteRequest = std::static_pointer_cast<avtas::lmcp::Object>(routePlanRequest);
-                                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectRouteRequest);
+                                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(routePlanRequest);
 
                                     isReadyToSendOptions = false; //need to wait to get routeresponse
                                     itTaskOptionClass->second->m_taskOption->setStartHeading(routePlanRequest->getRouteRequests().front()->getStartHeading());
@@ -264,8 +263,7 @@ PatternSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::
                     if (isAllOptionsComplete)
                     {
                         // once all options are complete, send out the message
-                        auto objectTaskPlanOptions = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectTaskPlanOptions);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
                     }
                     else
                     {
@@ -311,7 +309,7 @@ void PatternSearchTaskService::buildTaskPlanOptions()
     {
         // need to receive the sensor response before route request can be sent out
         // ask for footprints for each vehicle's nominal altitude, at the requested ground sample distance, and elevation angle.
-        auto footprintRequest = new uxas::messages::task::FootprintRequest;
+        auto footprintRequest = uxas::stduxas::make_unique<uxas::messages::task::FootprintRequest>();
         footprintRequest->setFootprintRequestID(itOption->first);
         // assume there is only one eligible entity per option
         footprintRequest->setVehicleID(itOption->second->m_eligibleEntities.front());
@@ -321,11 +319,9 @@ void PatternSearchTaskService::buildTaskPlanOptions()
         }
         footprintRequest->getEligibleWavelengths() = m_patternSearchTask->getDesiredWavelengthBands();
         footprintRequest->getElevationAngles().push_back(itOption->second->m_elevationLookAngle_rad);
-        sensorFootprintRequests->getFootprints().push_back(footprintRequest);
-        footprintRequest = nullptr;
+        sensorFootprintRequests->getFootprints().push_back(footprintRequest.release());
     }
-    auto objectFootprintRequests = std::static_pointer_cast<avtas::lmcp::Object>(sensorFootprintRequests);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectFootprintRequests);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(sensorFootprintRequests);
 };
 
 bool PatternSearchTaskService::isCalculateOption(const std::vector<int64_t>& eligibleEntities,
@@ -515,21 +511,23 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute_Spiral(std::shared_pt
             double longitude_deg(0.0);
             m_flatEarth.ConvertNorthEast_mToLatLong_deg(vehicleNorth_m, vehicleEast_m,
                                                             latitude_deg, longitude_deg);
-            auto waypoint = new afrl::cmasi::Waypoint();
+            auto waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
             waypoint->setNumber(waypointNumber);
             waypoint->setLatitude(latitude_deg);
             waypoint->setLongitude(longitude_deg);
             waypoint->setAltitude(pTaskOptionClass->m_altitude_m);
             waypoint->setSpeed(pTaskOptionClass->m_speed_mps);
-            waypoints.push_back(std::make_shared<uxas::common::utilities::SensorSteering::PointData>(waypoint->getNumber(), waypoint, m_flatEarth));
-            routePlan->getWaypoints().push_back(waypoint);
+            waypoints.push_back(std::make_shared<uxas::common::utilities::SensorSteering::PointData>(waypoint->getNumber(), waypoint.get(), m_flatEarth));
+
             if (firstWaypoint)
             {
-                pTaskOptionClass->m_taskOption->setStartLocation(new afrl::cmasi::Location3D(*(waypoint)));
+                auto loc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>(*waypoint);
+                pTaskOptionClass->m_taskOption->setStartLocation(loc.release());
                 pTaskOptionClass->m_taskOption->setStartHeading(n_Const::c_Convert::toDegrees(startHeading_rad));
                 firstWaypoint = false;
             }
-            waypoint = nullptr; // gave up ownership
+
+            routePlan->getWaypoints().push_back(waypoint.release());
 
             if (isSegmentEnd)
             {
@@ -564,7 +562,8 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute_Spiral(std::shared_pt
         }
 
         double endHeading_deg = n_Const::c_Convert::toDegrees(atan2(deltaEast_m, deltaNorth_m));
-        pTaskOptionClass->m_taskOption->setEndLocation(new afrl::cmasi::Location3D(*(routePlan->getWaypoints().back())));
+        auto loc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>(*(routePlan->getWaypoints().back()));
+        pTaskOptionClass->m_taskOption->setEndLocation(loc.release());
         pTaskOptionClass->m_taskOption->setEndHeading(endHeading_deg);
 
         int64_t routeId = TaskOptionClass::m_firstImplementationRouteId;
@@ -640,7 +639,7 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute_Sector(std::shared_pt
     }
 
     int64_t routeId = TaskOptionClass::m_firstImplementationRouteId;
-    afrl::cmasi::Location3D * lastEndLocation(nullptr);
+    std::unique_ptr<afrl::cmasi::Location3D> lastEndLocation = nullptr;
     double lastSegmentHeading_deg(0.0);
     double currentSegmentHeading_deg(0.0);
 
@@ -648,7 +647,7 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute_Sector(std::shared_pt
     {
         currentSegmentHeading_deg = searchSegment->m_heading_deg;
         // locations
-        auto startLocation = new afrl::cmasi::Location3D();
+        auto startLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
         double startLatitude_deg(0.0);
         double startLongitude_deg(0.0);
         m_flatEarth.ConvertNorthEast_mToLatLong_deg(searchSegment->m_startPosition.m_north_m,
@@ -657,7 +656,7 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute_Sector(std::shared_pt
         startLocation->setLongitude(startLongitude_deg);
         startLocation->setAltitude(pTaskOptionClass->m_altitude_m);
 
-        auto endLocation = new afrl::cmasi::Location3D();
+        auto endLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
         double endLatitude_deg(0.0);
         double endLongitude_deg(0.0);
         m_flatEarth.ConvertNorthEast_mToLatLong_deg(searchSegment->m_endPosition.m_north_m,
@@ -667,36 +666,31 @@ bool PatternSearchTaskService::isCalculatePatternScanRoute_Sector(std::shared_pt
         endLocation->setAltitude(pTaskOptionClass->m_altitude_m);
 
         // add a transition path (if required)
-        if (lastEndLocation != nullptr)
+        if (lastEndLocation)
         {
             // add the transition to next search lane path
-            auto routeConstraints = new uxas::messages::route::RouteConstraints;
+            auto routeConstraints = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
             routeConstraints->setRouteID(routeId);
-            routeConstraints->setStartLocation(lastEndLocation);
-            lastEndLocation = nullptr;
+            routeConstraints->setStartLocation(lastEndLocation.release());
             routeConstraints->setStartHeading(lastSegmentHeading_deg);
             routeConstraints->setEndLocation(startLocation->clone());
             routeConstraints->setEndHeading(currentSegmentHeading_deg);
-            routePlanRequest->getRouteRequests().push_back(routeConstraints);
-            routeConstraints = nullptr; //just gave up ownership                                
+            routePlanRequest->getRouteRequests().push_back(routeConstraints.release());
             pTaskOptionClass->m_pendingRouteIds.insert(routeId);
             routeId++;
         }
 
-        lastEndLocation = endLocation->clone();
+        lastEndLocation.reset(endLocation->clone());
         lastSegmentHeading_deg = currentSegmentHeading_deg;
 
         // add the search path
-        auto routeConstraints = new uxas::messages::route::RouteConstraints;
+        auto routeConstraints = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
         routeConstraints->setRouteID(routeId);
-        routeConstraints->setStartLocation(startLocation);
-        startLocation = nullptr;
+        routeConstraints->setStartLocation(startLocation.release());
         routeConstraints->setStartHeading(currentSegmentHeading_deg);
-        routeConstraints->setEndLocation(endLocation);
-        endLocation = nullptr;
+        routeConstraints->setEndLocation(endLocation.release());
         routeConstraints->setEndHeading(currentSegmentHeading_deg);
-        routePlanRequest->getRouteRequests().push_back(routeConstraints);
-        routeConstraints = nullptr; //just gave up ownership
+        routePlanRequest->getRouteRequests().push_back(routeConstraints.release());
         pTaskOptionClass->m_pendingRouteIds.insert(routeId);
         routeId++;
 
@@ -808,32 +802,28 @@ void PatternSearchTaskService::activeEntityState(const std::shared_ptr<afrl::cma
             auto vehicleActionCommand = std::make_shared<afrl::cmasi::VehicleActionCommand>();
             vehicleActionCommand->setVehicleID(entityState->getID());
 
-            afrl::cmasi::GimbalStareAction* pGimbalStareAction = new afrl::cmasi::GimbalStareAction();
+            auto pGimbalStareAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalStareAction>();
             pGimbalStareAction->setPayloadID(gimbalPayloadId);
             pGimbalStareAction->getAssociatedTaskList().push_back(m_patternSearchTask->getTaskID());
             pGimbalStareAction->setStarepoint(sensorStarePoint.clone());
-            vehicleActionCommand->getVehicleActionList().push_back(pGimbalStareAction);
-            pGimbalStareAction = nullptr;
+            vehicleActionCommand->getVehicleActionList().push_back(pGimbalStareAction.release());
 
 #ifdef CONFIGURE_THE_SENSOR
             //configure the sensor
-            afrl::cmasi::CameraAction* pCameraAction = new afrl::cmasi::CameraAction();
+            auto pCameraAction = uxas::stduxas::make_unique<afrl::cmasi::CameraAction>();
             pCameraAction->setPayloadID(pVehicle->gsdGetSettings().iGetPayloadID_Sensor());
             pCameraAction->setHorizontalFieldOfView(static_cast<float> (pVehicle->gsdGetSettings().dGetHorizantalFOV_rad() * _RAD_TO_DEG));
             pCameraAction->getAssociatedTaskList().push_back(iGetID());
-            vehicleActionCommand->getVehicleActionList().push_back(pCameraAction);
-            pCameraAction = 0; //don't own it
+            vehicleActionCommand->getVehicleActionList().push_back(pCameraAction.release());
 #endif  //CONFIGURE_THE_SENSOR
 
             // send out the response
-            auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
 
             //send the record video command to the axis box
             auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
             VideoRecord->setRecord(true);
-            auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
-            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(VideoRecord);
         }
         else    //if(itOptionWaypointId != m_optionWaypointIdVsFinalWaypointId.end())
         {
@@ -866,34 +856,30 @@ void PatternSearchTaskService::activeEntityState(const std::shared_ptr<afrl::cma
         auto vehicleActionCommand = std::make_shared<afrl::cmasi::VehicleActionCommand>();
         vehicleActionCommand->setVehicleID(entityState->getID());
 
-        auto gimbalAngleAction = new afrl::cmasi::GimbalAngleAction();
+        auto gimbalAngleAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalAngleAction>();
         gimbalAngleAction->setPayloadID(gimbalPayloadId);
         gimbalAngleAction->getAssociatedTaskList().push_back(m_patternSearchTask->getTaskID());
         gimbalAngleAction->setAzimuth(0.0);
         gimbalAngleAction->setElevation(-80.0);
 
-        vehicleActionCommand->getVehicleActionList().push_back(gimbalAngleAction);
-        gimbalAngleAction = nullptr;
+        vehicleActionCommand->getVehicleActionList().push_back(gimbalAngleAction.release());
 
 #ifdef CONFIGURE_THE_SENSOR
         //configure the sensor
-        afrl::cmasi::CameraAction* pCameraAction = new afrl::cmasi::CameraAction();
+        auto pCameraAction = uxas::stduxas::make_unique<afrl::cmasi::CameraAction>();
         pCameraAction->setPayloadID(pVehicle->gsdGetSettings().iGetPayloadID_Sensor());
         pCameraAction->setHorizontalFieldOfView(static_cast<float> (pVehicle->gsdGetSettings().dGetHorizantalFOV_rad() * _RAD_TO_DEG));
         pCameraAction->getAssociatedTaskList().push_back(iGetID());
-        vehicleActionCommand->getVehicleActionList().push_back(pCameraAction);
-        pCameraAction = 0; //don't own it
+        vehicleActionCommand->getVehicleActionList().push_back(pCameraAction.release());
 #endif  //CONFIGURE_THE_SENSOR
 
         // send out the response
-        auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
 
         //send the record video command to the axis box
         auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
         VideoRecord->setRecord(true);
-        auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(VideoRecord);
     } ////if(m_isUseDpss)
 }
 }; //namespace task

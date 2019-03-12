@@ -50,8 +50,6 @@ using namespace std;
 
 namespace n_FrameworkLib
 {
-    
-    typedef std::shared_ptr<afrl::cmasi::Waypoint> PTR_CMASI_WAYPOINT_t;
 
 class CWaypoint;
 
@@ -338,7 +336,7 @@ public:    //constructors
          m_dLoiterRadius_m(-1.0),    //invalid
          m_iLoiterDuration_s(0),
          m_bDoNotRemove(false),
-         m_ptr_CMASI_Waypoint(new afrl::cmasi::Waypoint())
+         m_ptr_CMASI_Waypoint(std::make_shared<afrl::cmasi::Waypoint>())
     {
     };
 
@@ -363,8 +361,7 @@ public:    //constructors
          m_dLoiterRadius_m(-1.0),    //invalid
          m_iLoiterDuration_s(0),
          m_bDoNotRemove(false),
-         m_ptr_CMASI_Waypoint(new afrl::cmasi::Waypoint())
-
+         m_ptr_CMASI_Waypoint(std::make_shared<afrl::cmasi::Waypoint>())
     {
     };
 
@@ -387,8 +384,7 @@ public:    //constructors
          m_dLoiterRadius_m(-1.0),    //invalid
          m_iLoiterDuration_s(0),
          m_bDoNotRemove(false),
-         m_ptr_CMASI_Waypoint(new afrl::cmasi::Waypoint())
-
+         m_ptr_CMASI_Waypoint(std::make_shared<afrl::cmasi::Waypoint>())
     {
     };
 
@@ -411,8 +407,7 @@ public:    //constructors
          m_dLoiterRadius_m(-1.0),    //invalid
          m_iLoiterDuration_s(0),
          m_bDoNotRemove(false),
-         m_ptr_CMASI_Waypoint(new afrl::cmasi::Waypoint())
-
+         m_ptr_CMASI_Waypoint(std::make_shared<afrl::cmasi::Waypoint>())
     {
     };
 
@@ -448,8 +443,7 @@ public:    //constructors
          m_dLoiterRadius_m(-1.0),    //invalid
          m_iLoiterDuration_s(0),
          m_bDoNotRemove(false),
-         m_ptr_CMASI_Waypoint(new afrl::cmasi::Waypoint())
-
+         m_ptr_CMASI_Waypoint(std::make_shared<afrl::cmasi::Waypoint>())
     {
     };
 
@@ -479,7 +473,7 @@ public:    //constructors
         dGetLoiterRadius_m() = rhs.dGetLoiterRadius_m();
         iGetLoiterDuration_s() = rhs.iGetLoiterDuration_s();
         bGetDoNotRemove() = rhs.bGetDoNotRemove();
-        ptr_GetCMASI_Waypoint().reset(rhs.ptr_GetCMASI_Waypoint()->clone());
+        m_ptr_CMASI_Waypoint.reset(rhs.m_ptr_CMASI_Waypoint->clone());
     }
 
     void operator=(const CWaypoint& rhs)
@@ -503,7 +497,7 @@ public:    //constructors
         dGetLoiterRadius_m() = rhs.dGetLoiterRadius_m();
         iGetLoiterDuration_s() = rhs.iGetLoiterDuration_s();
         bGetDoNotRemove() = rhs.bGetDoNotRemove();
-                ptr_GetCMASI_Waypoint().reset(rhs.ptr_GetCMASI_Waypoint()->clone());
+        m_ptr_CMASI_Waypoint.reset(rhs.m_ptr_CMASI_Waypoint->clone());
     };
 
     void operator=(const CPosition& rhs)
@@ -724,9 +718,6 @@ public:
 
     bool& bGetDoNotRemove(){return(m_bDoNotRemove);};
     const bool& bGetDoNotRemove() const {return(m_bDoNotRemove);};
-
-        PTR_CMASI_WAYPOINT_t& ptr_GetCMASI_Waypoint(){return(m_ptr_CMASI_Waypoint);};
-        const PTR_CMASI_WAYPOINT_t& ptr_GetCMASI_Waypoint()const{return(m_ptr_CMASI_Waypoint);};
         
 protected:
     int m_iID;    //this id will be unique for every new waypoint added
@@ -751,7 +742,7 @@ protected:
 
     bool m_bDoNotRemove;    // if this flag is true then put this waypoint in the plan even if it is close to another
 
-    PTR_CMASI_WAYPOINT_t m_ptr_CMASI_Waypoint;    //fisrt step: only using for passing actions to CMASI
+    std::shared_ptr<afrl::cmasi::Waypoint> m_ptr_CMASI_Waypoint;    //fisrt step: only using for passing actions to CMASI
 
 //Added by Nicola Ceccarelli 04/05/2007
 protected:

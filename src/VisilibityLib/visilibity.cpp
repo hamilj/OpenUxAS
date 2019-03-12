@@ -627,7 +627,6 @@ namespace VisiLibity
 
   Line_Segment::Line_Segment()
   {
-    endpoints_ = NULL;
     size_ = 0;
   }
 
@@ -636,16 +635,13 @@ namespace VisiLibity
   {
     switch(line_segment_temp.size_){
     case 0:
-      endpoints_ = NULL;
       size_ = 0;
       break;
     case 1:
-      endpoints_ = new Point[1];
       endpoints_[0] = line_segment_temp.endpoints_[0];
       size_ = 1;
       break;
     case 2:
-      endpoints_ = new Point[2];
       endpoints_[0] = line_segment_temp.endpoints_[0];
       endpoints_[1] = line_segment_temp.endpoints_[1];
       size_ = 2;
@@ -655,7 +651,6 @@ namespace VisiLibity
 
   Line_Segment::Line_Segment(const Point& pointemp)
   {
-    endpoints_ = new Point[1];
     endpoints_[0] = pointemp;
     size_ = 1;
   }
@@ -665,12 +660,10 @@ namespace VisiLibity
                  const Point& second_pointemp, double epsilon)
   {
     if( distance(first_pointemp, second_pointemp) <= epsilon ){
-      endpoints_ = new Point[1];
       endpoints_[0] = first_pointemp;
       size_ = 1;
     }
     else{
-      endpoints_ = new Point[2];
       endpoints_[0] = first_pointemp;
       endpoints_[1] = second_pointemp;
       size_ = 2;
@@ -728,23 +721,9 @@ namespace VisiLibity
     //Makes sure not to delete dynamic vars before they're copied.
     if(this==&line_segment_temp)
       return *this;
-    delete [] endpoints_;
-    switch(line_segment_temp.size_){
-    case 0:
-      endpoints_ = NULL;
-      size_ = 0;
-      break;
-    case 1:
-      endpoints_ = new Point[1];
-      endpoints_[0] = line_segment_temp.endpoints_[0];
-      size_ = 1;
-      break;
-    case 2:
-      endpoints_ = new Point[2];
-      endpoints_[0] = line_segment_temp.endpoints_[0];
-      endpoints_[1] = line_segment_temp.endpoints_[1];
-      size_ = 2;
-    }
+    endpoints_[0] = line_segment_temp.endpoints_[0];
+    endpoints_[1] = line_segment_temp.endpoints_[1];
+    size_ = line_segment_temp.size_;
     return *this;
   }
 
@@ -754,7 +733,6 @@ namespace VisiLibity
     Point second_pointemp;
     switch(size_){
     case 0:
-      endpoints_ = new Point[1];
       endpoints_[0] = pointemp;
       size_ = 1;
       break;
@@ -762,8 +740,6 @@ namespace VisiLibity
       if( distance(endpoints_[0], pointemp) <= epsilon )
     { endpoints_[0] = pointemp; return; }
       second_pointemp = endpoints_[0];
-      delete [] endpoints_;
-      endpoints_ = new Point[2];
       endpoints_[0] = pointemp;
       endpoints_[1] = second_pointemp;
       size_ = 2;
@@ -771,8 +747,6 @@ namespace VisiLibity
     case 2:
       if( distance(pointemp, endpoints_[1]) > epsilon )
     { endpoints_[0] = pointemp; return; }
-      delete [] endpoints_;
-      endpoints_ = new Point[1];
       endpoints_[0] = pointemp;
       size_ = 1;
     }
@@ -784,7 +758,6 @@ namespace VisiLibity
     Point first_pointemp;
     switch(size_){
     case 0:
-      endpoints_ = new Point[1];
       endpoints_[0] = pointemp;
       size_ = 1;
       break;
@@ -792,8 +765,6 @@ namespace VisiLibity
       if( distance(endpoints_[0], pointemp) <= epsilon )
     { endpoints_[0] = pointemp; return; }
       first_pointemp = endpoints_[0];
-      delete [] endpoints_;
-      endpoints_ = new Point[2];
       endpoints_[0] = first_pointemp;
       endpoints_[1] = pointemp;
       size_ = 2;
@@ -801,8 +772,6 @@ namespace VisiLibity
     case 2:
       if( distance(endpoints_[0], pointemp) > epsilon )
     { endpoints_[1] = pointemp; return; }
-      delete [] endpoints_;
-      endpoints_ = new Point[1];
       endpoints_[0] = pointemp;
       size_ = 1;
     }
@@ -828,15 +797,13 @@ namespace VisiLibity
 
   void Line_Segment::clear()
   {
-    delete [] endpoints_;
-    endpoints_ = NULL;
     size_ = 0;
   }
 
 
   Line_Segment::~Line_Segment()
   {
-    delete [] endpoints_;
+
   }
 
 
@@ -2435,10 +2402,8 @@ namespace VisiLibity
     Visibility_Polygon finish_visibility_polygon(finish, *this, epsilon);
 
     //Connect start and finish Points to the visibility graph
-    bool *start_visible;  //start row of visibility graph
-    bool *finish_visible; //finish row of visibility graph
-    start_visible = new bool[n()];
-    finish_visible = new bool[n()];
+    std::vector<bool> start_visible(n());  //start row of visibility graph
+    std::vector<bool> finish_visible(n()); //finish row of visibility graph
     for(unsigned k=0; k<n(); k++){
       if(  (*this)(k).in( start_visibility_polygon , epsilon )  )
     start_visible[k] = true;
@@ -2707,10 +2672,6 @@ namespace VisiLibity
       }
       shortest_path_output.reverse();
     }
-
-    //free memory
-    delete [] start_visible;
-    delete [] finish_visible;
 
     //shortest_path_output.eliminate_redundant_vertices( epsilon );
     //May not be desirable to eliminate redundant vertices, because
@@ -3887,7 +3848,7 @@ namespace VisiLibity
     vertex_counts_ = visibility_graph_temp.vertex_counts_;
 
     //resize adjacency_matrix_
-    if( adjacency_matrix_ != NULL ){
+    if( adjacency_matrix_ ){
       delete [] adjacency_matrix_[0];
       delete [] adjacency_matrix_; 
     }
@@ -3922,7 +3883,7 @@ namespace VisiLibity
 
   Visibility_Graph::~Visibility_Graph()    
   { 
-    if( adjacency_matrix_ != NULL ){
+    if( adjacency_matrix_ ){
       delete [] adjacency_matrix_[0];
       delete [] adjacency_matrix_; 
     }

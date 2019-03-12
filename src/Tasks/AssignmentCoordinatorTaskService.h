@@ -87,10 +87,10 @@ public:
     static const std::string&
     s_directoryName() { static std::string s_string(""); return (s_string); };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new AssignmentCoordinatorTaskService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<AssignmentCoordinatorTaskService>(pLmcpObjectNetworkClient);
     };
 
     explicit AssignmentCoordinatorTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

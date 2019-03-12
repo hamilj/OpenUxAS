@@ -121,8 +121,7 @@ LmcpObjectMessageReceiverPipe::getNextMessageObject()
         std::unique_ptr<avtas::lmcp::Object> lmcpObject = deserializeMessage(nextZeroMqMessage->getPayload());
         if (lmcpObject)
         {
-            std::unique_ptr<uxas::communications::data::LmcpMessage> lmcpMessage 
-                    = uxas::stduxas::make_unique<uxas::communications::data::LmcpMessage>
+            auto lmcpMessage = uxas::stduxas::make_unique<uxas::communications::data::LmcpMessage>
               (nextZeroMqMessage->getMessageAttributesOwnership(), std::move(lmcpObject));
             return (lmcpMessage);
         }
@@ -130,8 +129,7 @@ LmcpObjectMessageReceiverPipe::getNextMessageObject()
 
     // handle empty return case (got empty AddressedAttributedMessage or failed de-serialization)
     // return empty unique pointer
-    std::unique_ptr<uxas::communications::data::LmcpMessage> emptyLmcpMessage;
-    return (emptyLmcpMessage);
+    return nullptr;
 };
 
 std::unique_ptr<uxas::communications::data::AddressedAttributedMessage>

@@ -40,7 +40,7 @@ AssignmentTreeBranchBoundService::~AssignmentTreeBranchBoundService() { };
 
 void AssignmentTreeBranchBoundService::runCalculateAssignment(const std::shared_ptr<AssigmentPrerequisites>& assigmentPrerequisites)
 {
-    std::unique_ptr<c_Node_Base> nodeAssignment(new c_Node_TreeBranchAndBound);
+    auto nodeAssignment = uxas::stduxas::make_unique<c_Node_TreeBranchAndBound>();
     AssignmentTreeBranchBoundBase::calculateAssignment(std::move(nodeAssignment),assigmentPrerequisites);
 }
 
@@ -52,7 +52,7 @@ void AssignmentTreeBranchBoundService::runCalculateAssignment(const std::shared_
 
 std::unique_ptr<c_Node_Base> c_Node_TreeBranchAndBound::clone()
 {
-    return (std::unique_ptr<c_Node_Base>(new c_Node_TreeBranchAndBound(*this)));
+    return uxas::stduxas::make_unique<c_Node_Base>(*this);
 }
 
 c_Node_TreeBranchAndBound::c_Node_TreeBranchAndBound(const c_Node_TreeBranchAndBound & rhs) //copy constructor

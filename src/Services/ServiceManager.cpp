@@ -62,7 +62,7 @@ ServiceManager&
 ServiceManager::getInstance()
 {
     // first time/one time creation
-    if (ServiceManager::s_instance == nullptr)
+    if (!ServiceManager::s_instance)
     {
         UXAS_LOG_INFORM(s_typeName(), "::getInstance static ServiceBase subclass initialization started");
         // force initialization of classes and their static class members

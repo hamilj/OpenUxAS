@@ -102,7 +102,7 @@ namespace utilities
                 }
             }
             set_isThreadRunning(true);
-            _thrThread.reset(new std::thread(&c_CallbackTimer::CallbackTimerExecutitve, this, time_ms, callbackFunction));
+            _thrThread = std::make_shared<std::thread>(&c_CallbackTimer::CallbackTimerExecutitve, this, time_ms, callbackFunction);
         }
     }
 

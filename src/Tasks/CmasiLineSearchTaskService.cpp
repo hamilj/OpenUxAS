@@ -231,8 +231,7 @@ void CmasiLineSearchTaskService::buildTaskPlanOptions()
     // send out the options
     if (isSuccessful)
     {
-        auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
     }
 };
 
@@ -347,13 +346,12 @@ bool CmasiLineSearchTaskService::isCalculateOption(const int64_t& taskId, const 
                 double longitude_deg(0.0);
                 unitConversions.ConvertNorthEast_mToLatLong_deg(itWaypoint->x, itWaypoint->y, latitude_deg, longitude_deg);
 
-                auto waypoint = new afrl::cmasi::Waypoint();
+                auto waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                 waypoint->setNumber(waypointNumber);
                 waypoint->setLatitude(latitude_deg);
                 waypoint->setLongitude(longitude_deg);
                 waypoint->setAltitude(itWaypoint->z);
-                routePlanForward->getWaypoints().push_back(waypoint);
-                waypoint = nullptr; // gave up ownership
+                routePlanForward->getWaypoints().push_back(waypoint.release());
 
                 if (itWaypoint != vxyPlanForward.begin())
                 {
@@ -502,13 +500,12 @@ bool CmasiLineSearchTaskService::isCalculateOption(const int64_t& taskId, const 
                 double longitude_deg(0.0);
                 unitConversions.ConvertNorthEast_mToLatLong_deg(itWaypoint->x, itWaypoint->y, latitude_deg, longitude_deg);
 
-                auto waypoint = new afrl::cmasi::Waypoint();
+                auto waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                 waypoint->setNumber(waypointNumber);
                 waypoint->setLatitude(latitude_deg);
                 waypoint->setLongitude(longitude_deg);
                 waypoint->setAltitude(itWaypoint->z);
-                routePlanForward->getWaypoints().push_back(waypoint);
-                waypoint = nullptr; // gave up ownership
+                routePlanForward->getWaypoints().push_back(waypoint.release());
 
                 if (itWaypoint != vxyPlanForward.begin())
                 {
@@ -628,38 +625,33 @@ void CmasiLineSearchTaskService::activeEntityState(const std::shared_ptr<afrl::c
         auto vehicleActionCommand = std::make_shared<afrl::cmasi::VehicleActionCommand>();
         vehicleActionCommand->setVehicleID(entityState->getID());
 
-        afrl::cmasi::GimbalStareAction* pGimbalStareAction = new afrl::cmasi::GimbalStareAction();
+        auto pGimbalStareAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalStareAction>();
         pGimbalStareAction->setPayloadID(gimbalPayloadId);
         pGimbalStareAction->getAssociatedTaskList().push_back(m_lineSearchTask->getTaskID());
-        afrl::cmasi::Location3D* stareLocation = new afrl::cmasi::Location3D;
+        auto stareLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
         stareLocation->setLatitude(dLatitude_deg);
         stareLocation->setLongitude(dLongitude_deg);
         stareLocation->setAltitude(static_cast<float> (xyStarePoint.z));
-        pGimbalStareAction->setStarepoint(stareLocation);
-        stareLocation = nullptr;
+        pGimbalStareAction->setStarepoint(stareLocation.release());
 
-        vehicleActionCommand->getVehicleActionList().push_back(pGimbalStareAction);
-        pGimbalStareAction = nullptr;
+        vehicleActionCommand->getVehicleActionList().push_back(pGimbalStareAction.release());
 
 #ifdef CONFIGURE_THE_SENSOR
         //configure the sensor
-        afrl::cmasi::CameraAction* pCameraAction = new afrl::cmasi::CameraAction();
+        auto pCameraAction = uxas::stduxas::make_unique<afrl::cmasi::CameraAction>();
         pCameraAction->setPayloadID(pVehicle->gsdGetSettings().iGetPayloadID_Sensor());
         pCameraAction->setHorizontalFieldOfView(static_cast<float> (pVehicle->gsdGetSettings().dGetHorizantalFOV_rad() * _RAD_TO_DEG));
         pCameraAction->getAssociatedTaskList().push_back(iGetID());
-        vehicleActionCommand->getVehicleActionList().push_back(pCameraAction);
-        pCameraAction = 0; //don't own it
+        vehicleActionCommand->getVehicleActionList().push_back(pCameraAction.release());
 #endif  //CONFIGURE_THE_SENSOR
 
         // send out the response
-        auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
 
         //send the record video command to the axis box
         auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
         VideoRecord->setRecord(true);
-        auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(VideoRecord);
     }
     else
     {

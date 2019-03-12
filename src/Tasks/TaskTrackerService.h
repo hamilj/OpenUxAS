@@ -101,10 +101,10 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new TaskTrackerService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<TaskTrackerService>(pLmcpObjectNetworkClient);
     };
 
     explicit TaskTrackerService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

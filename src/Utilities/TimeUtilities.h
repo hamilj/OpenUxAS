@@ -21,11 +21,18 @@
 
 #include <chrono>       // time functions
 
-//#include <mutex>
+#include <memory>
 
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 namespace n_POSIX_TIME = boost::posix_time;
+
+namespace std
+{
+
+class mutex;
+
+} // namespace std
 
 namespace uxas
 {
@@ -40,9 +47,6 @@ namespace utilities
  * the system clock-based time.
  * 
  */
-
-    class mutex;
-
 class c_TimeUtilities
 {
 public:
@@ -87,10 +91,6 @@ public:
     
     static void bSetTimeCorrected_b(const bool& bTimeCorrected){m_bTimeCorrected = bTimeCorrected ;};
     static const bool& bGetTimeCorrected(){return(m_bTimeCorrected);};
-    /*! \brief accessor function for: std::mutex m_mtxTimeSyncMutex */
-    static mutex*& pmtxGetTimeSyncMutex() {
-        return (m_pmtxTimeSyncMutex);
-    };
     
 protected:
     
@@ -101,7 +101,7 @@ protected:
     static n_POSIX_TIME::time_duration m_tmdrtnTimeCorrection; //add this correction to Computer Time, i.e. n_POSIX_TIME::microsec_clock::universal_time(), to get corrected time, e.g. GPS time
     static bool m_bTimeCorrected;
             /*! \brief  synchronize low level operations*/
-    static mutex* m_pmtxTimeSyncMutex;
+    static std::unique_ptr<std::mutex> m_pmtxTimeSyncMutex;
 
 
 };

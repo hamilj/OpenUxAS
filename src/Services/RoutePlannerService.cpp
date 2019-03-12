@@ -92,20 +92,19 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
 {
     if (uxas::messages::route::isRoutePlanRequest(receivedLmcpMessage->m_object.get()))
     {
-        std::shared_ptr<uxas::messages::route::RoutePlanRequest> request = std::static_pointer_cast<uxas::messages::route::RoutePlanRequest>(receivedLmcpMessage->m_object);
+        auto request = std::static_pointer_cast<uxas::messages::route::RoutePlanRequest>(receivedLmcpMessage->m_object);
         // only handle requests for air and surface vehicles
         if (m_airVehicles.find(request->getVehicleID()) != m_airVehicles.end() ||
                 m_surfaceVehicles.find(request->getVehicleID()) != m_surfaceVehicles.end())
         {
             std::shared_ptr<uxas::messages::route::RoutePlanResponse> response = HandleRoutePlanRequestMsg(request);
-            std::shared_ptr<avtas::lmcp::Object> pResponse = std::static_pointer_cast<avtas::lmcp::Object>(response);
             // always limited-cast route plan responses
             m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(
                     uxas::communications::getNetworkClientUnicastAddress(
                         receivedLmcpMessage->m_attributes->getSourceEntityId(),
                         receivedLmcpMessage->m_attributes->getSourceServiceId()
                     ),
-                    pResponse);
+                    response);
         }
     }
     else if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object.get()))
@@ -114,7 +113,7 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
         m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         // no region update for generic entities
     }
-    else if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object))
+    else if (afrl::cmasi::isAirVehicleState(receivedLmcpMessage->m_object))
     {
         int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
         m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
@@ -151,7 +150,7 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
         m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         // no region update for generic entities
     }
-    else if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(receivedLmcpMessage->m_object))
+    else if (afrl::cmasi::isAirVehicleConfiguration(receivedLmcpMessage->m_object))
     {
         int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
         m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
@@ -192,17 +191,17 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
         {
             if (afrl::vehicles::isSurfaceVehicleConfiguration(e.second.get()))
             {
-                auto s = std::dynamic_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(e.second);
+                auto s = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(e.second);
                 if (s->getWaterArea() == wzone->getZoneID())
                 {
-                    UpdateRegions(std::dynamic_pointer_cast<avtas::lmcp::Object>(s));
+                    UpdateRegions(s);
                 }
             }
         }
     }
     else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object.get()))
     {
-        std::shared_ptr<afrl::cmasi::KeepInZone> kiZone = std::static_pointer_cast<afrl::cmasi::KeepInZone>(receivedLmcpMessage->m_object);
+        auto kiZone = std::static_pointer_cast<afrl::cmasi::KeepInZone>(receivedLmcpMessage->m_object);
         int64_t id = kiZone->getZoneID();
         auto zone = m_keepInZones.find(id);
         if (zone != m_keepInZones.end())
@@ -216,7 +215,7 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
     }
     else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object.get()))
     {
-        std::shared_ptr<afrl::cmasi::KeepOutZone> koZone = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(receivedLmcpMessage->m_object);
+        auto koZone = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(receivedLmcpMessage->m_object);
         int64_t id = koZone->getZoneID();
         auto zone = m_keepOutZones.find(id);
         if (zone != m_keepOutZones.end())
@@ -230,7 +229,7 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
     }
     else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object.get()))
     {
-        std::shared_ptr<afrl::cmasi::OperatingRegion> region = std::static_pointer_cast<afrl::cmasi::OperatingRegion>(receivedLmcpMessage->m_object);
+        auto region = std::static_pointer_cast<afrl::cmasi::OperatingRegion>(receivedLmcpMessage->m_object);
         int64_t id = region->getID();
         auto r = m_operatingRegions.find(id);
         if (r != m_operatingRegions.end())
@@ -276,7 +275,7 @@ void RoutePlannerService::BuildVisibilityRegion(std::shared_ptr<afrl::cmasi::Ope
         auto surfaceConfig = m_entityConfigurations.find(*id);
         if (surfaceConfig != m_entityConfigurations.end())
         {
-            std::shared_ptr<afrl::vehicles::SurfaceVehicleConfiguration> config = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(surfaceConfig->second);
+            auto config = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(surfaceConfig->second);
             if (m_waterZones.find(config->getWaterArea()) != m_waterZones.end())
             {
                 waterzone = m_waterZones[config->getWaterArea()]->getBoundary();
@@ -288,9 +287,9 @@ void RoutePlannerService::BuildVisibilityRegion(std::shared_ptr<afrl::cmasi::Ope
 
 void RoutePlannerService::UpdateRegions(std::shared_ptr<avtas::lmcp::Object> msg)
 {
-    if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(msg))
+    if (afrl::cmasi::isAirVehicleState(msg))
     {
-        std::shared_ptr<afrl::cmasi::AirVehicleState> avstate = std::static_pointer_cast<afrl::cmasi::AirVehicleState>(msg);
+        auto avstate = std::static_pointer_cast<afrl::cmasi::AirVehicleState>(msg);
         for (auto r = m_operatingRegions.begin(); r != m_operatingRegions.end(); r++)
         {
             std::shared_ptr<afrl::cmasi::OperatingRegion> region = r->second;
@@ -299,7 +298,7 @@ void RoutePlannerService::UpdateRegions(std::shared_ptr<avtas::lmcp::Object> msg
     }
     else if (afrl::cmasi::isAirVehicleConfiguration(msg.get()))
     {
-        std::shared_ptr<afrl::cmasi::AirVehicleConfiguration> avconfig = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(msg);
+        auto avconfig = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(msg);
         for (auto r = m_operatingRegions.begin(); r != m_operatingRegions.end(); r++)
         {
             std::shared_ptr<afrl::cmasi::OperatingRegion> region = r->second;
@@ -308,7 +307,7 @@ void RoutePlannerService::UpdateRegions(std::shared_ptr<avtas::lmcp::Object> msg
     }
     else if (afrl::vehicles::isSurfaceVehicleState(msg.get()))
     {
-        std::shared_ptr<afrl::vehicles::SurfaceVehicleState> surfstate = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleState>(msg);
+        auto surfstate = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleState>(msg);
         for (auto r = m_operatingRegions.begin(); r != m_operatingRegions.end(); r++)
         {
             std::shared_ptr<afrl::cmasi::OperatingRegion> region = r->second;
@@ -318,7 +317,7 @@ void RoutePlannerService::UpdateRegions(std::shared_ptr<avtas::lmcp::Object> msg
     }
     else if (afrl::vehicles::isSurfaceVehicleConfiguration(msg.get()))
     {
-        std::shared_ptr<afrl::vehicles::SurfaceVehicleConfiguration> surfconfig = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(msg);
+        auto surfconfig = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(msg);
         afrl::cmasi::AbstractGeometry* waterzone = nullptr;
         if (m_waterZones.find(surfconfig->getWaterArea()) != m_waterZones.end())
         {
@@ -338,7 +337,7 @@ void RoutePlannerService::UpdateRegions(std::shared_ptr<avtas::lmcp::Object> msg
         if (!hasZeroRegion)
         {
             // insert zero region id for unspecified regions
-            std::shared_ptr<afrl::cmasi::OperatingRegion> oregion(new afrl::cmasi::OperatingRegion);
+            auto oregion = std::make_shared<afrl::cmasi::OperatingRegion>();
             oregion->setID(0);
             BuildVehicleSpecificRegion(oregion, surfconfig->getID(), waterzone);
         }
@@ -346,7 +345,7 @@ void RoutePlannerService::UpdateRegions(std::shared_ptr<avtas::lmcp::Object> msg
     }
     else if (afrl::cmasi::isKeepInZone(msg.get()))
     {
-        std::shared_ptr<afrl::cmasi::KeepInZone> zone = std::static_pointer_cast<afrl::cmasi::KeepInZone>(msg);
+        auto zone = std::static_pointer_cast<afrl::cmasi::KeepInZone>(msg);
         int64_t zoneId = zone->getZoneID();
 
         // rebuild any region that contains this zone
@@ -361,7 +360,7 @@ void RoutePlannerService::UpdateRegions(std::shared_ptr<avtas::lmcp::Object> msg
     }
     else if (afrl::cmasi::isKeepOutZone(msg.get()))
     {
-        std::shared_ptr<afrl::cmasi::KeepOutZone> zone = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(msg);
+        auto zone = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(msg);
         int64_t zoneId = zone->getZoneID();
 
         // rebuild any region that contains this zone
@@ -625,19 +624,15 @@ void RoutePlannerService::BuildVehicleSpecificRegion(std::shared_ptr<afrl::cmasi
         if (!polygonPlanningList.empty())
         {
             // create environment
-            VisiLibity::Environment* environment = new VisiLibity::Environment(polygonPlanningList);
+            auto environment = std::make_shared<VisiLibity::Environment>(polygonPlanningList);
 
             // check for epsilon valid
             if (environment->is_valid(epsilon))
             {
                 // save environment
-                m_environments[region->getID()][vehicleId].reset(environment);
+                m_environments[region->getID()][vehicleId] = environment;
                 // create visibility graph
-                m_visgraphs[region->getID()][vehicleId].reset(new VisiLibity::Visibility_Graph(*environment, epsilon));
-            }
-            else
-            {
-                delete environment;
+                m_visgraphs[region->getID()][vehicleId] = std::make_shared<VisiLibity::Visibility_Graph>(*environment, epsilon);
             }
         }
     }
@@ -651,7 +646,7 @@ bool RoutePlannerService::LinearizeBoundary(afrl::cmasi::AbstractGeometry* bound
 
     if (afrl::cmasi::isPolygon(boundary))
     {
-        afrl::cmasi::Polygon* boundaryPolygon = (afrl::cmasi::Polygon*) boundary;
+        auto boundaryPolygon = static_cast<afrl::cmasi::Polygon*>(boundary);
         for (unsigned int k = 0; k < boundaryPolygon->getBoundaryPoints().size(); k++)
         {
             VisiLibity::Point pt;
@@ -665,7 +660,7 @@ bool RoutePlannerService::LinearizeBoundary(afrl::cmasi::AbstractGeometry* bound
     }
     else if (afrl::cmasi::isRectangle(boundary))
     {
-        afrl::cmasi::Rectangle* rectangle = (afrl::cmasi::Rectangle*) boundary;
+        auto rectangle = static_cast<afrl::cmasi::Rectangle*>(boundary);
         VisiLibity::Point c;
         double north, east;
         flatEarth.ConvertLatLong_degToNorthEast_m(rectangle->getCenterPoint()->getLatitude(), rectangle->getCenterPoint()->getLongitude(), north, east);
@@ -687,7 +682,7 @@ bool RoutePlannerService::LinearizeBoundary(afrl::cmasi::AbstractGeometry* bound
     }
     else if (afrl::cmasi::isCircle(boundary))
     {
-        afrl::cmasi::Circle* circle = (afrl::cmasi::Circle*) boundary;
+        auto circle = static_cast<afrl::cmasi::Circle*>(boundary);
         VisiLibity::Point c;
         double north, east;
         flatEarth.ConvertLatLong_degToNorthEast_m(circle->getCenterPoint()->getLatitude(), circle->getCenterPoint()->getLongitude(), north, east);
@@ -745,7 +740,7 @@ RoutePlannerService::HandleRoutePlanRequestMsg(std::shared_ptr<uxas::messages::r
     }
 
     // plan for all the requests
-    std::shared_ptr<uxas::messages::route::RoutePlanResponse> response(new uxas::messages::route::RoutePlanResponse);
+    auto response = std::make_shared<uxas::messages::route::RoutePlanResponse>();
     response->setResponseID(request->getRequestID());
     response->setAssociatedTaskID(taskId);
     response->setVehicleID(vehicleId);
@@ -758,14 +753,14 @@ RoutePlannerService::HandleRoutePlanRequestMsg(std::shared_ptr<uxas::messages::r
         VisiLibity::Point startPt, endPt;
         double north, east;
 
-        uxas::messages::route::RoutePlan* plan = new uxas::messages::route::RoutePlan;
+        auto plan = uxas::stduxas::make_unique<uxas::messages::route::RoutePlan>();
         plan->setRouteID(routeId);
 
-        if (routeRequest->getStartLocation() == nullptr && hasState)
+        if (!routeRequest->getStartLocation() && hasState)
         {
             startPt = vehiclePt;
         }
-        else if (routeRequest->getStartLocation() != nullptr)
+        else if (routeRequest->getStartLocation())
         {
             flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getStartLocation()->getLatitude(), routeRequest->getStartLocation()->getLongitude(), north, east);
             startPt.set_x(east);
@@ -776,11 +771,11 @@ RoutePlannerService::HandleRoutePlanRequestMsg(std::shared_ptr<uxas::messages::r
             hasValidLocations = false;
         }
 
-        if (routeRequest->getEndLocation() == nullptr && hasState)
+        if (!routeRequest->getEndLocation() && hasState)
         {
             endPt = vehiclePt;
         }
-        else if (routeRequest->getEndLocation() != nullptr)
+        else if (routeRequest->getEndLocation())
         {
             flatEarth.ConvertLatLong_degToNorthEast_m(routeRequest->getEndLocation()->getLatitude(), routeRequest->getEndLocation()->getLongitude(), north, east);
             endPt.set_x(east);
@@ -821,10 +816,9 @@ RoutePlannerService::HandleRoutePlanRequestMsg(std::shared_ptr<uxas::messages::r
 
                                 if (!request->getIsCostOnlyRequest())
                                 {
-                                    afrl::cmasi::Waypoint* wp;
                                     for (size_t n = 0; n < path.size(); n++)
                                     {
-                                        wp = new afrl::cmasi::Waypoint();
+                                        auto wp = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                                         double lat, lon;
                                         flatEarth.ConvertNorthEast_mToLatLong_deg(path[n].y(), path[n].x(), lat, lon);
                                         wp->setLatitude(lat);
@@ -839,7 +833,7 @@ RoutePlannerService::HandleRoutePlanRequestMsg(std::shared_ptr<uxas::messages::r
                                         }
                                         wp->setSpeed(speed);
                                         wp->setTurnType(afrl::cmasi::TurnType::TurnShort);
-                                        plan->getWaypoints().push_back(wp);
+                                        plan->getWaypoints().push_back(wp.release());
                                     }
                                 }
                             }
@@ -856,10 +850,9 @@ RoutePlannerService::HandleRoutePlanRequestMsg(std::shared_ptr<uxas::messages::r
 
                 if (!request->getIsCostOnlyRequest())
                 {
-                    afrl::cmasi::Waypoint* wp;
                     double lat, lon;
 
-                    wp = new afrl::cmasi::Waypoint();
+                    auto wp = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                     flatEarth.ConvertNorthEast_mToLatLong_deg(startPt.y(), startPt.x(), lat, lon);
                     wp->setLatitude(lat);
                     wp->setLongitude(lon);
@@ -869,9 +862,9 @@ RoutePlannerService::HandleRoutePlanRequestMsg(std::shared_ptr<uxas::messages::r
                     wp->setNextWaypoint(2);
                     wp->setSpeed(speed);
                     wp->setTurnType(afrl::cmasi::TurnType::TurnShort);
-                    plan->getWaypoints().push_back(wp);
+                    plan->getWaypoints().push_back(wp.release());
 
-                    wp = new afrl::cmasi::Waypoint();
+                    wp = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                     flatEarth.ConvertNorthEast_mToLatLong_deg(endPt.y(), endPt.x(), lat, lon);
                     wp->setLatitude(lat);
                     wp->setLongitude(lon);
@@ -881,12 +874,12 @@ RoutePlannerService::HandleRoutePlanRequestMsg(std::shared_ptr<uxas::messages::r
                     wp->setNextWaypoint(2);
                     wp->setSpeed(speed);
                     wp->setTurnType(afrl::cmasi::TurnType::TurnShort);
-                    plan->getWaypoints().push_back(wp);
+                    plan->getWaypoints().push_back(wp.release());
                 }
             }
         }
 
-        response->getRouteResponses().push_back(plan);
+        response->getRouteResponses().push_back(plan.release());
     }
 
     return response;

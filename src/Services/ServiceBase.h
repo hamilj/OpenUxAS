@@ -121,17 +121,15 @@ public:
     instantiateService(const std::string& serviceType, std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
         auto it = createFunctionByServiceType().find(serviceType);
-        ServiceBase * newService(it == createFunctionByServiceType().end() ? nullptr : (it->second)(pLmcpObjectNetworkClient));
-        std::unique_ptr<ServiceBase> service(newService);
-        return (service);
+        return (it == createFunctionByServiceType().end()) ? std::unique_ptr<ServiceBase>(nullptr) : (it->second)(pLmcpObjectNetworkClient);
     }
 
 protected:
     // Children must implement a create function returning a new object of the subclass via
-    //    static ServiceBase* create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+    //    static std::unique_ptr<ServiceBase> create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
 
     /** \brief type representing a pointer to a service creation function.  */
-    using serviceCreationFunctionPointer = ServiceBase* (*)(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient>);
+    using serviceCreationFunctionPointer = std::unique_ptr<ServiceBase> (*)(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient>);
 
     /** \brief registers service type name, alias type names and it's create() function for a subclass.  */
     static
@@ -140,8 +138,7 @@ protected:
     {
         for (auto& serviceTypeName : registryServiceTypeNames)
         {
-            auto it = createFunctionByServiceType().find(serviceTypeName);
-            if (it != createFunctionByServiceType().end())
+            if (createFunctionByServiceType().find(serviceTypeName) != createFunctionByServiceType().end())
             {
                 UXAS_LOG_WARN("ServiceBase::registerServiceCreationFunctionPointers is overwriting existing service creation function pointer ", serviceTypeName);
             }
@@ -152,8 +149,7 @@ protected:
     template <typename T>
     struct CreationRegistrar
     {
-        explicit
-        CreationRegistrar(const std::vector<std::string>& registryServiceTypeNames)
+        explicit CreationRegistrar(const std::vector<std::string>& registryServiceTypeNames)
         {
             ServiceBase::registerServiceCreationFunctionPointers(registryServiceTypeNames, &T::create);
         }

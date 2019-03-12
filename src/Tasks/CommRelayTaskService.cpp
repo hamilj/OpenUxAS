@@ -92,16 +92,16 @@ CommRelayTaskService::configureDynamicTask(const pugi::xml_node& ndComponent)
     {
         if (m_CommRelayTask->getSupportedEntityID() == 0)
         {
-            if (m_CommRelayTask->getDestinationLocation() != nullptr)
+            if (m_CommRelayTask->getDestinationLocation())
             {
-                m_supportedEntityStateLast = std::shared_ptr<afrl::cmasi::Location3D>(m_CommRelayTask->getDestinationLocation()->clone());
+                m_supportedEntityStateLast.reset(m_CommRelayTask->getDestinationLocation()->clone());
             }
         }
         else
         {
             if (m_entityStates.find(m_CommRelayTask->getSupportedEntityID()) != m_entityStates.end())
             {
-                m_supportedEntityStateLast = std::shared_ptr<afrl::cmasi::Location3D>(m_entityStates[m_CommRelayTask->getSupportedEntityID()]->getLocation()->clone());
+                m_supportedEntityStateLast.reset(m_entityStates[m_CommRelayTask->getSupportedEntityID()]->getLocation()->clone());
             }
             else
             {
@@ -140,12 +140,12 @@ bool
 CommRelayTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
 //example: if (afrl::cmasi::isServiceStatus(receivedLmcpObject))
 {
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpObject))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
         if (entityState->getID() == m_CommRelayTask->getSupportedEntityID())
         {
-            m_supportedEntityStateLast = std::shared_ptr<afrl::cmasi::Location3D>(entityState->getLocation()->clone());
+            m_supportedEntityStateLast.reset(entityState->getLocation()->clone());
         }
     }
     return (false); // always false implies never terminating service from here
@@ -153,7 +153,7 @@ CommRelayTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<avta
 
 std::shared_ptr<afrl::cmasi::Location3D> CommRelayTaskService::calculateTargetLocation(const std::shared_ptr<afrl::cmasi::EntityState> entityState)
 {
-    auto middle = std::shared_ptr<afrl::cmasi::Location3D>(entityState->getLocation()->clone());
+    std::shared_ptr<afrl::cmasi::Location3D> middle(entityState->getLocation()->clone());
 
     if (m_supportedEntityStateLast)
     {

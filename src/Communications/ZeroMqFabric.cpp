@@ -67,7 +67,7 @@ ZeroMqFabric::createSocket(ZeroMqSocketConfiguration& socketConfiguration)
     }
     
     UXAS_LOG_DEBUGGING("ZeroMqFabric::createSocket attempting to build socket of type ", socketConfiguration.m_zmqSocketType);
-    std::unique_ptr<zmq::socket_t> zmqSocket = uxas::stduxas::make_unique<zmq::socket_t>(*m_zmqContext, socketConfiguration.m_zmqSocketType);
+    auto zmqSocket = uxas::stduxas::make_unique<zmq::socket_t>(*m_zmqContext, socketConfiguration.m_zmqSocketType);
     
     if(!zmqSocket)
     {

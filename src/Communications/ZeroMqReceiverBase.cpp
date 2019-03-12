@@ -54,7 +54,7 @@ ZeroMqReceiverBase::initialize(uint32_t entityId, uint32_t serviceId, SocketConf
     catch (std::exception& ex)
     {
         UXAS_LOG_ERROR("ZeroMqReceiverBase::initialize, create socket EXCEPTION: ", ex.what());
-        m_zmqSocket = nullptr;
+        m_zmqSocket.reset(nullptr);
     }
 };
 

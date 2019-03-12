@@ -92,9 +92,9 @@ OverwatchTaskService::processRecievedLmcpMessageDynamicTask(std::shared_ptr<avta
 //example: if (afrl::cmasi::isServiceStatus(receivedLmcpObject))
 {
     // track watched entity
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpObject))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
         if (entityState->getID() == m_watchTask->getWatchedEntityID())
         {
             if( fabs(entityState->getLocation()->getLatitude()) < 0.01 && fabs(entityState->getLocation()->getLongitude()) < 0.01 )
@@ -145,7 +145,7 @@ std::shared_ptr<afrl::cmasi::Location3D> OverwatchTaskService::calculateTargetLo
     }
 
     // project state based on constant velocity assumption
-    auto projstate = std::shared_ptr<afrl::cmasi::EntityState>(m_watchedEntityStateLast->clone());
+    std::shared_ptr<afrl::cmasi::EntityState> projstate(m_watchedEntityStateLast->clone());
 
     // if estimating, start with zero expected motion
     if(m_estimateTargetMotion)

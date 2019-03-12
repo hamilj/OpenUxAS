@@ -99,10 +99,10 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new AngledAreaSearchTaskService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<AngledAreaSearchTaskService>(pLmcpObjectNetworkClient);
     };
 
     explicit AngledAreaSearchTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

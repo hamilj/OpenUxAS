@@ -82,7 +82,7 @@ SendMessagesService::configure(const pugi::xml_node& serviceXmlNode)
         {
             bool isGoodMessage(true);
 
-            std::unique_ptr<TestMessage> newMessage(new TestMessage());
+            auto newMessage = uxas::stduxas::make_unique<TestMessage>();
             if (!currentXmlNode.attribute(STRING_XML_MESSAGE_FILE_NAME).empty())
             {
                 std::string fileName = currentXmlNode.attribute(STRING_XML_MESSAGE_FILE_NAME).value();
@@ -106,17 +106,16 @@ SendMessagesService::configure(const pugi::xml_node& serviceXmlNode)
                         }
                     }
                     UXAS_LOG_DEBUGGING(s_typeName(), "::configure loaded XML ", fulltxt);
-                    avtas::lmcp::Object* lmcpObj = avtas::lmcp::xml::readXML(fulltxt);
+                    std::unique_ptr<avtas::lmcp::Object> lmcpObj(avtas::lmcp::xml::readXML(fulltxt));
                     isGoodMessage = (lmcpObj != nullptr);
                     if (isGoodMessage)
                     {
                         UXAS_LOG_INFORM(s_typeName(), "::configure created LMCP object from loaded XML");
-                        newMessage->m_lmcpObjectPayload.reset(lmcpObj);
-                        lmcpObj = nullptr;
+                        newMessage->m_lmcpObjectPayload.reset(lmcpObj.release());
 
                         if (uxas::messages::route::isGraphRegion(newMessage->m_lmcpObjectPayload))
                         {
-                            uxas::messages::route::GraphRegion* pGraphRegion = static_cast<uxas::messages::route::GraphRegion*> (newMessage->m_lmcpObjectPayload.get());
+                            auto pGraphRegion = static_cast<uxas::messages::route::GraphRegion*> (newMessage->m_lmcpObjectPayload.get());
                             UXAS_LOG_DEBUGGING(s_typeName(), "::configure loaded ", uxas::messages::route::GraphRegion::TypeName, 
                                           " object with node list size ", pGraphRegion->getNodeList().size(), 
                                           " and edge list size ", pGraphRegion->getEdgeList().size());
@@ -125,14 +124,13 @@ SendMessagesService::configure(const pugi::xml_node& serviceXmlNode)
                                 UXAS_LOG_DEBUGGING(s_typeName(), "::configure loaded ", uxas::messages::route::GraphRegion::TypeName,
                                               " with pGraphRegion->getEdgeList()[0]->getEdgeID() ", pGraphRegion->getEdgeList()[0]->getEdgeID());
                             }
-                            pGraphRegion = 0;
+                            pGraphRegion = nullptr;
                         }
 #ifdef AFRL_INTERNAL_ENABLED
                         else if (uxas::project::isolate::isUgsManagementTask(newMessage->m_lmcpObjectPayload))
                         {
-                            avtas::lmcp::ByteBuffer* pbbBufferObject = avtas::lmcp::Factory::packMessage(newMessage->m_lmcpObjectPayload.get(), true);
+                            std::unique_ptr<avtas::lmcp::ByteBuffer> pbbBufferObject(avtas::lmcp::Factory::packMessage(newMessage->m_lmcpObjectPayload.get(), true));
                             std::string strMessageToSave(reinterpret_cast<char*> (pbbBufferObject->array()), pbbBufferObject->capacity());
-                            delete pbbBufferObject;
                             std::string fileOutPath = m_workDirectoryPath + "SaveUgsManagementTaskPacked";
                             std::ofstream fileOut(fileOutPath);
                             fileOut << strMessageToSave;

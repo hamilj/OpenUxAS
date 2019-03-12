@@ -55,8 +55,11 @@ bool MustFlyTaskService::configureTask(const pugi::xml_node& ndComponent)
 {
     (void)ndComponent; // -Wunused-parameter
 
-    m_mustFlyTask = std::dynamic_pointer_cast<afrl::cmasi::MustFlyTask>(m_task);
-    if (!m_mustFlyTask)
+    if (afrl::cmasi::isMustFlyTask(m_task.get()))
+    {
+        m_mustFlyTask = std::static_pointer_cast<afrl::cmasi::MustFlyTask>(m_task);
+    }
+    else
     {
         UXAS_LOG_ERROR("ERROR:: **MustFlyTaskService::bConfigure failed: taskObject[" + m_task->getFullLmcpTypeName() + "] is not a MustFlyTask.");
         return false;
@@ -131,8 +134,7 @@ void MustFlyTaskService::buildTaskPlanOptions()
 
     m_taskPlanOptions->setComposition(compositionString);
 
-    auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
 }
 
 bool MustFlyTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse,
@@ -144,11 +146,11 @@ bool MustFlyTaskService::isProcessTaskImplementationRouteResponse(std::shared_pt
     (void)route; // -Wunused-parameter
 
     // make sure altitude matches must fly altitude
-    auto mustfly = std::dynamic_pointer_cast<afrl::cmasi::MustFlyTask>(m_task);
+    assert(m_mustFlyTask);
     for(auto wp : taskImplementationResponse->getTaskWaypoints())
     {
-        wp->setAltitude(mustfly->getPosition()->getAltitude());
-        wp->setAltitudeType(mustfly->getPosition()->getAltitudeType());
+        wp->setAltitude(m_mustFlyTask->getPosition()->getAltitude());
+        wp->setAltitudeType(m_mustFlyTask->getPosition()->getAltitudeType());
     }
 
 #ifdef AFRL_INTERNAL_ENABLED
@@ -192,7 +194,7 @@ bool MustFlyTaskService::isBuildAndSendImplementationRouteRequest(const int64_t&
     routePlanRequest->setVehicleID(taskImplementationRequest->getVehicleID());
     m_pendingImplementationRouteRequests.insert(routePlanRequest->getRequestID());
 
-    auto routeConstraints = new uxas::messages::route::RouteConstraints();
+    auto routeConstraints = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
     int64_t routeId = itTaskOptionClass->second->m_routeIdFromLastTask;
     m_transitionRouteRequestId = routeId;
     itTaskOptionClass->second->m_pendingRouteIds.insert(routeId);
@@ -216,7 +218,7 @@ bool MustFlyTaskService::isBuildAndSendImplementationRouteRequest(const int64_t&
     }
 #endif
 
-    routePlanRequest->getRouteRequests().push_back(routeConstraints);
+    routePlanRequest->getRouteRequests().push_back(routeConstraints.release());
 
     m_routeIdVsTaskImplementationRequest[routePlanRequest->getRequestID()] = taskImplementationRequest;
     m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(routePlanRequest);

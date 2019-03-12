@@ -73,15 +73,14 @@ SimpleWaypointPlanManagerService::initialize()
 bool
 SimpleWaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-    auto entityConfig = std::dynamic_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
-
-    if(entityState)
+    if(afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_states[entityState->getID()] = entityState;
     }
-    else if(entityConfig)
+    else if(afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
+        auto entityConfig = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         m_configs[entityConfig->getID()] = entityConfig;
     }
     else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object))
@@ -120,17 +119,18 @@ void SimpleWaypointPlanManagerService::handleSingleWaypointPlan(std::shared_ptr<
         // R = V^2/tan(phi)/g
         double V = m_configs[m_vehicleID]->getNominalSpeed();
         double phi = 45.0; // default assumption vehicles without bank angle considerations
-        auto avconfig = std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(m_configs[m_vehicleID]);
-        auto svconfig = std::dynamic_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(m_configs[m_vehicleID]);
-        if(avconfig)
+
+        if(afrl::cmasi::isAirVehicleConfiguration(m_configs[m_vehicleID].get()))
         {
+            auto avconfig = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(m_configs[m_vehicleID]);
             phi = avconfig->getNominalFlightProfile()->getMaxBankAngle();
         }
-        if(svconfig)
+        else if(afrl::vehicles::isSurfaceVehicleConfiguration(m_configs[m_vehicleID].get()))
         {
+            auto svconfig = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(m_configs[m_vehicleID]);
             phi = svconfig->getMaxBankAngle();
         }
-        
+
         // make sure max bank angle is reasonable (i.e. must be postive between 1 .. 89)
         phi = fabs(phi);
         if(phi < 1.0) phi = 1.0;
@@ -156,7 +156,7 @@ void SimpleWaypointPlanManagerService::handleSingleWaypointPlan(std::shared_ptr<
         heading = atan2(east - pos_east, north - pos_north);
     }
 
-    auto wp = mish->getWaypointList().back()->clone();
+    std::unique_ptr<afrl::cmasi::Waypoint> wp(mish->getWaypointList().back()->clone());
     mish->getWaypointList().back()->setNextWaypoint(mish->getWaypointList().back()->getNumber()+1);
     wp->setNumber(mish->getWaypointList().back()->getNumber()+1);
 
@@ -168,7 +168,7 @@ void SimpleWaypointPlanManagerService::handleSingleWaypointPlan(std::shared_ptr<
     wp->setLatitude(lat);
     wp->setLongitude(lon);
 
-    mish->getWaypointList().push_back(wp);
+    mish->getWaypointList().push_back(wp.release());
 }
 
 }; //namespace service

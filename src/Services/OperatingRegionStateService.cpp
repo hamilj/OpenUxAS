@@ -50,7 +50,7 @@ OperatingRegionStateService::configure(const pugi::xml_node& serviceXmlNode)
     m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::RemoveZones::Subscription);
     m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::WaterZone::Subscription);
 
-    m_region.reset(new afrl::cmasi::OperatingRegion);
+    m_region = std::make_shared<afrl::cmasi::OperatingRegion>();
     m_region->setID(0); // YEAR2: simply match all requests from agent
 
     return true;
@@ -163,8 +163,7 @@ OperatingRegionStateService::processReceivedLmcpMessage(std::unique_ptr<uxas::co
     }
 
     if (addZone || removeZone) {
-        auto sendMsg = std::static_pointer_cast<avtas::lmcp::Object>(m_region);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(sendMsg);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_region);
         IMPACT_INFORM("Working Operating Region KIZs ", m_region->getKeepInAreas().size(), " KOZs ", m_region->getKeepOutAreas().size());
     }
 

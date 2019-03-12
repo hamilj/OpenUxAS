@@ -87,7 +87,7 @@ int Dpss::CurrentSegmentAndXYPosition(VehicleTelemetry& uav, xyPoint& xyPos, Seg
 void Dpss::PreProcessPath(DpssWaypoint pathPoints[], int numPoints, std::vector<xyPoint>& xyPathPoints)
 {
     xyPathPoints.clear();
-    if( pathPoints == NULL ) return;
+    if( !pathPoints ) return;
     if( numPoints <= 0 ) return;
 
     UpdateLinearization(pathPoints, numPoints);
@@ -367,7 +367,7 @@ void Dpss::RemoveZeroLengthSegments(std::vector<xyPoint> &xyPoints)
 void Dpss::UpdateLinearization(DpssWaypoint points[], int numPoints)
 {
     // handle nonsense input
-    if( points == NULL ) return;
+    if( !points ) return;
     if( numPoints <= 0 ) return;
 
     //convert to x-y by picking midpoint all lat/lon in list

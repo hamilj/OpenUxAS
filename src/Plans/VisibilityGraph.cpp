@@ -59,22 +59,10 @@ namespace n_FrameworkLib
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
 
     CVisibilityGraph::CVisibilityGraph()
-    : m_pedglstvecGraph(0),
+    : m_pedglstvecGraph(nullptr),
     m_ptypeType(CPathInformation::ptypeEqualLength),
     m_iLengthSegmentMinimum(1)
     {
-    }
-    
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////        
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
-
-    CVisibilityGraph::~CVisibilityGraph(void)
-    {
-        if (pedglstvecGetGraph())
-        {
-            delete pedglstvecGetGraph();
-        }
-        pedglstvecGetGraph() = 0;
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////        
@@ -547,7 +535,7 @@ namespace n_FrameworkLib
         }
 
         PRINT_DEBUG("*DEBUG*")
-        pedglstvecGetGraph() = new GRAPH_LIST_VEC_t(veGetEdgesVisibleBase().begin(),
+        pedglstvecGetGraph() = uxas::stduxas::make_unique<GRAPH_LIST_VEC_t>(veGetEdgesVisibleBase().begin(),
                 veGetEdgesVisibleBase().end(),
                 viEdgeLengths.begin(),
                 vposGetVerticiesBase().size());
@@ -651,8 +639,8 @@ namespace n_FrameworkLib
     {
         enError errReturn(errNoError);
         int32_t i32IdEnd(1000); // dummy Id
-        PTR_M_INT_PATHINFORMATION_t ptr_mipthDistanceMapStart(new M_INT_PATHINFORMATION_t);
-        PTR_M_INT_PATHINFORMATION_t ptr_mipthDistanceMapEnd(new M_INT_PATHINFORMATION_t);
+        auto ptr_mipthDistanceMapStart(std::make_shared<M_INT_PATHINFORMATION_t>());
+        auto ptr_mipthDistanceMapEnd(std::make_shared<M_INT_PATHINFORMATION_t>());
 
         errReturn = errFindShortestPathLinear(pathInformation->posGetStart(), i32IdEnd, pathInformation->posGetEnd(), ptr_mipthDistanceMapStart, ptr_mipthDistanceMapEnd);
 
@@ -670,8 +658,8 @@ namespace n_FrameworkLib
     {
         enError errReturn(errNoError);
         int32_t i32IdEnd(1000); // dummy Id
-        PTR_M_INT_PATHINFORMATION_t ptr_mipthDistanceMapStart(new M_INT_PATHINFORMATION_t);
-        PTR_M_INT_PATHINFORMATION_t ptr_mipthDistanceMapEnd(new M_INT_PATHINFORMATION_t);
+        auto ptr_mipthDistanceMapStart(std::make_shared<M_INT_PATHINFORMATION_t>());
+        auto ptr_mipthDistanceMapEnd(std::make_shared<M_INT_PATHINFORMATION_t>());
 
         errReturn = errFindShortestPathLinear(posPositionStart, i32IdEnd, posPositionEnd, ptr_mipthDistanceMapStart, ptr_mipthDistanceMapEnd);
 
@@ -855,8 +843,8 @@ namespace n_FrameworkLib
     {
         enError errReturn(errNoError);
         int32_t i32IdEnd(1000); // dummy Id
-        PTR_M_INT_PATHINFORMATION_t ptr_mipthDistanceMapStart(new M_INT_PATHINFORMATION_t);
-        PTR_M_INT_PATHINFORMATION_t ptr_mipthDistanceMapEnd(new M_INT_PATHINFORMATION_t);
+        auto ptr_mipthDistanceMapStart(std::make_shared<M_INT_PATHINFORMATION_t>());
+        auto ptr_mipthDistanceMapEnd(std::make_shared<M_INT_PATHINFORMATION_t>());
 
         errReturn = errFindShortestPathGround(posPositionStart, i32IdEnd, posPositionEnd, ptr_mipthDistanceMapStart, ptr_mipthDistanceMapEnd);
 
@@ -1116,13 +1104,12 @@ namespace n_FrameworkLib
 
                     //NOTE:: not setting AltitudeType, Number, NextWaypoint, Speed, SpeedType, ClimbRate, TurnType, VehicleActionList, ContingencyWaypointA, ContingencyWaypointB, AssociatedTasks
                     //NOTE:: only setting Latitude, Longitude, Altitude  :)
-                    auto waypointCmasi = new afrl::cmasi::Waypoint();
+                    auto waypointCmasi = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                     waypointCmasi->setLatitude(latitude_deg);
                     waypointCmasi->setLongitude(longitude_deg);
                     waypointCmasi->setAltitude(waypoint.m_altitude_m);
 
-                    planWaypoints.push_back(waypointCmasi);
-                    waypointCmasi = nullptr; // gave up ownership
+                    planWaypoints.push_back(waypointCmasi.release());
                 }
             }
             else

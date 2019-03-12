@@ -87,9 +87,9 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
-        return new AutomationDiagramDataService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<AutomationDiagramDataService>(pLmcpObjectNetworkClient);
     };
 
     explicit AutomationDiagramDataService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

@@ -105,10 +105,10 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new WaypointPlanManagerService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<WaypointPlanManagerService>(pLmcpObjectNetworkClient);
     };
 
     explicit WaypointPlanManagerService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

@@ -82,7 +82,7 @@ ImpactLineSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
                 m_lineOfInterest = foundLine->second;
                 
                 //COPY PARAMETERS FROM IMPACT LINE SEARCH TO CMASI LINE SEARCH
-                m_lineSearchTask = std::shared_ptr<afrl::cmasi::LineSearchTask>(new afrl::cmasi::LineSearchTask());
+                m_lineSearchTask = std::make_shared<afrl::cmasi::LineSearchTask>();
                 // copy the search task parameters
                 m_lineSearchTask->getEligibleEntities() = impactLineSearchTask->getEligibleEntities();
                 m_lineSearchTask->setDwellTime(impactLineSearchTask->getDwellTime());
@@ -246,8 +246,7 @@ void ImpactLineSearchTaskService::buildTaskPlanOptions()
     // send out the options
     if (isSuccessful)
     {
-        auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
     }
 };
 
@@ -367,13 +366,12 @@ bool ImpactLineSearchTaskService::isCalculateOption(const int64_t& taskId, const
                 double longitude_deg(0.0);
                 unitConversions.ConvertNorthEast_mToLatLong_deg(itWaypoint->x, itWaypoint->y, latitude_deg, longitude_deg);
 
-                auto waypoint = new afrl::cmasi::Waypoint();
+                auto waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                 waypoint->setNumber(waypointNumber);
                 waypoint->setLatitude(latitude_deg);
                 waypoint->setLongitude(longitude_deg);
                 waypoint->setAltitude(itWaypoint->z);
-                routePlanForward->getWaypoints().push_back(waypoint);
-                waypoint = nullptr; // gave up ownership
+                routePlanForward->getWaypoints().push_back(waypoint.release());
 
                 if (itWaypoint != vxyPlanForward.begin())
                 {
@@ -401,21 +399,21 @@ bool ImpactLineSearchTaskService::isCalculateOption(const int64_t& taskId, const
 
             m_optionIdVsDpss.insert(std::make_pair(optionId, dpss));
 
-            auto taskOption = new uxas::messages::task::TaskOption;
+            auto taskOption = std::make_shared<uxas::messages::task::TaskOption>();
             taskOption->setTaskID(taskId);
             taskOption->setOptionID(optionId);
             taskOption->setCost(costForward_ms);
-            taskOption->setStartLocation(new afrl::cmasi::Location3D(*(routePlanForward->getWaypoints().front())));
+            auto startLoc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>(*(routePlanForward->getWaypoints().front()));
+            taskOption->setStartLocation(startLoc.release());
             taskOption->setStartHeading(startHeading_deg);
-            taskOption->setEndLocation(new afrl::cmasi::Location3D(*(routePlanForward->getWaypoints().back())));
+            auto endLoc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>(*(routePlanForward->getWaypoints().back()));
+            taskOption->setEndLocation(endLoc.release());
             taskOption->setEndHeading(endHeading_deg);
             taskOption->getEligibleEntities() = eligibleEntities; // defaults to all entities eligible
-            auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-            auto pTaskOptionClass = std::make_shared<TaskOptionClass>(pTaskOption);
+            auto pTaskOptionClass = std::make_shared<TaskOptionClass>(taskOption);
             pTaskOptionClass->m_orderedRouteIdVsPlan[routePlanForward->getRouteID()] = routePlanForward;
             m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, pTaskOptionClass));
-            m_taskPlanOptions->getOptions().push_back(taskOption);
-            taskOption = nullptr; //just gave up ownership
+            m_taskPlanOptions->getOptions().push_back(taskOption->clone());
             routeId++;
 
             if (m_isPlanBothDirections)
@@ -434,13 +432,12 @@ bool ImpactLineSearchTaskService::isCalculateOption(const int64_t& taskId, const
                     double longitude_deg(0.0);
                     unitConversions.ConvertNorthEast_mToLatLong_deg(itWaypoint->x, itWaypoint->y, latitude_deg, longitude_deg);
 
-                    auto waypoint = new afrl::cmasi::Waypoint();
+                    auto waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                     waypoint->setNumber(waypointNumber);
                     waypoint->setLatitude(latitude_deg);
                     waypoint->setLongitude(longitude_deg);
                     waypoint->setAltitude(itWaypoint->z);
-                    routePlanReverse->getWaypoints().push_back(waypoint);
-                    waypoint = nullptr; // gave up ownership
+                    routePlanReverse->getWaypoints().push_back(waypoint.release());
 
                     if (itWaypoint != vxyPlanReverse.begin())
                     {
@@ -469,21 +466,21 @@ bool ImpactLineSearchTaskService::isCalculateOption(const int64_t& taskId, const
 
                 m_optionIdVsDpss.insert(std::make_pair(optionId, dpss));
 
-                taskOption = new uxas::messages::task::TaskOption;
+                taskOption = std::make_shared<uxas::messages::task::TaskOption>();
                 taskOption->setTaskID(taskId);
                 taskOption->setOptionID(optionId);
                 taskOption->setCost(costReverse_ms);
-                taskOption->setStartLocation(new afrl::cmasi::Location3D(*(routePlanReverse->getWaypoints().front())));
+                auto startLoc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>(*(routePlanReverse->getWaypoints().front()));
+                taskOption->setStartLocation(startLoc.release());
                 taskOption->setStartHeading(startHeading_deg);
-                taskOption->setEndLocation(new afrl::cmasi::Location3D(*(routePlanReverse->getWaypoints().back())));
+                auto endLoc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>(*(routePlanReverse->getWaypoints().back()));
+                taskOption->setEndLocation(endLoc.release());
                 taskOption->setEndHeading(endHeading_deg);
                 taskOption->getEligibleEntities() = eligibleEntities; // defaults to all entities eligible
-                auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-                auto pTaskOptionClass = std::make_shared<TaskOptionClass>(pTaskOption);
+                auto pTaskOptionClass = std::make_shared<TaskOptionClass>(taskOption);
                 pTaskOptionClass->m_orderedRouteIdVsPlan[routePlanReverse->getRouteID()] = routePlanReverse;
                 m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, pTaskOptionClass));
-                m_taskPlanOptions->getOptions().push_back(taskOption);
-                taskOption = nullptr; //just gave up ownership
+                m_taskPlanOptions->getOptions().push_back(taskOption->clone());
             } //if(m_planBothDirections)
 
             algebraString += ")";
@@ -564,37 +561,32 @@ void ImpactLineSearchTaskService::activeEntityState(const std::shared_ptr<afrl::
         auto vehicleActionCommand = std::make_shared<afrl::cmasi::VehicleActionCommand>();
         vehicleActionCommand->setVehicleID(entityState->getID());
 
-        afrl::cmasi::GimbalStareAction* pGimbalStareAction = new afrl::cmasi::GimbalStareAction();
+        auto pGimbalStareAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalStareAction>();
         pGimbalStareAction->setPayloadID(gimbalPayloadId);
         pGimbalStareAction->getAssociatedTaskList().push_back(m_lineSearchTask->getTaskID());
-        afrl::cmasi::Location3D* stareLocation = new afrl::cmasi::Location3D;
+        auto stareLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
         stareLocation->setLatitude(dLatitude_deg);
         stareLocation->setLongitude(dLongitude_deg);
         stareLocation->setAltitude(static_cast<float> (xyStarePoint.z));
-        pGimbalStareAction->setStarepoint(stareLocation);
-        stareLocation = nullptr;
+        pGimbalStareAction->setStarepoint(stareLocation.release());
 
-        vehicleActionCommand->getVehicleActionList().push_back(pGimbalStareAction);
-        pGimbalStareAction = nullptr;
+        vehicleActionCommand->getVehicleActionList().push_back(pGimbalStareAction.release());
 
 #ifdef CONFIGURE_THE_SENSOR
         //configure the sensor
-        afrl::cmasi::CameraAction* pCameraAction = new afrl::cmasi::CameraAction();
+        auto pCameraAction = uxas::stduxas::make_unique<afrl::cmasi::CameraAction>();
         pCameraAction->setPayloadID(pVehicle->gsdGetSettings().iGetPayloadID_Sensor());
         pCameraAction->setHorizontalFieldOfView(static_cast<float> (pVehicle->gsdGetSettings().dGetHorizantalFOV_rad() * _RAD_TO_DEG));
         pCameraAction->getAssociatedTaskList().push_back(iGetID());
-        vehicleActionCommand->getVehicleActionList().push_back(pCameraAction);
-        pCameraAction = 0; //don't own it
+        vehicleActionCommand->getVehicleActionList().push_back(pCameraAction.release());
 #endif  //CONFIGURE_THE_SENSOR
 
         // send out the response
-        auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
 
         //send the record video command to the axis box
         auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
         VideoRecord->setRecord(true);
-        auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(VideoRecord);
     }
     else

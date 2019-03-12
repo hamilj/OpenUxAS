@@ -53,7 +53,7 @@ std::unique_ptr<std::string>
 SentinelSerialBuffer::getDetectSentinelBaseStringsMessage(const std::string& data)
 {
     //TODO - simplify
-    std::unique_ptr<std::string> detectMsg = uxas::stduxas::make_unique<std::string>();
+    auto detectMsg = uxas::stduxas::make_unique<std::string>();
     auto befPayloadSzBase = data.find(getSerialSentinelBeforePayloadSizeBase());
     auto aftPayloadSzBase = data.find(getSerialSentinelAfterPayloadSizeBase());
     auto befChecksumBase = data.find(getSerialSentinelBeforeChecksumBase());

@@ -73,32 +73,29 @@ main(int argc, char** argv)
 
     for (int i = 1; i < argc; i++)
     {
-        if (strcmp((const char *) argv[i], ARG_CFG_PATH) == 0)
+        if (strcmp(static_cast<const char *>(argv[i]), ARG_CFG_PATH) == 0)
         {
             i++;
             cfgPath = std::string(argv[i]);
         }
-        else if (strcmp((const char *) argv[i], ARG_RUN_UNTIL) == 0)
+        else if (strcmp(static_cast<const char *>(argv[i]), ARG_RUN_UNTIL) == 0)
         {
             i++;
             runUntil_sec = std::atoi(argv[i]);
         }
-        else if (strcmp((const char *) argv[i], ARG_VERSION) == 0)
+        else if (strcmp(static_cast<const char *>(argv[i]), ARG_VERSION) == 0)
         {
-            auto o = new afrl::cmasi::AirVehicleState;
-            auto p = new afrl::impact::AreaOfInterest;
+            auto avs = uxas::stduxas::make_unique<afrl::cmasi::AirVehicleState>();
+            auto aoi = uxas::stduxas::make_unique<afrl::impact::AreaOfInterest>();
             std::cout << std::endl << "#######################" << std::endl;
             std::cout << "   VERSION: " << MAJOR_VERSION << "." << MINOR_VERSION << "." << PATCH_VERSION << std::endl;
-            std::cout << "     CMASI:  " << o->getSeriesVersion() << std::endl;
-            std::cout << "     IMPACT: " << p->getSeriesVersion() << std::endl;
+            std::cout << "     CMASI:  " << avs->getSeriesVersion() << std::endl;
+            std::cout << "     IMPACT: " << aoi->getSeriesVersion() << std::endl;
 #ifdef AFRL_INTERNAL_ENABLED
-            auto q = new afrl::famus::PointSearchTask;
-            std::cout << "      FAMUS: " << q->getSeriesVersion() << std::endl;
-            delete q;
+            auto pst = uxas::stduxas::make_unique<afrl::famus::PointSearchTask>();
+            std::cout << "      FAMUS: " << pst->getSeriesVersion() << std::endl;
 #endif
             std::cout << "#######################" << std::endl << std::endl;
-            delete o;
-            delete p;
         }
         else
         {

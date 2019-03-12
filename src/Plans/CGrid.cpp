@@ -93,8 +93,9 @@ GC_T_EDGE_CLEAR(GC_T_EDGE_HIT)
 #endif
     
     VGrid.resize(TotalCells);                    // resize array - grab all memory
-    glx = new double[XGridResolution+1];                     // do we want vector or array?
-    gly = new double[YGridResolution+1];
+
+    glx.resize(XGridResolution+1);
+    gly.resize(YGridResolution+1);
     int attempt = 0;
     
 TryAgain:
@@ -113,14 +114,6 @@ TryAgain:
     for (i =0; i< YGridResolution ; i++) 
         gly[i] = min.m_east_m + i * ydelta;
     gly[i] = max.m_east_m;
-    
-    UpperBound = VGrid.end();
-    
-    for ( Index = VGrid.begin(); Index < UpperBound ; Index++) {
-        Index->tot_edges = 0;
-        Index->gc_flags = 0x0;
-        Index->Data = 0;
-    }
     
     // loop through edges and insert into grid structure 
 //    CPolygon::VPointsIterator vtx0, vtx1;
@@ -273,21 +266,14 @@ TryAgain:
                     // clean out all grid records 
                     
                     if ( VGrid.size()) {                        // skip if size = 0 - nothing to delete
-                        
-                        UpperBound = VGrid.end();
-                        
+
                         // Delete Cell structures 
                         
-                        for (Index = VGrid.begin(); Index < UpperBound ; Index ++ ) {
+                        for (auto it = VGrid.begin(); it != VGrid.end() ; ++it) {
 #if DEBUG_FLAG==1
                             cout << "deleting Grid Cell Data\n";
 #endif
-                            // delete *Index if not null
-                            if (Index->Data) {
-                                Index->Data->clear();
-                                delete (Index->Data);
-                                Index->Data = 0;
-                            }
+                            it->Data.clear();
                         }
                         
                     }
@@ -346,54 +332,12 @@ TryAgain:
         }
         iVertexIndex0 = iVertexIndex1 ;
     } 
-    vtxa = 0;    //we don't own this
-    vtxb = 0;    //we don't own this
+    vtxa = nullptr;    //we don't own this
+    vtxb = nullptr;    //we don't own this
 
     // grid is all setup, now set up the inside/outside value of each corner.
     Setup_Corner_Value();
     
-}
-
-
-CGrid::~CGrid() 
-{
-#if DEBUG_FLAG==1
-    if (METHOD_DEBUG)
-        cout << "CGrid destructor Method\n";
-#endif
-    
-    stringstream sstrPrintMessage;
-    
-    if ( VGrid.size() ) {                        // skip if zero lenght - nothing to delete
-        
-        UpperBound = VGrid.end();
-        
-        // Delete Cell structures and then clear vector
-        
-        for (Index = VGrid.begin() ; Index < UpperBound ; Index ++ ) {
-#if DEBUG_FLAG==1
-            if (DEBUG_FLAG) 
-                sstrPrintMessage << "deleting Grid \"CellData\"\n";
-#endif
-            
-            // delete *Index if not null
-            if (Index->Data) {
-                (*Index->Data).clear();        // clear vector
-                delete Index->Data;            // delete vector
-            }
-            
-        }
-        VGrid.clear();                    // clear vector
-        //    delete (VGrid);                    // delete VGrid
-    }
-    delete[] glx;
-    delete[] gly;
-    
-#if DEBUG_FLAG==1
-    if (DEBUG_FLAG) 
-        cout << sstrPrintMessage.str();
-    //mexPrintf(sstrPrintMessage.str().c_str())
-#endif
 }
 
 void CGrid::Setup_Corner_Value()  {
@@ -403,9 +347,8 @@ void CGrid::Setup_Corner_Value()  {
 #endif
     
     // Grid all set up, now set up the inside/outside value of each corner.
-    Index = VGrid.begin();
-    VCellIterator Index_Next = (VGrid.begin() + XGridResolution);
-    UpperBound = VGrid.end();
+    auto it = VGrid.begin();
+    auto it_next = VGrid.begin() + XGridResolution;
     
     int io_state;
     
@@ -419,38 +362,38 @@ void CGrid::Setup_Corner_Value()  {
             
             if (io_state) {
                 // change cell left corners to inside
-                Index->gc_flags |= GC_TL_IN;
-                Index_Next->gc_flags |= GC_BL_IN;
+                it->gc_flags |= GC_TL_IN;
+                it_next->gc_flags |= GC_BL_IN;
             }
             
-            if (Index->gc_flags & GC_T_EDGE_PARITY ) 
+            if (it->gc_flags & GC_T_EDGE_PARITY)
                 io_state = !io_state;
             
             if (io_state) {
                 // change cell right corners to inside 
-                Index->gc_flags |= GC_TR_IN;
-                Index_Next->gc_flags |= GC_BR_IN;
+                it->gc_flags |= GC_TR_IN;
+                it_next->gc_flags |= GC_BR_IN;
             }
             
-            Index++; 
-            Index_Next++; 
+            ++it;
+            ++it_next;
         }
     } 
-    for (Index = VGrid.begin() ; Index < UpperBound ; Index++) {
+    for (auto it = VGrid.begin(); it != VGrid.end(); ++it) {
         // reverse parity of edge clear - ( now 1 means edge clear ) 
-        unsigned short gc_clear_flags = Index->gc_flags ^ GC_ALL_EDGE_CLEAR;
+        unsigned short gc_clear_flags = it->gc_flags ^ GC_ALL_EDGE_CLEAR;
         
         if (gc_clear_flags & GC_L_EDGE_CLEAR) {
-            Index->gc_flags |= GC_AIM_L;
+            it->gc_flags |= GC_AIM_L;
         } else if (gc_clear_flags & GC_B_EDGE_CLEAR) {
-            Index->gc_flags |= GC_AIM_B;
+            it->gc_flags |= GC_AIM_B;
         } else if ( gc_clear_flags & GC_R_EDGE_CLEAR) {
-            Index->gc_flags |= GC_AIM_R;
+            it->gc_flags |= GC_AIM_R;
         } else if ( gc_clear_flags & GC_T_EDGE_CLEAR) {
-            Index->gc_flags |= GC_AIM_T;
+            it->gc_flags |= GC_AIM_T;
         } else {
             // all edges are intersected on them, do full test 
-            Index->gc_flags |= GC_AIM_C;
+            it->gc_flags |= GC_AIM_C;
         }
     } 
 #if DEBUG_FLAG==1
@@ -461,24 +404,18 @@ void CGrid::Setup_Corner_Value()  {
 void CGrid::Print() {
     if (METHOD_DEBUG)
         cout << "Cgrid Print() Method\n";
-    
-    UpperBound = VGrid.end();
+
     int i = 0;
     
-    for (Index = VGrid.begin() ; Index < UpperBound ; Index++) {
+    for (auto it = VGrid.begin() ; it != VGrid.end(); ++it) {
         cout << "\n Grid Cell " << i++ << "\n";
-        printf("\nTOTAL EDGES:    %d    GC_FLAGS:    %u\n", Index->tot_edges, Index->gc_flags );
+        printf("\nTOTAL EDGES:    %d    GC_FLAGS:    %u\n", it->tot_edges, it->gc_flags );
         
-        if (Index->Data) {
-            DUpperBound = Index->Data->end();
-            
-            for (DIndex = Index->Data->begin(); DIndex < DUpperBound ; DIndex++) {
-                
-                cout << "    xa,ya: " << DIndex->xa << "," << DIndex->ya << " ax, ay: " << DIndex->ax << "," << DIndex->ay << " slope " << DIndex->slope << "\n";
-                cout << "    minx: " << DIndex->minx << " maxx: " << DIndex->maxx << " miny: " << DIndex->miny << " maxy: " << DIndex->maxy << "\n";
-                cout << "    Vertex: (" << DIndex->VertexA.m_north_m <<" , " << DIndex->VertexA.m_east_m <<") , ( " << DIndex->VertexB.m_north_m << ", " << DIndex->VertexB.m_east_m << " ) \n";
-            }
-        }     
+        for (auto it_cell = it->Data.begin(); it_cell != it->Data.end(); ++it_cell) {
+            cout << "    xa,ya: " << it_cell->xa << "," << it_cell->ya << " ax, ay: " << it_cell->ax << "," << it_cell->ay << " slope " << it_cell->slope << "\n";
+            cout << "    minx: " << it_cell->minx << " maxx: " << it_cell->maxx << " miny: " << it_cell->miny << " maxy: " << it_cell->maxy << "\n";
+            cout << "    Vertex: (" << it_cell->VertexA.m_north_m <<" , " << it_cell->VertexA.m_east_m <<") , ( " << it_cell->VertexB.m_north_m << ", " << it_cell->VertexB.m_east_m << " ) \n";
+        }
     }
 }
 
@@ -510,40 +447,37 @@ bool CGrid::Setup_GridData(Cell &Cur_Cell, double xa, double ya, double xb, doub
     }
     
     Cur_Cell.tot_edges++;
-    if ( Cur_Cell.tot_edges <= 1) 
-        Cur_Cell.Data = new VData(1);
-    else
-        Cur_Cell.Data->resize(Cur_Cell.tot_edges);
+    Cur_Cell.Data.resize((Cur_Cell.tot_edges <= 1) ? 1 : Cur_Cell.tot_edges);
     
-    DUpperBound = ( Cur_Cell.Data->end() - 1 );
+    auto it_cell = Cur_Cell.Data.end() - 1;
     
-    DUpperBound->slope = slope ;
-    DUpperBound->inv_slope = inv_slope ;
+    it_cell->slope = slope ;
+    it_cell->inv_slope = inv_slope ;
     
-    DUpperBound->xa = xa ;
-    DUpperBound->ya = ya ;
+    it_cell->xa = xa ;
+    it_cell->ya = ya ;
     
     if ( xa <= xb ) {
-        DUpperBound->minx = xa ;
-        DUpperBound->maxx = xb ;
+        it_cell->minx = xa ;
+        it_cell->maxx = xb ;
     } else {
-        DUpperBound->minx = xb ;
-        DUpperBound->maxx = xa ;
+        it_cell->minx = xb ;
+        it_cell->maxx = xa ;
     }
     if ( ya <= yb ) {
-        DUpperBound->miny = ya ;
-        DUpperBound->maxy = yb ;
+        it_cell->miny = ya ;
+        it_cell->maxy = yb ;
     } else {
-        DUpperBound->miny = yb ;
-        DUpperBound->maxy = ya ;
+        it_cell->miny = yb ;
+        it_cell->maxy = ya ;
     }
     
     /* P2 - P1 */
-    DUpperBound->ax = xb - xa ;
-    DUpperBound->ay = yb - ya ;
+    it_cell->ax = xb - xa ;
+    it_cell->ay = yb - ya ;
     
-    DUpperBound->VertexA = vtxa;
-    DUpperBound->VertexB = vtxb;
+    it_cell->VertexA = vtxa;
+    it_cell->VertexB = vtxb;
     
     return true;
 }
@@ -556,7 +490,7 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
 #endif
     
     bool inside_flag = false;
-    Cell *p_gc = NULL;
+    Cell *p_gc = nullptr;
     double bx = 0, by = 0, cx = 0, cy= 0, alpha=0, beta=0, cornerx=0, cornery=0, denom=0;    
     
     // What cell are we in?
@@ -581,10 +515,6 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
         
         /* no, so find an edge which is free. */
         unsigned short gc_flags = p_gc->gc_flags ;
-        VData *p_gr = p_gc->Data;
-        
-        DIndex = p_gr->begin();
-        DUpperBound = p_gr->end();
         
         switch (gc_flags & GC_AIM ) {
             // CASE 1:   left edge is clear, shoot X- ray 
@@ -593,12 +523,12 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
             //left edge is clear, shoot X-ray
             inside_flag = (gc_flags & GC_BL_IN)? 1 : 0 ;
             
-            for ( ; DIndex < DUpperBound ; DIndex++ ) {
+            for (auto it_cell = p_gc->Data.begin(); it_cell != p_gc->Data.end(); ++it_cell) {
                 
                 // test if y is between edges 
-                if ( y >= DIndex->miny && y < DIndex->maxy ) {
+                if ( y >= it_cell->miny && y < it_cell->maxy ) {
                     
-                    if ( x > DIndex->maxx ) {
+                    if ( x > it_cell->maxx ) {
                         
                         inside_flag = !inside_flag ;
                         
@@ -606,10 +536,10 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
                         cout << " case 1 (a) - x > maxx test \n" ;
 #endif
                         
-                    } else if ( x > DIndex->minx ) {
+                    } else if ( x > it_cell->minx ) {
                         
                         // full computation 
-                        if ( ( DIndex->xa -    ( DIndex->ya - y ) * DIndex->slope ) < x )  {
+                        if ( ( it_cell->xa -    ( it_cell->ya - y ) * it_cell->slope ) < x )  {
                             inside_flag = !inside_flag ;
                             
 #if DEBUG_FLAG==1
@@ -627,22 +557,22 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
             // note - this next statement requires that GC_BL_IN is 1 
             inside_flag = (gc_flags & GC_BL_IN ) ? 1 : 0 ;
             
-            for ( ; DIndex < DUpperBound ; DIndex++ ) {
+            for (auto it_cell = p_gc->Data.begin(); it_cell != p_gc->Data.end(); ++it_cell) {
                 
                 // test if x is between edges 
-                if ( x >= DIndex->minx && x < DIndex->maxx ) {
+                if ( x >= it_cell->minx && x < it_cell->maxx ) {
                     
-                    if ( y > DIndex->maxy ) {
+                    if ( y > it_cell->maxy ) {
                         
                         inside_flag = !inside_flag ;
 #if DEBUG_FLAG==1
                         cout << "case 2 (a) - y > maxy test \n";
 #endif
                         
-                    } else if ( y > DIndex->miny ) {
+                    } else if ( y > it_cell->miny ) {
                         // full computation 
                         
-                        if ( ( DIndex->ya - ( DIndex->xa - x ) * DIndex->inv_slope ) < y ) {
+                        if ( ( it_cell->ya - ( it_cell->xa - x ) * it_cell->inv_slope ) < y ) {
                             inside_flag = !inside_flag ;
                             
 #if DEBUG_FLAG==1
@@ -661,12 +591,12 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
             // by miny or somesuch, and so be able to cut testing
             // short when the list's miny > point.y .
             
-            for ( ; DIndex < DUpperBound ; DIndex++ ) {
+            for (auto it_cell = p_gc->Data.begin(); it_cell != p_gc->Data.end(); ++it_cell) {
                 
                 // test if y is between edges 
-                if ( y >= DIndex->miny && y < DIndex->maxy ) {
+                if ( y >= it_cell->miny && y < it_cell->maxy ) {
                     
-                    if ( x <= DIndex->minx ) {
+                    if ( x <= it_cell->minx ) {
                         
                         inside_flag = !inside_flag ;
                         
@@ -674,10 +604,10 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
                         cout << "case 3 (a) - y > maxy test \n";
 #endif
                         
-                    } else if ( x <= DIndex->maxx ) {
+                    } else if ( x <= it_cell->maxx ) {
                         
                         // full computation 
-                        if ( ( DIndex->xa - ( DIndex->ya - y ) * DIndex->slope ) >= x ) {
+                        if ( ( it_cell->xa - ( it_cell->ya - y ) * it_cell->slope ) >= x ) {
                             inside_flag = !inside_flag ;
 #if DEBUG_FLAG==1
                             cout << "case 3 (b) - full computation \n";
@@ -691,18 +621,18 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
             // CASE 4:    top edge is clear, shoot Y+ ray 
         case (3<<10):
             inside_flag = (gc_flags & GC_TR_IN) ? 1 : 0 ;
-            for ( ; DIndex < DUpperBound ; DIndex++ ) {
+            for (auto it_cell = p_gc->Data.begin(); it_cell != p_gc->Data.end(); ++it_cell) {
                 // test if x is between edges 
-                if ( x >= DIndex->minx && x < DIndex->maxx ) {
-                    if ( y <= DIndex->miny ) {
+                if ( x >= it_cell->minx && x < it_cell->maxx ) {
+                    if ( y <= it_cell->miny ) {
                         inside_flag = !inside_flag ;
                         
 #if DEBUG_FLAG==1
                         cout << "case 4 (a) - y <= miny test \n";
 #endif
-                    } else if ( y <= DIndex->maxy ) {
+                    } else if ( y <= it_cell->maxy ) {
                         // full computation 
-                        if ( ( DIndex->ya - ( DIndex->xa - x ) * DIndex->inv_slope ) >= y ) {
+                        if ( ( it_cell->ya - ( it_cell->xa - x ) * it_cell->inv_slope ) >= y ) {
                             inside_flag = !inside_flag ;
 #if DEBUG_FLAG==1
                             cout << "case 4 (b) - full computation \n";
@@ -726,12 +656,12 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
             cornerx = glx[ (int)xcell ];
             cornery = gly[ (int)ycell ];
             
-            for ( ; DIndex < DUpperBound ; DIndex++ ) {
+            for (auto it_cell = p_gc->Data.begin(); it_cell != p_gc->Data.end(); ++it_cell) {
                 
                 // quick out test: if test point is
                 // less than minx & miny, edge cannot overlap.
                 
-                if ( x >= DIndex->minx && y >= DIndex->miny ) {
+                if ( x >= it_cell->minx && y >= it_cell->miny ) {
                     
                     // quick test failed, now check if test point and
                     // corner are on different sides of edge.
@@ -742,15 +672,15 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
                         by = y - cornery ;
                     }
                     
-                    denom = DIndex->ay * bx - DIndex->ax * by ;
+                    denom = it_cell->ay * bx - it_cell->ax * by ;
                     
                     if ( denom != 0.0 ) {
                         
                         // lines are not collinear, so continue: P1 - P3 
-                        cx = DIndex->xa - x ;
-                        cy = DIndex->ya - y ;
+                        cx = it_cell->xa - x ;
+                        cy = it_cell->ya - y ;
                         alpha = by * cx - bx * cy ;
-                        beta = DIndex->ax * cy - DIndex->ay * cx ;
+                        beta = it_cell->ax * cy - it_cell->ay * cx ;
                         
                         if ( ( denom > 0.0 ) && 
                             (  ! ( alpha < 0.0 || alpha >= denom )             // test edge hit 
@@ -787,48 +717,45 @@ bool CGrid::InPolygon(double x, double y, const CPosition &min, stringstream &ss
         // better to save points in structure and not test whole thing 
         // but do this later
         if ((!inside_flag) && (count) ){
-            DIndex = p_gr->begin();
-            
-            CPosition *vertexA = 0, *vertexB = 0;
+            CPosition *vertexA = nullptr, *vertexB = nullptr;
             CPosition posX(x,y);
             
-            for ( ; DIndex < DUpperBound ; DIndex++ )
-                        {
-                                //def is_on(a, b, c):
-                                //    "Return true iff point c intersects the line segment from a to b."
-                                //    # (or the degenerate case that all 3 points are coincident)
-                                //    return (collinear(a, b, c)
-                                //            and (within(a.x, c.x, b.x) if a.x != b.x else 
-                                //                 within(a.y, c.y, b.y)))
-                                //
-                                //def collinear(a, b, c):
-                                //    "Return true iff a, b, and c all lie on the same line."
-                                //    return (b.x - a.x) * (c.y - a.y) == (c.x - a.x) * (b.y - a.y)
-                                //
-                                //def within(p, q, r):
-                                //    "Return true iff q is between p and r (inclusive)."
-                                //    return p <= q <= r or r <= q <= p        
-                            
-                            // OR
-                            //
-                                //def distance(a,b):
-                                //    return sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
-                                //
-                                //def is_between(a,c,b):
-                                //    return distance(a,c) + distance(c,b) == distance(a,b)
+            for (auto it_cell = p_gc->Data.begin(); it_cell != p_gc->Data.end(); ++it_cell) {
+                    //def is_on(a, b, c):
+                    //    "Return true iff point c intersects the line segment from a to b."
+                    //    # (or the degenerate case that all 3 points are coincident)
+                    //    return (collinear(a, b, c)
+                    //            and (within(a.x, c.x, b.x) if a.x != b.x else
+                    //                 within(a.y, c.y, b.y)))
+                    //
+                    //def collinear(a, b, c):
+                    //    "Return true iff a, b, and c all lie on the same line."
+                    //    return (b.x - a.x) * (c.y - a.y) == (c.x - a.x) * (b.y - a.y)
+                    //
+                    //def within(p, q, r):
+                    //    "Return true iff q is between p and r (inclusive)."
+                    //    return p <= q <= r or r <= q <= p
 
+                // OR
+                //
+                    //def distance(a,b):
+                    //    return sqrt((a.x - b.x)**2 + (a.y - b.y)**2)
+                    //
+                    //def is_between(a,c,b):
+                    //    return distance(a,c) + distance(c,b) == distance(a,b)
 
-                vertexA = &DIndex->VertexA; 
-                vertexB = &DIndex->VertexB;
+                vertexA = &it_cell->VertexA;
+                vertexB = &it_cell->VertexB;
                 //    cout << " Points tested are: (" << vertexA->X << ", " << vertexA->Y << ")  & ( " << vertexB->X << ", " << vertexB->Y << ") \n";
-                                double dDistanceAtoB = vertexA->relativeDistance2D_m(*vertexB);
-                                double dDistanceAtoX = vertexA->relativeDistance2D_m(posX);
-                                double dDistanceBtoX = vertexB->relativeDistance2D_m(posX);
-                                double dResult = dDistanceAtoX + dDistanceBtoX - dDistanceAtoB;
+                double dDistanceAtoB = vertexA->relativeDistance2D_m(*vertexB);
+                double dDistanceAtoX = vertexA->relativeDistance2D_m(posX);
+                double dDistanceBtoX = vertexB->relativeDistance2D_m(posX);
+                double dResult = dDistanceAtoX + dDistanceBtoX - dDistanceAtoB;
+
                 if (fabs(dResult) < 1.0e-2 )
-                                {
-                                    inside_flag = 1;
-                                    break;
+                {
+                    inside_flag = 1;
+                    break;
                 }
             } 
         } 

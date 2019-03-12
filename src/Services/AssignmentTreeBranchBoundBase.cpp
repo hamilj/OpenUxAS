@@ -192,7 +192,7 @@ AssignmentTreeBranchBoundBase::processReceivedLmcpMessage(std::unique_ptr<uxas::
     if (assigmentPrerequisites)
     {
         runCalculateAssignment(assigmentPrerequisites);
-        c_Node_Base::m_staticAssignmentParameters.reset(new c_StaticAssignmentParameters);
+        c_Node_Base::m_staticAssignmentParameters = uxas::stduxas::make_unique<c_StaticAssignmentParameters>();
     }
 
     processReceivedLmcpMessageAssignment(std::move(receivedLmcpMessage));
@@ -263,10 +263,10 @@ void AssignmentTreeBranchBoundBase::sendErrorMsg(std::string& errStr)
 {
     auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
     serviceStatus->setStatusType(afrl::cmasi::ServiceStatusType::Error);
-    auto keyValuePair = new afrl::cmasi::KeyValuePair;
+    auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
     keyValuePair->setKey(std::string("No UniqueAutomationResponse"));
     keyValuePair->setValue("AssignmentTree: " + errStr);
-    serviceStatus->getInfo().push_back(keyValuePair);
+    serviceStatus->getInfo().push_back(keyValuePair.release());
     m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
 }
 
@@ -484,7 +484,7 @@ bool AssignmentTreeBranchBoundBase::isInitializeAlgebra(const std::shared_ptr<As
 
 void AssignmentTreeBranchBoundBase::runCalculateAssignment(const std::shared_ptr<AssigmentPrerequisites>& assigmentPrerequisites)
 {
-    std::unique_ptr<c_Node_Base> nodeAssignment(new c_Node_Base);
+    auto nodeAssignment = uxas::stduxas::make_unique<c_Node_Base>();
     calculateAssignment(std::move(nodeAssignment), assigmentPrerequisites);
 }
 
@@ -498,7 +498,7 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
     /////////////////////////////////////////////////////////
 
     // re-initialize static storage/parameters
-    nodeAssignment->m_staticAssignmentParameters.reset(new c_StaticAssignmentParameters);
+    nodeAssignment->m_staticAssignmentParameters = uxas::stduxas::make_unique<c_StaticAssignmentParameters>();
     nodeAssignment->m_staticAssignmentParameters->m_CostFunction = m_CostFunction;
     nodeAssignment->m_staticAssignmentParameters->m_numberNodesMaximum = m_numberNodesMaximum;
 #ifdef AFRL_INTERNAL_ENABLED
@@ -518,7 +518,7 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
                 int64_t taskOptionId = c_TaskAssignmentState::getTaskAndOptionId((*itOption)->getTaskID(), (*itOption)->getOptionID());
                 if (nodeAssignment->m_staticAssignmentParameters->m_taskOptionIdVsInformation.find(taskOptionId) == nodeAssignment->m_staticAssignmentParameters->m_taskOptionIdVsInformation.end())
                 {
-                    nodeAssignment->m_staticAssignmentParameters->m_taskOptionIdVsInformation[taskOptionId] = std::unique_ptr<c_TaskInformationStatic>(new c_TaskInformationStatic());
+                    nodeAssignment->m_staticAssignmentParameters->m_taskOptionIdVsInformation[taskOptionId] = uxas::stduxas::make_unique<c_TaskInformationStatic>();
                 }
                 for (auto itObjVehicle = (*itOption)->getEligibleEntities().begin(); itObjVehicle != (*itOption)->getEligibleEntities().end(); itObjVehicle++)
                 {
@@ -540,15 +540,15 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
             // instantiate new vehicle assignment classes if necessary
             if (nodeAssignment->m_vehicleIdVsAssignmentState.find(vehicleId) == nodeAssignment->m_vehicleIdVsAssignmentState.end())
             {
-                nodeAssignment->m_vehicleIdVsAssignmentState[vehicleId] = std::unique_ptr<c_VehicleAssignmentState>(new c_VehicleAssignmentState(vehicleId));
+                nodeAssignment->m_vehicleIdVsAssignmentState[vehicleId] = uxas::stduxas::make_unique<c_VehicleAssignmentState>(vehicleId);
             }
             if (nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation.find(vehicleId) == nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation.end())
             {
-                nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation[vehicleId] = std::unique_ptr<c_VehicleInformationStatic>(new c_VehicleInformationStatic(vehicleId));
+                nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation[vehicleId] = uxas::stduxas::make_unique<c_VehicleInformationStatic>(vehicleId);
             }
             if (nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation[vehicleId]->m_FromIdVsToIdVsTravelTime.find(fromId) == nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation[vehicleId]->m_FromIdVsToIdVsTravelTime.end())
             {
-                nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation[vehicleId]->m_FromIdVsToIdVsTravelTime[fromId] = std::unique_ptr<std::unordered_map<int64_t, int64_t >> (new std::unordered_map<int64_t, int64_t>);
+                nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation[vehicleId]->m_FromIdVsToIdVsTravelTime[fromId] = uxas::stduxas::make_unique<std::unordered_map<int64_t, int64_t>>();
             }
             nodeAssignment->m_staticAssignmentParameters->m_vehicleIdVsInformation[vehicleId]->m_FromIdVsToIdVsTravelTime[fromId]->operator[](toId) = travelCost;
         }
@@ -571,11 +571,10 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
         {
             auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
             serviceStatus->setStatusType(afrl::cmasi::ServiceStatusType::Error);
-            auto keyValuePair = new afrl::cmasi::KeyValuePair;
+            auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
             keyValuePair->setKey(std::string("No UniqueAutomationResponse"));
             keyValuePair->setValue(std::string("Assignment not found: ") + nodeAssignment->m_staticAssignmentParameters->m_reasonsForNoAssignment.str());
-            serviceStatus->getInfo().push_back(keyValuePair);
-            keyValuePair = nullptr;
+            serviceStatus->getInfo().push_back(keyValuePair.release());
             m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
             std::cout << "RoutesNotFound:: " << std::endl << nodeAssignment->m_staticAssignmentParameters->m_reasonsForNoAssignment.str() << std::endl << std::endl;
         }
@@ -583,10 +582,9 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
         {
             auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
             serviceStatus->setStatusType(afrl::cmasi::ServiceStatusType::Information);
-            auto keyValuePair = new afrl::cmasi::KeyValuePair;
+            auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
             keyValuePair->setKey(std::string("AssignmentComplete"));
-            serviceStatus->getInfo().push_back(keyValuePair);
-            keyValuePair = nullptr;
+            serviceStatus->getInfo().push_back(keyValuePair.release());
             m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
         }
 
@@ -612,8 +610,7 @@ void AssignmentTreeBranchBoundBase::calculateAssignment(std::unique_ptr<c_Node_B
                     taskAssignmentSummary->getTaskList().push_back((*itTaskAssignment)->clone());
                 }
             }
-            auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(taskAssignmentSummary);
-            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskAssignmentSummary);
             UXAS_LOG_INFORM("ASSIGNMENT COMPLETE!");
         }
         else
@@ -694,7 +691,7 @@ c_TaskAssignmentState::c_TaskAssignmentState(const c_TaskAssignmentState & rhs)
 }
 
 
-std::unique_ptr<c_StaticAssignmentParameters> c_Node_Base::m_staticAssignmentParameters(new c_StaticAssignmentParameters);
+std::unique_ptr<c_StaticAssignmentParameters> c_Node_Base::m_staticAssignmentParameters = uxas::stduxas::make_unique<c_StaticAssignmentParameters>();
 
 c_Node_Base::c_Node_Base() //this is used for the root node
 {
@@ -709,7 +706,7 @@ c_Node_Base::~c_Node_Base()
 
 std::unique_ptr<c_Node_Base> c_Node_Base::clone()
 {
-    return (std::unique_ptr<c_Node_Base>(new c_Node_Base(*this)));
+    return uxas::stduxas::make_unique<c_Node_Base>(*this);
 }
 
 //copy constructor
@@ -985,7 +982,7 @@ void c_Node_Base::NodeAssignment(std::unique_ptr<c_VehicleAssignmentState>& vehi
             if ((maxVehicleTravelTime_ms < 0) || (travelTimeTotalToEnd_ms < maxVehicleTravelTime_ms))
             {
                 // create new child for cost calculation
-                auto newChild = std::unique_ptr<c_Node_Base>(clone());
+                std::unique_ptr<c_Node_Base> newChild(clone());
                 // calculate assignment cost
                 int64_t nodeCost(INT64_MAX);
                 int64_t evaluationOrderCost(INT64_MAX);
@@ -1006,13 +1003,13 @@ void c_Node_Base::NodeAssignment(std::unique_ptr<c_VehicleAssignmentState>& vehi
                     //////// update the task //////////
                     if (newChild->m_taskIdVsAssignmentState.find(taskOptionId) == newChild->m_taskIdVsAssignmentState.end())
                     {
-                        newChild->m_taskIdVsAssignmentState[taskOptionId] = std::unique_ptr<c_TaskAssignmentState>(new c_TaskAssignmentState(taskOptionId));
+                        newChild->m_taskIdVsAssignmentState[taskOptionId] = uxas::stduxas::make_unique<c_TaskAssignmentState>(taskOptionId);
                     }
                     newChild->m_taskIdVsAssignmentState[taskOptionId]->m_taskCompletionTime_ms = travelTimeTotalToEnd_ms;
                     //////// update the vehicle //////////
                     newChild->m_vehicleIdVsAssignmentState[vehicleAssignmentState->m_vehicleId]->m_travelTimeTotal_ms = travelTimeTotalToEnd_ms;
                     // add the assignment
-                    auto taskAssignment = std::unique_ptr<uxas::messages::task::TaskAssignment>(new uxas::messages::task::TaskAssignment());
+                    auto taskAssignment = uxas::stduxas::make_unique<uxas::messages::task::TaskAssignment>();
                     taskAssignment->setTaskID(c_TaskAssignmentState::getTaskID(taskOptionId));
                     taskAssignment->setOptionID(c_TaskAssignmentState::getOptionID(taskOptionId));
                     taskAssignment->setAssignedVehicle(vehicleId);

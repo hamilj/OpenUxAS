@@ -34,7 +34,8 @@
 #include <sstream>
 #include <math.h>
 //#include "GlobalDefines.h"
-#include "CGrid.h"
+
+#include "stdUniquePtr.h"
 
 using namespace std;
 
@@ -98,16 +99,11 @@ void CPolygon::GridTest(double x, double y, V_POSITION_t& vposVertexContainer,st
 #endif
 
     if ((!GridPtr) || (GridUpdateNeeded)) {
-        if (GridPtr)
-            delete GridPtr;
-
-        GridPtr = new CGrid(viGetVerticies(),vposVertexContainer, 5, 5, posminBBoxPoint,posmaxBBoxPoint, sstrErrorMessage);
+        GridPtr = uxas::stduxas::make_unique<CGrid>(viGetVerticies(), vposVertexContainer, 5, 5, posminBBoxPoint, posmaxBBoxPoint, sstrErrorMessage);
         GridUpdateNeeded = false;
-
     }
 
     bInPolygon = GridPtr->InPolygon(x, y, posminBBoxPoint, sstrErrorMessage);
-
 }
 
 

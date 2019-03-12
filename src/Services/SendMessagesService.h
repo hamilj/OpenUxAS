@@ -65,10 +65,10 @@ public:
     static const std::string&
     s_directoryName() { static std::string s_string("SendMessagesService"); return (s_string); };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new SendMessagesService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<SendMessagesService>(pLmcpObjectNetworkClient);
     };
 
     explicit SendMessagesService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

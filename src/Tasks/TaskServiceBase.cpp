@@ -104,8 +104,8 @@ bool TaskServiceBase::configure(const pugi::xml_node& serviceXmlNode)
     }
 
     //double check sane Ground Sample Distance
-    auto searchTask = std::dynamic_pointer_cast<afrl::cmasi::SearchTask>(m_task);
-    if (searchTask) {
+    if (afrl::cmasi::isSearchTask(m_task.get())) {
+        auto searchTask = std::static_pointer_cast<afrl::cmasi::SearchTask>(m_task);
         if (searchTask->getGroundSampleDistance() < 0.01) {
             searchTask->setGroundSampleDistance(1000); 
         }
@@ -118,14 +118,14 @@ bool TaskServiceBase::configure(const pugi::xml_node& serviceXmlNode)
 
         std::stringstream stringStream;
         currentXmlNode.print(stringStream);
-        avtas::lmcp::Object* object = avtas::lmcp::xml::readXML(stringStream.str());
-        if (object == nullptr)
+        std::unique_ptr<avtas::lmcp::Object> object(avtas::lmcp::xml::readXML(stringStream.str()));
+        if (!object)
             continue;
 
-        if (dynamic_cast<afrl::cmasi::EntityConfiguration*> (object))
+        if (afrl::cmasi::isEntityConfiguration(object.get()))
         {
             std::shared_ptr<afrl::cmasi::EntityConfiguration> entityConfiguration;
-            entityConfiguration.reset(static_cast<afrl::cmasi::EntityConfiguration*> (object->clone()));
+            entityConfiguration.reset(static_cast<afrl::cmasi::EntityConfiguration*>(object.release()));
             auto foundEntity = std::find(m_task->getEligibleEntities().begin(), m_task->getEligibleEntities().end(), entityConfiguration->getID());
             if (m_task->getEligibleEntities().empty() || foundEntity != m_task->getEligibleEntities().end())
             {
@@ -139,55 +139,54 @@ bool TaskServiceBase::configure(const pugi::xml_node& serviceXmlNode)
                 }
             }
         }
-        else if (dynamic_cast<afrl::cmasi::EntityState*> (object))
+        else if (afrl::cmasi::isEntityState(object.get()))
         {
             std::shared_ptr<afrl::cmasi::EntityState> entityState;
-            entityState.reset(static_cast<afrl::cmasi::EntityState*> (object->clone()));
+            entityState.reset(static_cast<afrl::cmasi::EntityState*>(object.release()));
             m_entityStates[entityState->getID()] = entityState;
         }
-        else if (afrl::cmasi::isMissionCommand(object))
+        else if (afrl::cmasi::isMissionCommand(object.get()))
         {
             std::shared_ptr<afrl::cmasi::MissionCommand> missionCommand;
-            missionCommand.reset(static_cast<afrl::cmasi::MissionCommand*> (object->clone()));
+            missionCommand.reset(static_cast<afrl::cmasi::MissionCommand*>(object.release()));
             m_currentMissions[missionCommand->getVehicleID()] = missionCommand;
         }
-        else if (afrl::impact::isAreaOfInterest(object))
+        else if (afrl::impact::isAreaOfInterest(object.get()))
         {
             std::shared_ptr<afrl::impact::AreaOfInterest> areaOfInterest;
-            areaOfInterest.reset(static_cast<afrl::impact::AreaOfInterest*> (object->clone()));
+            areaOfInterest.reset(static_cast<afrl::impact::AreaOfInterest*>(object.release()));
             m_areasOfInterest[areaOfInterest->getAreaID()] = areaOfInterest;
         }
-        else if (afrl::impact::isLineOfInterest(object))
+        else if (afrl::impact::isLineOfInterest(object.get()))
         {
             std::shared_ptr<afrl::impact::LineOfInterest> lineOfInterest;
-            lineOfInterest.reset(static_cast<afrl::impact::LineOfInterest*> (object->clone()));
+            lineOfInterest.reset(static_cast<afrl::impact::LineOfInterest*>(object.release()));
             m_linesOfInterest[lineOfInterest->getLineID()] = lineOfInterest;
         }
-        else if (afrl::impact::isPointOfInterest(object))
+        else if (afrl::impact::isPointOfInterest(object.get()))
         {
             std::shared_ptr<afrl::impact::PointOfInterest> pointOfInterest;
-            pointOfInterest.reset(static_cast<afrl::impact::PointOfInterest*> (object->clone()));
+            pointOfInterest.reset(static_cast<afrl::impact::PointOfInterest*>(object.release()));
             m_pointsOfInterest[pointOfInterest->getPointID()] = pointOfInterest;
         }
-        else if (afrl::cmasi::isKeepInZone(object))
+        else if (afrl::cmasi::isKeepInZone(object.get()))
         {
             std::shared_ptr<afrl::cmasi::KeepInZone> kiz;
-            kiz.reset(static_cast<afrl::cmasi::KeepInZone*>(object->clone()));
+            kiz.reset(static_cast<afrl::cmasi::KeepInZone*>(object.release()));
             m_keepInZones[kiz->getZoneID()] = kiz;
         }
-        else if (afrl::cmasi::isKeepOutZone(object))
+        else if (afrl::cmasi::isKeepOutZone(object.get()))
         {
             std::shared_ptr<afrl::cmasi::KeepOutZone> koz;
-            koz.reset(static_cast<afrl::cmasi::KeepOutZone*>(object->clone()));
+            koz.reset(static_cast<afrl::cmasi::KeepOutZone*>(object.release()));
             m_keepOutZones[koz->getZoneID()] = koz;
         }
-        else if (afrl::cmasi::isOperatingRegion(object))
+        else if (afrl::cmasi::isOperatingRegion(object.get()))
         {
             std::shared_ptr<afrl::cmasi::OperatingRegion> opr;
-            opr.reset(static_cast<afrl::cmasi::OperatingRegion*>(object->clone()));
+            opr.reset(static_cast<afrl::cmasi::OperatingRegion*>(object.release()));
             m_OperatingRegions[opr->getID()] = opr;
         }
-        delete object;
     }
 
     // set a (likely) unique ID from the task ID
@@ -249,11 +248,9 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
 {
     bool isKillService = false;
 
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-    auto entityConfiguration = std::dynamic_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
-
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_entityStates[entityState->getID()] = entityState;
         if (m_assignedVehicleIds.find(entityState->getID()) != m_assignedVehicleIds.end())
         {
@@ -274,8 +271,7 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                     taskActive->setTaskID(m_task->getTaskID());
                     taskActive->setEntityID(entityState->getID());
                     taskActive->setTimeTaskActivated(uxas::common::Time::getInstance().getUtcTimeSinceEpoch_ms());
-                    auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(taskActive);
-                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
+                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskActive);
                     std::this_thread::sleep_for(std::chrono::milliseconds(50));
                 }
                 m_assignedVehicleIdVsLastTaskWaypoint[entityState->getID()] = entityState->getCurrentWaypoint();
@@ -297,15 +293,15 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                     }
                     taskCompleteUxas->setTaskID(m_task->getTaskID());
                     taskCompleteUxas->setTimeTaskCompleted(uxas::common::Time::getInstance().getUtcTimeSinceEpoch_ms());
-                    auto newMessageUxas = std::static_pointer_cast<avtas::lmcp::Object>(taskCompleteUxas);
-                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessageUxas);
+                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskCompleteUxas);
                     m_assignedVehicleIdVsLastTaskWaypoint.erase(entityState->getID());
                 }
             }
         }
     }
-    else if (entityConfiguration)
+    else if (afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
+        auto entityConfiguration = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         auto foundEntity = std::find(m_task->getEligibleEntities().begin(), m_task->getEligibleEntities().end(), entityConfiguration->getID());
         if (m_task->getEligibleEntities().empty() || foundEntity != m_task->getEligibleEntities().end())
         {
@@ -387,7 +383,7 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                     m_taskPlanOptions->setCorrespondingAutomationRequestID(uniqueAutomationRequest->getRequestID());
                     m_taskPlanOptions->setTaskID(m_task->getTaskID());
 
-                    itOption->second->m_restartTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(itOption->second->m_taskOption->clone());
+                    itOption->second->m_restartTaskOption.reset(itOption->second->m_taskOption->clone());
                     itOption->second->m_restartTaskOption->getEligibleEntities().clear();
                     itOption->second->m_restartTaskOption->getEligibleEntities().push_back(vehicleIdRestart);
 
@@ -489,8 +485,7 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                         compositionString += ")";
 
                         m_taskPlanOptions->setComposition(compositionString);
-                        auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
                     }
                     else
                     {
@@ -640,7 +635,7 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
         auto ares = std::static_pointer_cast<afrl::cmasi::AutomationResponse>(receivedLmcpMessage->m_object);
         for (auto v : ares->getMissionCommandList())
         {
-            m_currentMissions[v->getVehicleID()] = std::shared_ptr<afrl::cmasi::MissionCommand>(v->clone());
+            m_currentMissions[v->getVehicleID()].reset(v->clone());
         }
     }
     else if (afrl::cmasi::isMissionCommand(receivedLmcpMessage->m_object))
@@ -706,7 +701,7 @@ void TaskServiceBase::buildAndSendImplementationRouteRequestBase(const int64_t& 
             routePlanRequest->setVehicleID(taskImplementationRequest->getVehicleID());
             m_pendingImplementationRouteRequests.insert(routePlanRequest->getRequestID());
 
-            auto routeConstraints = new uxas::messages::route::RouteConstraints();
+            auto routeConstraints = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
             int64_t routeId = itTaskOptionClass->second->m_routeIdFromLastTask;
             m_transitionRouteRequestId = routeId;
             itTaskOptionClass->second->m_pendingRouteIds.insert(routeId);
@@ -744,13 +739,11 @@ void TaskServiceBase::buildAndSendImplementationRouteRequestBase(const int64_t& 
                 }
             }
 
-            routePlanRequest->getRouteRequests().push_back(routeConstraints);
-            routeConstraints = nullptr; //just gave up ownership
+            routePlanRequest->getRouteRequests().push_back(routeConstraints.release());
 
             m_routeIdVsTaskImplementationRequest[routePlanRequest->getRequestID()] = taskImplementationRequest;
 
-            auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(routePlanRequest);
-            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(routePlanRequest);
         }
         else //if ((itTaskOptionClass != m_optionIdVsTaskOptionClass.end()))
         {
@@ -774,7 +767,7 @@ void TaskServiceBase::processOptionsRoutePlanResponseBase(const std::shared_ptr<
             for (auto routePlan : routePlanResponse->getRouteResponses())
             {
                 // we are waiting for this one
-                auto route = std::shared_ptr<uxas::messages::route::RoutePlan>(routePlan->clone());
+                std::shared_ptr<uxas::messages::route::RoutePlan> route(routePlan->clone());
                 // call virtual function
                 if (!isHandleOptionsRouteResponse(vehicleId, optionId, operatingRegion, route))
                 {
@@ -807,8 +800,7 @@ void TaskServiceBase::processOptionsRoutePlanResponseBase(const std::shared_ptr<
                     if (isAllOptionsComplete)
                     {
                         // once all options are complete, send out the message
-                        auto objectTaskPlanOptions = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectTaskPlanOptions);
+                        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
                     }
                 }
             } //for (auto routePlan : routePlanResponse->getRouteResponses())
@@ -870,7 +862,7 @@ void TaskServiceBase::processImplementationRoutePlanResponseBase(const std::shar
                             itTaskOptionClass->second->m_taskOption->setCost(totalCost);
                         }
                         /////////////////////////////////////////////////////////////////////////////////////////////////////
-                        auto pRoutePlan = std::shared_ptr<uxas::messages::route::RoutePlan>(routePlan->clone());
+                        std::shared_ptr<uxas::messages::route::RoutePlan> pRoutePlan(routePlan->clone());
                         itTaskOptionClass->second->m_orderedRouteIdVsPlan[routePlan->getRouteID()] = pRoutePlan;
                         // once all of the routePlans have been received, build the response and send it out
                         if (itTaskOptionClass->second->m_pendingRouteIds.empty())
@@ -916,7 +908,7 @@ void TaskServiceBase::processImplementationRoutePlanResponseBase(const std::shar
                                     for (auto& planWaypoint : taskPlan->getWaypoints())
                                     {
                                         auto originalPlanWaypointNumber = planWaypoint->getNumber();
-                                        auto waypoint = planWaypoint->clone();
+                                        std::unique_ptr<afrl::cmasi::Waypoint> waypoint(planWaypoint->clone());
                                         planWaypoint->setNumber(waypointId); // need to update the number in the save route waypoints
                                         waypoint->setNumber(waypointId);
                                         waypoint->setAltitude(itEntityConfiguration->second->getNominalAltitude());
@@ -945,7 +937,7 @@ void TaskServiceBase::processImplementationRoutePlanResponseBase(const std::shar
 
                                         // if a waypoint is co-located with the previous waypoint, replace the previous waypoint
                                         if(!taskImplementationResponse->getTaskWaypoints().empty() &&
-                                            isColocated(taskImplementationResponse->getTaskWaypoints().back(), waypoint))
+                                            isColocated(taskImplementationResponse->getTaskWaypoints().back(), waypoint.get()))
                                         {
                                             waypointId = taskImplementationResponse->getTaskWaypoints().back()->getNumber();
                                             int64_t nextId = taskImplementationResponse->getTaskWaypoints().back()->getNextWaypoint();
@@ -955,9 +947,8 @@ void TaskServiceBase::processImplementationRoutePlanResponseBase(const std::shar
                                             taskImplementationResponse->getTaskWaypoints().pop_back();
                                         }
 
-                                        taskImplementationResponse->getTaskWaypoints().push_back(waypoint);
+                                        taskImplementationResponse->getTaskWaypoints().push_back(waypoint.release());
                                         waypointId++;
-                                        waypoint = nullptr; // gave up ownership
                                     }
                                 }
                                 // got a new plan so remove old restart plan, if any
@@ -974,19 +965,17 @@ void TaskServiceBase::processImplementationRoutePlanResponseBase(const std::shar
                                     // disassociate the last waypoint in the plan from the tasks, allows tasks to complete
                                     if (taskImplementationResponse->getTaskWaypoints().back()->getNextWaypoint() == 0)
                                     {
-                                        auto waypointLast = taskImplementationResponse->getTaskWaypoints().back()->clone();
+                                        std::unique_ptr<afrl::cmasi::Waypoint> waypointLast(taskImplementationResponse->getTaskWaypoints().back()->clone());
                                         auto newNumber = waypointLast->getNumber() + 1;
                                         waypointLast->setNumber(newNumber);
                                         waypointLast->setNextWaypoint(newNumber);
                                         taskImplementationResponse->getTaskWaypoints().back()->setNextWaypoint(newNumber);
                                         waypointLast->getAssociatedTasks().clear();
-                                        taskImplementationResponse->getTaskWaypoints().push_back(waypointLast);
-                                        waypointLast = nullptr;
+                                        taskImplementationResponse->getTaskWaypoints().push_back(waypointLast.release());
                                     }
 
                                     // send out the response
-                                    auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(taskImplementationResponse);
-                                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
+                                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(taskImplementationResponse);
                                     m_assignedVehicleIdVsAssignedOptionId[vehicleId] = optionId;
                                 }
                                 else //if(!taskImplementationResponse->getTaskWaypoints().empty())
@@ -1043,11 +1032,10 @@ std::shared_ptr<afrl::cmasi::Task> TaskServiceBase::generateTaskObject(const pug
     {
         std::stringstream taskStringStream;
         taskRequestNode.first_child().print(taskStringStream);
-        avtas::lmcp::Object* object = avtas::lmcp::xml::readXML(taskStringStream.str());
-        if (object != nullptr)
+        std::unique_ptr<avtas::lmcp::Object> object(avtas::lmcp::xml::readXML(taskStringStream.str()));
+        if (object && afrl::cmasi::isTask(object.get()))
         {
-            auto task = dynamic_cast<afrl::cmasi::Task*> (object);
-            taskPointer.reset(task);
+            taskPointer.reset(static_cast<afrl::cmasi::Task*>(object.release()));
         }
     }
     return (taskPointer);
@@ -1059,10 +1047,10 @@ std::shared_ptr<afrl::cmasi::EntityConfiguration> TaskServiceBase::generateEntit
 
     std::stringstream stringStream;
     entityConfigNode.print(stringStream);
-    avtas::lmcp::Object* object = avtas::lmcp::xml::readXML(stringStream.str());
-    if (object != nullptr)
+    std::unique_ptr<avtas::lmcp::Object> object(avtas::lmcp::xml::readXML(stringStream.str()));
+    if (object)
     {
-        entityConfiguration.reset(static_cast<afrl::cmasi::EntityConfiguration*> (object));
+        entityConfiguration.reset(static_cast<afrl::cmasi::EntityConfiguration*>(object.release()));
     }
     return (entityConfiguration);
 }

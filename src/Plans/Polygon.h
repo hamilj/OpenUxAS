@@ -57,6 +57,7 @@
 #include <list>
 #include <utility>    //pair
 #include <map>
+#include <memory>
 #include <vector>
 #include <sstream>
 
@@ -312,7 +313,7 @@ public:    //constructors/destructors
 		SelectedTest(GRID),
 		GridUpdateNeeded(true),
 		BBUpdateNeeded(true),
-		GridPtr(0)
+		GridPtr(nullptr)
     {
         posminBBoxPoint.m_north_m=(0);
         posminBBoxPoint.m_east_m=(0);
@@ -321,17 +322,6 @@ public:    //constructors/destructors
         posmaxBBoxPoint.m_east_m=(0);
         posmaxBBoxPoint.m_altitude_m=(0);
 
-    };
-
-
-
-    ~CPolygon()
-    {
-        if(GridPtr)
-        {
-            delete GridPtr;
-        }
-        GridPtr = 0;
     };
 
     CPolygon(const CPolygon& rhs)
@@ -351,7 +341,7 @@ public:    //constructors/destructors
         veGetPolygonEdges() = rhs.veGetPolygonEdges();
         veGetExtraVisibleEdges() = rhs.veGetExtraVisibleEdges();
         dGetPolygonExpansionDistance() = rhs.dGetPolygonExpansionDistance();
-        GridPtr = 0;
+        GridPtr.reset();
         GridUpdateNeeded = true;
         BBUpdateNeeded = true;
         dynbsGetLocalID() = rhs.dynbsGetLocalID();
@@ -717,7 +707,7 @@ private:
     //struct Edge { double A; double B; double C; };
 
 
-    CGrid *GridPtr;                    // want as pointer because may not always exist
+    std::unique_ptr<CGrid> GridPtr;
 
     /************************************************
     *                Private Member Functions        *

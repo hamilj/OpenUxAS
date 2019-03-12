@@ -173,8 +173,7 @@ ZeroMqAddressedAttributedMessageTcpReceiverSender::getNextMessage()
             while (!recvdTcpDataSegment.empty())
             {
                 UXAS_LOG_DEBUG_VERBOSE("ZeroMqAddressedAttributedMessageTcpReceiverSender::getNextMessage processing complete object string segment");
-                std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> recvdTcpAddAttMsg
-                        = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
+                auto recvdTcpAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
                 if (recvdTcpAddAttMsg->setAddressAttributesAndPayloadFromDelimitedString(std::move(recvdTcpDataSegment)))
                 {
                     m_recvdMsgs.push_back( std::move(recvdTcpAddAttMsg) );
@@ -205,8 +204,7 @@ ZeroMqAddressedAttributedMessageTcpReceiverSender::getNextMessage()
 void
 ZeroMqAddressedAttributedMessageTcpReceiverSender::sendMessage(const std::string& address, const std::string& contentType, const std::string& descriptor, const std::string& payload)
 {
-    std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> message
-            = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
+    auto message = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
     message->setAddressAttributesAndPayload(address, contentType, descriptor, m_sourceGroup,
                                            m_entityIdString, m_serviceIdString, std::move(payload));
     sendAddressedAttributedMessage(std::move(message));
