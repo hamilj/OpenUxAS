@@ -87,28 +87,27 @@ SerialAutomationRequestTestService::initialize()
 
 bool
 SerialAutomationRequestTestService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
-        if (afrl::cmasi::isAutomationRequest(receivedLmcpMessage->m_object.get()) || afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object.get()))
+    if (afrl::cmasi::isAutomationRequest(receivedLmcpMessage->m_object) || afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object))
+    {
+        if (m_waitingRequests.empty() && m_isAllClear)
         {
-            if (m_waitingRequests.empty() && m_isAllClear)
-            {
-                m_isAllClear = false;
-                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage("UniqueAutomationRequest", receivedLmcpMessage->m_object);
+            m_isAllClear = false;
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage("UniqueAutomationRequest", receivedLmcpMessage->m_object);
 
-                // reset the timer
-                uxas::common::TimerManager::getInstance().startSingleShotTimer(m_responseTimerId, m_maxResponseTime_ms);
-            }
-            else
-            {
-                m_waitingRequests.push_back(receivedLmcpMessage->m_object);
-            }
+            // reset the timer
+            uxas::common::TimerManager::getInstance().startSingleShotTimer(m_responseTimerId, m_maxResponseTime_ms);
         }
-        else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object.get()) || afrl::impact::isImpactAutomationResponse(receivedLmcpMessage->m_object.get()))
+        else
         {
-            OnResponseTimeout();
+            m_waitingRequests.push_back(receivedLmcpMessage->m_object);
         }
-        return false;
+    }
+    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object) || afrl::impact::isImpactAutomationResponse(receivedLmcpMessage->m_object))
+    {
+        OnResponseTimeout();
+    }
+    return false;
 }
 
 void SerialAutomationRequestTestService::OnResponseTimeout()

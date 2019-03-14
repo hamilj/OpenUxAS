@@ -101,10 +101,9 @@ RouteAggregatorService::configure(const pugi::xml_node& ndComponent)
 
 bool
 RouteAggregatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
     // successful de-serialization of message
-    if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object.get()))
+    if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object))
     {
         auto rplan = std::static_pointer_cast<uxas::messages::route::RoutePlanResponse>(receivedLmcpMessage->m_object);
         m_routePlanResponses[rplan->getResponseID()] = rplan;
@@ -114,7 +113,7 @@ RouteAggregatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communi
         }
         CheckAllRoutePlans();
     }
-    else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object))
     {
         auto rreq = std::static_pointer_cast<uxas::messages::route::RouteRequest>(receivedLmcpMessage->m_object);
         HandleRouteRequest(rreq);
@@ -125,13 +124,13 @@ RouteAggregatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communi
         m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_airVehicles.insert(id);
     }
-    else if (afrl::vehicles::isGroundVehicleState(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isGroundVehicleState(receivedLmcpMessage->m_object))
     {
         int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
         m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_groundVehicles.insert(id);
     }
-    else if (afrl::vehicles::isSurfaceVehicleState(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isSurfaceVehicleState(receivedLmcpMessage->m_object))
     {
         int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
         m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
@@ -143,26 +142,26 @@ RouteAggregatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communi
         m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         m_airVehicles.insert(id);
     }
-    else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object))
     {
         int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
         m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         m_groundVehicles.insert(id);
     }
-    else if (afrl::vehicles::isSurfaceVehicleConfiguration(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isSurfaceVehicleConfiguration(receivedLmcpMessage->m_object))
     {
         int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
         m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         m_surfaceVehicles.insert(id);
     }
-    else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object))
     {
         auto areq = std::static_pointer_cast<uxas::messages::task::UniqueAutomationRequest>(receivedLmcpMessage->m_object);
         m_uniqueAutomationRequests[m_autoRequestId++] = areq;
         //ResetTaskOptions(areq); // clear m_taskOptions and wait for refresh from tasks
         CheckAllTaskOptionsReceived();
     }
-    else if (afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object))
     {
         auto sreq = std::static_pointer_cast<afrl::impact::ImpactAutomationRequest>(receivedLmcpMessage->m_object);
         auto areq = std::make_shared<uxas::messages::task::UniqueAutomationRequest>();
@@ -172,7 +171,7 @@ RouteAggregatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communi
         //ResetTaskOptions(areq); // clear m_taskOptions and wait for refresh from tasks
         CheckAllTaskOptionsReceived();
     }
-    else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object))
     {
         auto taskOptions = std::static_pointer_cast<uxas::messages::task::TaskPlanOptions>(receivedLmcpMessage->m_object);
         m_taskOptions[taskOptions->getTaskID()] = taskOptions;

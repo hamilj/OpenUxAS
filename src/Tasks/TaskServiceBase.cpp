@@ -246,8 +246,6 @@ void TaskServiceBase::terminate()
 
 bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
-    bool isKillService = false;
-
     if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
         auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
@@ -644,9 +642,7 @@ bool TaskServiceBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
         m_currentMissions[mish->getVehicleID()] = mish;
     }
 
-    isKillService = isKillService || processReceivedLmcpMessageTask(receivedLmcpMessage->m_object);
-
-    return (isKillService);
+    return processReceivedLmcpMessageTask(receivedLmcpMessage->m_object);
 };
 
 int64_t TaskServiceBase::getOptionRouteId(const int64_t& OptionId)

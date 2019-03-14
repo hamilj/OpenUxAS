@@ -89,9 +89,8 @@ bool
 }
 
 bool BatchSummaryService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
-    if (afrl::impact::isBatchSummaryRequest(receivedLmcpMessage->m_object.get()))
+    if (afrl::impact::isBatchSummaryRequest(receivedLmcpMessage->m_object))
     {
         HandleBatchSummaryRequest(std::static_pointer_cast<afrl::impact::BatchSummaryRequest>(receivedLmcpMessage->m_object));
     }
@@ -101,7 +100,7 @@ bool BatchSummaryService::processReceivedLmcpMessage(std::unique_ptr<uxas::commu
         int64_t id = config->getID();
         m_entityConfigs[id] = config;
 
-        if (afrl::impact::isRadioTowerConfiguration(receivedLmcpMessage->m_object.get()))
+        if (afrl::impact::isRadioTowerConfiguration(receivedLmcpMessage->m_object))
         {
             auto rconfig = std::static_pointer_cast<afrl::impact::RadioTowerConfiguration>(receivedLmcpMessage->m_object);
             int64_t id = rconfig->getID();
@@ -115,31 +114,29 @@ bool BatchSummaryService::processReceivedLmcpMessage(std::unique_ptr<uxas::commu
         int64_t id = state->getID();
         m_entityStates[id] = state;
 
-   if (afrl::impact::isRadioTowerState(receivedLmcpMessage->m_object.get()))
-   {
-       m_towerLocations[id].reset(state->getLocation()->clone());
-       auto rs = std::static_pointer_cast<afrl::impact::RadioTowerState>(receivedLmcpMessage->m_object);
-       if (m_towerRanges.find(id) != m_towerRanges.end())
-       {
-           m_towerRanges[id].second = rs->getEnabled();
-       }
-   }
-       }
+        if (afrl::impact::isRadioTowerState(receivedLmcpMessage->m_object))
+        {
+            m_towerLocations[id].reset(state->getLocation()->clone());
+            auto rs = std::static_pointer_cast<afrl::impact::RadioTowerState>(receivedLmcpMessage->m_object);
+            if (m_towerRanges.find(id) != m_towerRanges.end())
+            {
+                m_towerRanges[id].second = rs->getEnabled();
+            }
+        }
+    }
+    else if (messages::task::isTaskAutomationResponse(receivedLmcpMessage->m_object))
+    {
+        HandleTaskAutomationResponse(std::static_pointer_cast<messages::task::TaskAutomationResponse>(receivedLmcpMessage->m_object));
+        //check if all have been received and send out the batchSumaryResponse.
+    }
+    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object))
+    {
+        auto koz = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(receivedLmcpMessage->m_object);
+        auto poly = FromAbstractGeometry(koz->getBoundary());
 
-       else if (messages::task::isTaskAutomationResponse(receivedLmcpMessage->m_object))
-       {
-
-           HandleTaskAutomationResponse(std::static_pointer_cast<messages::task::TaskAutomationResponse>(receivedLmcpMessage->m_object));
-           //check if all have been received and send out the batchSumaryResponse.
-       }
-       else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object))
-       {
-           auto koz = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(receivedLmcpMessage->m_object);
-           auto poly = FromAbstractGeometry(koz->getBoundary());
-
-           m_keepOutZones[koz->getZoneID()] = poly;
-       }
-       return (false); // always false implies never terminating service from here
+        m_keepOutZones[koz->getZoneID()] = poly;
+    }
+    return (false); // always false implies never terminating service from here
 }
 
 void BatchSummaryService::HandleTaskAutomationResponse(const std::shared_ptr<messages::task::TaskAutomationResponse>& taskAutomationResponse)

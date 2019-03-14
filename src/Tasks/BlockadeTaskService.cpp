@@ -109,7 +109,6 @@ BlockadeTaskService::configureTask(const pugi::xml_node& ndComponent)
 
 bool
 BlockadeTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
     if (afrl::cmasi::isEntityState(receivedLmcpObject))
     {

@@ -88,9 +88,8 @@ RoutePlannerService::configure(const pugi::xml_node& serviceXmlNode)
 
 bool
 RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
-    if (uxas::messages::route::isRoutePlanRequest(receivedLmcpMessage->m_object.get()))
+    if (uxas::messages::route::isRoutePlanRequest(receivedLmcpMessage->m_object))
     {
         auto request = std::static_pointer_cast<uxas::messages::route::RoutePlanRequest>(receivedLmcpMessage->m_object);
         // only handle requests for air and surface vehicles
@@ -107,16 +106,17 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
                     response);
         }
     }
-    else if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
-        int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
-        m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        auto state = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        m_entityStates[state->getID()] = state;
         // no region update for generic entities
     }
     else if (afrl::cmasi::isAirVehicleState(receivedLmcpMessage->m_object))
     {
-        int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
-        m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        auto state = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        int64_t id = state->getID();
+        m_entityStates[id] = state;
 
         // check for unknown vehicle
         if (m_airVehicles.find(id) == m_airVehicles.end())
@@ -125,17 +125,19 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
         }
         m_airVehicles.insert(id);
     }
-    else if (afrl::vehicles::isGroundVehicleState(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isGroundVehicleState(receivedLmcpMessage->m_object))
     {
-        int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
-        m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        auto state = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        int64_t id = state->getID();
+        m_entityStates[id] = state;
         m_groundVehicles.insert(id);
         // no region update for ground vehicles
     }
-    else if (afrl::vehicles::isSurfaceVehicleState(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isSurfaceVehicleState(receivedLmcpMessage->m_object))
     {
-        int64_t id = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object)->getID();
-        m_entityStates[id] = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        auto state = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+        int64_t id = state->getID();
+        m_entityStates[id] = state;
 
         // check for unknown vehicle
         if (m_surfaceVehicles.find(id) == m_surfaceVehicles.end())
@@ -146,14 +148,15 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
     }
     else if (afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
-        int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
-        m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        auto config = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        m_entityConfigurations[config->getID()] = config;
         // no region update for generic entities
     }
     else if (afrl::cmasi::isAirVehicleConfiguration(receivedLmcpMessage->m_object))
     {
-        int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
-        m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        auto config = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        int64_t id = config->getID();
+        m_entityConfigurations[id] = config;
 
         // check for unknown vehicle
         if (m_airVehicles.find(id) == m_airVehicles.end())
@@ -162,29 +165,32 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
         }
         m_airVehicles.insert(id);
     }
-    else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object))
     {
-        int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
-        m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        auto config = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        int64_t id = config->getID();
+        m_entityConfigurations[id] = config;
         m_groundVehicles.insert(id);
         // no region updates for ground vehicles
     }
-    else if (afrl::vehicles::isSurfaceVehicleConfiguration(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isSurfaceVehicleConfiguration(receivedLmcpMessage->m_object))
     {
-        int64_t id = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object)->getID();
+        auto config = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        int64_t id = config->getID();
 
         // check for unknown vehicle
         if (m_entityConfigurations.find(id) == m_entityConfigurations.end())
         {
             UpdateRegions(receivedLmcpMessage->m_object); // force update for new surface vehicles with embedded keep-in water zone
         }
-        m_entityConfigurations[id] = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
+        m_entityConfigurations[id] = config;
         m_surfaceVehicles.insert(id);
     }
-    else if (afrl::impact::isWaterZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isWaterZone(receivedLmcpMessage->m_object))
     {
         auto wzone = std::static_pointer_cast<afrl::impact::WaterZone>(receivedLmcpMessage->m_object);
-        m_waterZones[wzone->getZoneID()] = wzone;
+        int64_t id = wzone->getZoneID();
+        m_waterZones[id] = wzone;
 
         // check all surface vehicle configurations with this zone referenced
         for (auto e : m_entityConfigurations)
@@ -192,14 +198,14 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
             if (afrl::vehicles::isSurfaceVehicleConfiguration(e.second.get()))
             {
                 auto s = std::static_pointer_cast<afrl::vehicles::SurfaceVehicleConfiguration>(e.second);
-                if (s->getWaterArea() == wzone->getZoneID())
+                if (s->getWaterArea() == id)
                 {
                     UpdateRegions(s);
                 }
             }
         }
     }
-    else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object))
     {
         auto kiZone = std::static_pointer_cast<afrl::cmasi::KeepInZone>(receivedLmcpMessage->m_object);
         int64_t id = kiZone->getZoneID();
@@ -213,7 +219,7 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
         }
         m_keepInZones[id] = kiZone;
     }
-    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object))
     {
         auto koZone = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(receivedLmcpMessage->m_object);
         int64_t id = koZone->getZoneID();
@@ -227,7 +233,7 @@ RoutePlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
         }
         m_keepOutZones[id] = koZone;
     }
-    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object))
     {
         auto region = std::static_pointer_cast<afrl::cmasi::OperatingRegion>(receivedLmcpMessage->m_object);
         int64_t id = region->getID();

@@ -247,7 +247,6 @@ OsmPlannerService::initialize()
 
 bool
 OsmPlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
     if (uxas::messages::route::isRoutePlanRequest(receivedLmcpMessage->m_object))
     {
@@ -295,8 +294,7 @@ OsmPlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicatio
                                                    egressResponse);
         }
     }
-
-    else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object))
     {
         auto config = std::static_pointer_cast<afrl::vehicles::GroundVehicleConfiguration>(receivedLmcpMessage->m_object);
         m_entityConfigurations[config->getID()] = config;

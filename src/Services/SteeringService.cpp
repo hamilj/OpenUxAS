@@ -307,7 +307,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             }
         }
     }
-    else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object))
     {
         const auto req = std::static_pointer_cast<uxas::messages::task::UniqueAutomationRequest>(receivedLmcpMessage->m_object);
         if(!req->getSandBoxRequest() && req->getOriginalRequest())
@@ -319,7 +319,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             m_requestToRegionMap.erase(req->getRequestID());
         }
     }
-    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object))
     {
         const auto resp = std::static_pointer_cast<uxas::messages::task::UniqueAutomationResponse>(receivedLmcpMessage->m_object);
         if(resp->getOriginalResponse())
@@ -348,7 +348,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             }
         }
     }
-    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object))
     {
         const auto pResponse = std::static_pointer_cast<afrl::cmasi::AutomationResponse>(receivedLmcpMessage->m_object);
         const std::vector<afrl::cmasi::MissionCommand*> missionCommands = pResponse->getMissionCommandList();
@@ -363,7 +363,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             reset(*it_mission);
         }
     }
-    else if (afrl::cmasi::isMissionCommand(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isMissionCommand(receivedLmcpMessage->m_object))
     {
         const auto pMission = std::static_pointer_cast<afrl::cmasi::MissionCommand>(receivedLmcpMessage->m_object);
 
@@ -374,7 +374,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             reset(pMission.get());
         }
     }
-    else if (uxas::messages::uxnative::isSpeedOverrideAction(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::uxnative::isSpeedOverrideAction(receivedLmcpMessage->m_object))
     {
         auto speed_override = std::static_pointer_cast<uxas::messages::uxnative::SpeedOverrideAction>(receivedLmcpMessage->m_object);
         if(speed_override->getVehicleID() == m_vehicleID)
@@ -383,7 +383,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             m_overrideSpeed = speed_override->getSpeed();
         }
     }
-    else if (afrl::cmasi::isVehicleActionCommand(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isVehicleActionCommand(receivedLmcpMessage->m_object))
     {
         auto vehicleActionCommand = std::static_pointer_cast<afrl::cmasi::VehicleActionCommand>(receivedLmcpMessage->m_object);
         if(vehicleActionCommand->getVehicleID() == m_vehicleID)

@@ -170,7 +170,7 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
         m_availableInitializedTasks.erase(task->getTaskID());
         m_availableTasks[task->getTaskID()] = task;
     }
-    else if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object))
     {
         // log any error messages in the assignment pipeline
         auto sstatus = std::static_pointer_cast<afrl::cmasi::ServiceStatus>(receivedLmcpMessage->m_object);
@@ -178,7 +178,7 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
             for(auto kvp : sstatus->getInfo())
                 m_errorResponse->getOriginalResponse()->getInfo().push_back(kvp->clone());
     }
-    else if (afrl::cmasi::isRemoveTasks(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isRemoveTasks(receivedLmcpMessage->m_object))
     {
         auto removeTasks = std::static_pointer_cast<afrl::cmasi::RemoveTasks>(receivedLmcpMessage->m_object);
         for (auto& taskId : removeTasks->getTaskList())
@@ -187,38 +187,38 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
             m_availableInitializedTasks.erase(taskId);
         }
     }
-    else if (uxas::messages::task::isTaskInitialized(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isTaskInitialized(receivedLmcpMessage->m_object))
     {
         auto taskInitialized = std::static_pointer_cast<uxas::messages::task::TaskInitialized>(receivedLmcpMessage->m_object);
         m_availableInitializedTasks.insert(taskInitialized->getTaskID());
         checkTasksInitialized();
     }
-    else if (afrl::impact::isAreaOfInterest(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isAreaOfInterest(receivedLmcpMessage->m_object))
     {
         auto areaOfInterest = std::static_pointer_cast<afrl::impact::AreaOfInterest>(receivedLmcpMessage->m_object);
         m_availableAreaOfInterestIds.insert(areaOfInterest->getAreaID());
     }
-    else if (afrl::impact::isLineOfInterest(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isLineOfInterest(receivedLmcpMessage->m_object))
     {
         auto lineOfInterest = std::static_pointer_cast<afrl::impact::LineOfInterest>(receivedLmcpMessage->m_object);
         m_availableLineOfInterestIds.insert(lineOfInterest->getLineID());
     }
-    else if (afrl::impact::isPointOfInterest(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isPointOfInterest(receivedLmcpMessage->m_object))
     {
         auto pointOfInterest = std::static_pointer_cast<afrl::impact::PointOfInterest>(receivedLmcpMessage->m_object);
         m_availablePointOfInterestIds.insert(pointOfInterest->getPointID());
     }
-    else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object))
     {
         auto keepInZone = std::static_pointer_cast<afrl::cmasi::KeepInZone>(receivedLmcpMessage->m_object);
         m_availableKeepInZoneIds.insert(keepInZone->getZoneID());
     }
-    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object))
     {
         auto keepOutZone = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(receivedLmcpMessage->m_object);
         m_availableKeepOutZoneIds.insert(keepOutZone->getZoneID());
     }
-    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object))
     {
         auto operatingRegion = std::static_pointer_cast<afrl::cmasi::OperatingRegion>(receivedLmcpMessage->m_object);
         m_availableOperatingRegions[operatingRegion->getID()] = operatingRegion;
@@ -229,7 +229,7 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
     {
         HandleAutomationRequest(receivedLmcpMessage->m_object);
     }
-    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object))
     {
         HandleAutomationResponse(receivedLmcpMessage->m_object);
     }

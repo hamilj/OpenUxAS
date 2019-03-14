@@ -171,7 +171,7 @@ bool StatusReportService::processReceivedLmcpMessage(std::unique_ptr<uxas::commu
         m_report.getConnectedEntities().clear();
         m_report.getConnectedEntities().insert(m_report.getConnectedEntities().end(), m_connections.begin(), m_connections.end());
     }
-    else if (uxas::messages::uxnative::isAutopilotKeepAlive(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::uxnative::isAutopilotKeepAlive(receivedLmcpMessage->m_object))
     {
         auto keepAlive = std::static_pointer_cast<uxas::messages::uxnative::AutopilotKeepAlive>(receivedLmcpMessage->m_object);
         m_report.setValidAuthorization(keepAlive->getAutopilotEnabled());

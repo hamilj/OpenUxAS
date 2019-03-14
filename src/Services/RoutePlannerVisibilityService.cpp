@@ -168,7 +168,6 @@ RoutePlannerVisibilityService::initialize()
 
 bool
 RoutePlannerVisibilityService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
     if (afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
@@ -181,23 +180,23 @@ RoutePlannerVisibilityService::processReceivedLmcpMessage(std::unique_ptr<uxas::
         auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_idVsEntityState[entityState->getID()] = entityState;
     }
-    else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object))
     {
         bProcessZone(std::static_pointer_cast<afrl::cmasi::AbstractZone>(receivedLmcpMessage->m_object), true);
     }
-    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object))
     {
         bProcessZone(std::static_pointer_cast<afrl::cmasi::AbstractZone>(receivedLmcpMessage->m_object), false);
     }
-    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object))
     {
         bProcessOperatingRegion(std::static_pointer_cast<afrl::cmasi::OperatingRegion>(receivedLmcpMessage->m_object));
     }
-    else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::route::isRouteRequest(receivedLmcpMessage->m_object))
     {
         bProcessRouteRequest(std::static_pointer_cast<uxas::messages::route::RouteRequest>(receivedLmcpMessage->m_object));
     }
-    else if (uxas::messages::route::isRoutePlanRequest(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::route::isRoutePlanRequest(receivedLmcpMessage->m_object))
     {
         auto request = std::static_pointer_cast<uxas::messages::route::RoutePlanRequest>(receivedLmcpMessage->m_object);
         auto itEntityConfiguration = m_idVsEntityConfiguration.find(request->getVehicleID());

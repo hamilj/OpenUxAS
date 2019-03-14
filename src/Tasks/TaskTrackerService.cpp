@@ -78,7 +78,6 @@ TaskTrackerService::configure(const pugi::xml_node& serviceXmlNode)
 
 bool
 TaskTrackerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
     if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {

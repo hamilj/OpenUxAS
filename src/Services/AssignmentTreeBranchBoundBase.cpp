@@ -121,10 +121,9 @@ AssignmentTreeBranchBoundBase::configure(const pugi::xml_node& ndComponent)
 
 bool
 AssignmentTreeBranchBoundBase::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
     std::shared_ptr<AssigmentPrerequisites> assigmentPrerequisites;
-    if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get()))
+    if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object))
     {
         auto uniqueAutomationRequest = std::static_pointer_cast<uxas::messages::task::UniqueAutomationRequest>(receivedLmcpMessage->m_object);
         if (m_idVsAssigmentPrerequisites.find(uniqueAutomationRequest->getRequestID()) == m_idVsAssigmentPrerequisites.end())
@@ -139,7 +138,7 @@ AssignmentTreeBranchBoundBase::processReceivedLmcpMessage(std::unique_ptr<uxas::
             m_idVsAssigmentPrerequisites.erase(uniqueAutomationRequest->getRequestID());
         }
     }
-    else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isTaskPlanOptions(receivedLmcpMessage->m_object))
     {
         auto taskPlanOptions = std::static_pointer_cast<uxas::messages::task::TaskPlanOptions>(receivedLmcpMessage->m_object);
         if (m_idVsAssigmentPrerequisites.find(taskPlanOptions->getCorrespondingAutomationRequestID()) == m_idVsAssigmentPrerequisites.end())
@@ -153,7 +152,7 @@ AssignmentTreeBranchBoundBase::processReceivedLmcpMessage(std::unique_ptr<uxas::
             m_idVsAssigmentPrerequisites.erase(taskPlanOptions->getCorrespondingAutomationRequestID());
         }
     }
-    else if (uxas::messages::task::isAssignmentCostMatrix(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isAssignmentCostMatrix(receivedLmcpMessage->m_object))
     {
         auto assignmentCostMatrix = std::static_pointer_cast<uxas::messages::task::AssignmentCostMatrix>(receivedLmcpMessage->m_object);
         if (m_idVsAssigmentPrerequisites.find(assignmentCostMatrix->getCorrespondingAutomationRequestID()) == m_idVsAssigmentPrerequisites.end())
@@ -168,7 +167,7 @@ AssignmentTreeBranchBoundBase::processReceivedLmcpMessage(std::unique_ptr<uxas::
         }
     }
 #ifdef AFRL_INTERNAL_ENABLED
-    else if (uxas::project::pisr::isPSIR_AssignmentType(receivedLmcpMessage->m_object.get()))
+    else if (uxas::project::pisr::isPSIR_AssignmentType(receivedLmcpMessage->m_object))
     {
         m_isUsingAssignmentTypes = true;
         auto pisrAssignmentType = std::static_pointer_cast<uxas::project::pisr::PSIR_AssignmentType>(receivedLmcpMessage->m_object);

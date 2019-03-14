@@ -199,7 +199,7 @@ SendMessagesService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicat
     bool isFinished(false);
     
     if (!m_isStartUpComplete 
-            && uxas::messages::uxnative::isStartupComplete(receivedLmcpMessage->m_object.get()))
+            && uxas::messages::uxnative::isStartupComplete(receivedLmcpMessage->m_object))
     {
         m_messageZeroTime_ms = uxas::common::Time::getInstance().getUtcTimeSinceEpoch_ms();
         m_isStartUpComplete = true;

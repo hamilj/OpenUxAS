@@ -203,7 +203,7 @@ WaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::com
             }
         }
     }
-    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object))
     {
         auto automationResponse = std::static_pointer_cast<afrl::cmasi::AutomationResponse> (receivedLmcpMessage->m_object);
         for (auto mission : automationResponse->getMissionCommandList())
