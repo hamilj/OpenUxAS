@@ -105,10 +105,10 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-       return new PatternSearchTaskService(pLmcpObjectNetworkClient);
+       return uxas::stduxas::make_unique<PatternSearchTaskService>(pLmcpObjectNetworkClient);
     };
 
     explicit PatternSearchTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

@@ -99,29 +99,18 @@ SensorManagerService::initialize()
 
 bool
 SensorManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
-    bool isMessageProcessed(false);
-    auto entityConfiguration = std::dynamic_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
-    if (entityConfiguration)
+    if (afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
+        auto entityConfiguration = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         m_idVsEntityConfiguration.insert(std::make_pair(entityConfiguration->getID(), entityConfiguration));
-        isMessageProcessed = true;
     }
-    if (!isMessageProcessed)
+    else if (uxas::messages::task::isSensorFootprintRequests(receivedLmcpMessage->m_object))
     {
-        auto sensorFootprintRequests = std::dynamic_pointer_cast<uxas::messages::task::SensorFootprintRequests>(receivedLmcpMessage->m_object);
-        if (sensorFootprintRequests)
-        {
-            ProcessSensorFootprintRequests(sensorFootprintRequests);
-            isMessageProcessed = true;
-        }
+        auto sensorFootprintRequests = std::static_pointer_cast<uxas::messages::task::SensorFootprintRequests>(receivedLmcpMessage->m_object);
+        ProcessSensorFootprintRequests(sensorFootprintRequests);
+    }
 
-    }
-    if (!isMessageProcessed)
-    {
-        //CERR_FILE_LINE_MSG("WARNING::SensorManagerService::ProcessMessage: MessageType [" << receivedLmcpMessage->m_object->getFullLmcpTypeName() << "] not processed.")
-    }
     return (false); // always false implies never terminating service from here
 };
 
@@ -187,21 +176,19 @@ void SensorManagerService::ProcessSensorFootprintRequests(const std::shared_ptr<
                     {
                         for (auto& elevationAngle : elevationAngles)
                         {
-                            auto sensorFootprint = new uxas::messages::task::SensorFootprint();
-                            FindSensorFootPrint(entityConfiguration, eligibleWavelength, groundSampleDistance, aglAltitude, elevationAngle, sensorFootprint);
+                            auto sensorFootprint = uxas::stduxas::make_unique<uxas::messages::task::SensorFootprint>();
+                            FindSensorFootPrint(entityConfiguration, eligibleWavelength, groundSampleDistance, aglAltitude, elevationAngle, sensorFootprint.get());
                             // set IDs after sensorfootprint is found to facilitate retrieving stored footprints
                             sensorFootprint->setFootprintResponseID(request->getFootprintRequestID());
                             sensorFootprint->setVehicleID(entityConfiguration->getID());
-                            sensorFootprintResponse->getFootprints().push_back(sensorFootprint);
-                            sensorFootprint = nullptr; //gave up ownership
+                            sensorFootprintResponse->getFootprints().push_back(sensorFootprint.release());
                         }
                     }
                 }
             }
         } //if(m_idVsEntityConfiguration.find(request->getVehicleID()) != m_idVsEntityConfiguration.end())
     } //for (auto& request : sensorFootprintRequests->getFootprints())
-    auto response = std::static_pointer_cast<avtas::lmcp::Object>(sensorFootprintResponse);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(response);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(sensorFootprintResponse);
 };
 
 void SensorManagerService::FindSensorFootPrint(const std::shared_ptr<afrl::cmasi::EntityConfiguration>& entityConfiguration,

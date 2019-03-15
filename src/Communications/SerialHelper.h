@@ -63,8 +63,8 @@ public:
         		<< " with baud rate " << baudRate
 				<< " during " << actionString << " operation";
         errorMessage = ss.str();
-        std::unique_ptr<afrl::cmasi::ServiceStatus> serviceStatus = uxas::stduxas::make_unique<afrl::cmasi::ServiceStatus>();
-        std::unique_ptr<afrl::cmasi::KeyValuePair> keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
+        auto serviceStatus = uxas::stduxas::make_unique<afrl::cmasi::ServiceStatus>();
+        auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
         keyValuePair->setKey(std::string("EXCEPTION " + networkActorType));
         keyValuePair->setValue(errorMessage);
         serviceStatus->getInfo().push_back(keyValuePair.get());

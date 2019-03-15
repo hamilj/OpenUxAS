@@ -96,10 +96,10 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new CordonTaskService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<CordonTaskService>(pLmcpObjectNetworkClient);
     };
 
     explicit CordonTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

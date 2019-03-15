@@ -91,7 +91,7 @@ ImpactPointSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
                     isSuccessful = false;
                 }
             }
-            if (m_pointSearchTask->getDesiredAction() == nullptr)
+            if (!m_pointSearchTask->getDesiredAction())
             {
                 sstrErrors << "ERROR:: **ImpactPointSearchTaskService::bConfigure PointOfInterest. Missing Loiter Action " << std::endl;
                 CERR_FILE_LINE_MSG(sstrErrors.str())
@@ -201,8 +201,7 @@ void ImpactPointSearchTaskService::buildTaskPlanOptions()
     // send out the options
     if (isSuccessful)
     {
-        auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
     }
 };
 
@@ -213,7 +212,7 @@ bool ImpactPointSearchTaskService::isCalculateOption(const int64_t& taskId, int6
     uxas::common::utilities::CUnitConversions unitConversions;
     auto standoffDistance = m_pointSearchTask->getStandoffDistance();
 
-    auto taskOption = new uxas::messages::task::TaskOption;
+    auto taskOption = std::make_shared<uxas::messages::task::TaskOption>();
     auto startEndHeading_deg = n_Const::c_Convert::dNormalizeAngleRad((wedgeHeading_rad + n_Const::c_Convert::dPi()), 0.0) * n_Const::c_Convert::dRadiansToDegrees(); // [0,2PI) 
     taskOption->setStartHeading(startEndHeading_deg);
     taskOption->setEndHeading(startEndHeading_deg);
@@ -243,19 +242,19 @@ bool ImpactPointSearchTaskService::isCalculateOption(const int64_t& taskId, int6
 
             break;
         }
-        afrl::cmasi::Polygon *poly = new afrl::cmasi::Polygon();
+        auto poly = uxas::stduxas::make_unique<afrl::cmasi::Polygon>();
         auto length = m_pointSearchTask->getDesiredAction()->getRadius();
         for (double rad = 0; rad < n_Const::c_Convert::dTwoPi(); rad += n_Const::c_Convert::dPiO10())
         {
             double lat_deg, lon_deg;
             
             unitConversions.ConvertNorthEast_mToLatLong_deg(north + length * sin(rad), east + length * cos(rad), lat_deg, lon_deg);
-            auto loc = new afrl::cmasi::Location3D();
+            auto loc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
             loc->setLatitude(lat_deg);
             loc->setLongitude(lon_deg);
-            poly->getBoundaryPoints().push_back(loc);
+            poly->getBoundaryPoints().push_back(loc.release());
         }
-        auto loiterArea = BatchSummaryService::FromAbstractGeometry(poly);
+        auto loiterArea = BatchSummaryService::FromAbstractGeometry(poly.get());
 
         //check if loiter intersects the perimiter of the koz case
         if ( loiterArea->n() > 0 && koz.second->n() > 0 &&
@@ -293,10 +292,8 @@ bool ImpactPointSearchTaskService::isCalculateOption(const int64_t& taskId, int6
             for (auto id : itEligibleEntities.second)
                 taskOption->getEligibleEntities().push_back(id);
         taskOption->setCost(0);
-        auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(pTaskOption)));
-        m_taskPlanOptions->getOptions().push_back(taskOption);
-        taskOption = nullptr; //just gave up ownership
+        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(taskOption)));
+        m_taskPlanOptions->getOptions().push_back(taskOption->clone());
     }
     else
     {
@@ -313,67 +310,51 @@ bool ImpactPointSearchTaskService::isCalculateOption(const int64_t& taskId, int6
         double longitude_rad(0.0);
 
         unitConversions.ConvertNorthEast_mToLatLong_rad(newNorth_m, newEast_m, latitude_rad, longitude_rad);
-        auto startLocation = new afrl::cmasi::Location3D();
+        auto startLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
         startLocation->setLatitude(latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
         startLocation->setLongitude(longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
-        taskOption->setStartLocation(startLocation);
-        startLocation = nullptr; // just gave up ownership
+        taskOption->setStartLocation(startLocation.release());
         taskOption->setEndLocation(m_pointSearchTask->getDesiredAction()->getLocation()->clone());
 
         auto routePlan = std::make_shared<uxas::messages::route::RoutePlan>();
 
         int64_t waypointNumber = 1;
-        auto waypoint = new afrl::cmasi::Waypoint();
+        auto waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
         waypoint->setNumber(waypointNumber);
         waypoint->setLatitude(taskOption->getStartLocation()->getLatitude());
         waypoint->setLongitude(taskOption->getStartLocation()->getLongitude());
         waypoint->setAltitude(taskOption->getStartLocation()->getAltitude());
-        routePlan->getWaypoints().push_back(waypoint);
-        waypoint = nullptr; // gave up ownership
+        routePlan->getWaypoints().push_back(waypoint.release());
         
         waypointNumber++;
-        waypoint = new afrl::cmasi::Waypoint();
+        waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
         waypoint->setNumber(waypointNumber);
         waypoint->setLatitude(taskOption->getEndLocation()->getLatitude());
         waypoint->setLongitude(taskOption->getEndLocation()->getLongitude());
         waypoint->setAltitude(taskOption->getEndLocation()->getAltitude());
-        routePlan->getWaypoints().push_back(waypoint);
-        int64_t routeId = TaskOptionClass::m_firstImplementationRouteId;
+        routePlan->getWaypoints().push_back(waypoint.release());
 
-        routePlan->setRouteID(routeId);
+        routePlan->setRouteID(TaskOptionClass::m_firstImplementationRouteId);
 //        double costForward_ms = static_cast<int64_t> (((nominalSpeed_mps > 0.0) ? (standoffDistance / nominalSpeed_mps) : (0.0))*1000.0);
         int64_t costForward_ms = 0;
         routePlan->setRouteCost(costForward_ms);
 
-
-        auto taskOptionLocal = taskOption->clone();
-        taskOptionLocal->setOptionID(optionId);
         for (auto itEligibleEntites = m_speedAltitudeVsEligibleEntityIdsRequested.begin(); itEligibleEntites != m_speedAltitudeVsEligibleEntityIdsRequested.end(); itEligibleEntites++)
         {
+            std::unique_ptr<uxas::messages::task::TaskOption> taskOptionLocal(taskOption->clone());
+            taskOptionLocal->setOptionID(optionId);
             taskOptionLocal->getEligibleEntities() = itEligibleEntites->second;
             if (itEligibleEntites->first.first > 0)
             {
                 taskOptionLocal->setCost(static_cast<int32_t> (standoffDistance) / itEligibleEntites->first.first);
             }
-            auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOptionLocal->clone());
+            std::shared_ptr<uxas::messages::task::TaskOption> pTaskOption(taskOptionLocal->clone());
             auto pTaskOptionClass = std::make_shared<TaskOptionClass>(pTaskOption);
             pTaskOptionClass->m_orderedRouteIdVsPlan[routePlan->getRouteID()] = routePlan;
             m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, pTaskOptionClass));
-            m_taskPlanOptions->getOptions().push_back(taskOptionLocal);
-            // start a new option
+            m_taskPlanOptions->getOptions().push_back(taskOptionLocal.release());
+
             optionId++;
-            taskOptionLocal = taskOption->clone();
-            taskOptionLocal->setOptionID(optionId);
-        } //for(auto itSpeedId=m_speedVsVehicleId.begin();itSpeedId!=m_speedVsVehicleId.end();itSpeedId++)
-        if (taskOptionLocal != nullptr)
-        {
-            delete taskOptionLocal;
-            taskOptionLocal = nullptr;
-        }
-        if (taskOption != nullptr)
-        {
-            delete taskOption;
-            taskOption = nullptr;
         }
     }
 
@@ -400,20 +381,18 @@ bool ImpactPointSearchTaskService::isProcessTaskImplementationRouteResponse(std:
             {
                 action->getAssociatedTaskList().push_back(m_task->getTaskID());
             }
-            auto state = m_entityStates[taskImplementationResponse.get()->getVehicleID()];
-            auto cast = static_cast<std::shared_ptr<avtas::lmcp::Object>>(state);
 
             auto finalWaypoint = taskImplementationResponse->getTaskWaypoints().back();
             //hotfix for surface vehicles staying in place if the next waypoint has a loiter 
-            if (afrl::vehicles::isSurfaceVehicleState(cast))
+            if (afrl::vehicles::isSurfaceVehicleState(m_entityStates[taskImplementationResponse.get()->getVehicleID()].get()))
             {
-                auto newFinalWp = finalWaypoint->clone();
+                std::unique_ptr<afrl::cmasi::Waypoint> newFinalWp(finalWaypoint->clone());
                 auto newFinalWaypointNumber = finalWaypoint->getNumber() + 1;
                 finalWaypoint->setNextWaypoint(newFinalWaypointNumber);
                 newFinalWp->setNumber(newFinalWaypointNumber);
                 newFinalWp->setNextWaypoint(newFinalWaypointNumber);
-                taskImplementationResponse->getTaskWaypoints().push_back(newFinalWp);
-                finalWaypoint = newFinalWp;
+                finalWaypoint = newFinalWp.get();
+                taskImplementationResponse->getTaskWaypoints().push_back(newFinalWp.release());
             }
             action->getLocation()->setAltitude(finalWaypoint->getAltitude());
             finalWaypoint->getVehicleActionList().push_back(action->clone());

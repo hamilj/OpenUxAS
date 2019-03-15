@@ -168,8 +168,7 @@ CmasiAreaSearchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas
                                                        routePlanRequest);
                             itTaskOptionClass->second->m_routePlanRequest = routePlanRequest;
                             m_pendingOptionRouteRequests.insert(routePlanRequest->getRequestID());
-                            auto objectRouteRequest = std::static_pointer_cast<avtas::lmcp::Object>(routePlanRequest);
-                            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectRouteRequest);
+                            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(routePlanRequest);
 
                             if (!routePlanRequest->getRouteRequests().empty())
                             {
@@ -300,7 +299,7 @@ void CmasiAreaSearchTaskService::buildTaskPlanOptions()
     {
         // need to receive the sensor response before route request can be sent out
         // ask for footprints for each vehicle's nominal altitude, at the requested ground sample distance, and elevation angle.
-        auto footprintRequest = new uxas::messages::task::FootprintRequest;
+        auto footprintRequest = uxas::stduxas::make_unique<uxas::messages::task::FootprintRequest>();
         footprintRequest->setFootprintRequestID(itTaskOptionClass->first);
         // assume there is only one eligible entity per option
         footprintRequest->setVehicleID(itTaskOptionClass->second->m_eligibleEntities.front());
@@ -310,11 +309,9 @@ void CmasiAreaSearchTaskService::buildTaskPlanOptions()
         }
         footprintRequest->getEligibleWavelengths() = m_areaSearchTask->getDesiredWavelengthBands();
         footprintRequest->getElevationAngles().push_back(itTaskOptionClass->second->m_elevationLookAngle_rad);
-        sensorFootprintRequests->getFootprints().push_back(footprintRequest);
-        footprintRequest = nullptr;
+        sensorFootprintRequests->getFootprints().push_back(footprintRequest.release());
     }
-    auto objectFootprintRequests = std::static_pointer_cast<avtas::lmcp::Object>(sensorFootprintRequests);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(objectFootprintRequests);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(sensorFootprintRequests);
 };
 
 bool CmasiAreaSearchTaskService::isCalculateOption(const std::vector<int64_t>& eligibleEntities,
@@ -330,18 +327,11 @@ bool CmasiAreaSearchTaskService::isCalculateOption(const std::vector<int64_t>& e
     for (auto itEntity = eligibleEntities.begin(); itEntity != eligibleEntities.end(); itEntity++)
     {
         // One Entity per option
-        auto taskOption = new uxas::messages::task::TaskOption;
+        auto taskOption = std::make_shared<uxas::messages::task::TaskOption>();
         taskOption->setTaskID(m_task->getTaskID());
         taskOption->setOptionID(optionId);
-        //taskOption->setCost(costForward_m);
-        //taskOption->setStartLocation(new afrl::cmasi::Location3D(*(routePlanForward->getWaypoints().front())));        
-        //taskOption->setStartHeading(startHeading_deg);        
-        //taskOption->setEndLocation(new afrl::cmasi::Location3D(*(routePlanForward->getWaypoints().back())));            
-        //taskOption->setEndHeading(endHeading_deg);
-        taskOption->getEligibleEntities().clear();
         taskOption->getEligibleEntities().push_back(*itEntity); // defaults to all entities eligible
-        auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-        auto pTaskOptionClass = std::make_shared<TaskOptionClass>(pTaskOption);
+        auto pTaskOptionClass = std::make_shared<TaskOptionClass>(taskOption);
         pTaskOptionClass->m_altitude_m = altitude_m;
         pTaskOptionClass->m_speed_mps = speed_mps;
         pTaskOptionClass->m_searchAxisHeading_rad = searchAxisHeading_rad;
@@ -368,16 +358,16 @@ bool CmasiAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Task
     auto localsearchAxisHeading_rad = n_Const::c_Convert::dNormalizeAngleRad(taskOptionClass->m_searchAxisHeading_rad, 0.0);
 
     std::vector<n_FrameworkLib::CPosition> searchAreaBoundary;
-    auto centerPosition = std::unique_ptr<n_FrameworkLib::CPosition>();
+    auto centerPosition = uxas::stduxas::make_unique<n_FrameworkLib::CPosition>();
 
     if (afrl::cmasi::isCircle(m_areaSearchTask->getSearchArea()))
     {
-        afrl::cmasi::Circle* pCircle = static_cast<afrl::cmasi::Circle*> (m_areaSearchTask->getSearchArea());
+        auto pCircle = static_cast<afrl::cmasi::Circle*> (m_areaSearchTask->getSearchArea());
 
         double increment_rad(n_Const::c_Convert::dPiO18());
         double theta_rad(0.0);
-        centerPosition.reset(new n_FrameworkLib::CPosition(pCircle->getCenterPoint()->getLatitude() * n_Const::c_Convert::dDegreesToRadians(),
-                                                           pCircle->getCenterPoint()->getLongitude() * n_Const::c_Convert::dDegreesToRadians(), taskOptionClass->m_altitude_m, 0.0));
+        centerPosition = uxas::stduxas::make_unique<n_FrameworkLib::CPosition>(pCircle->getCenterPoint()->getLatitude() * n_Const::c_Convert::dDegreesToRadians(),
+                                                           pCircle->getCenterPoint()->getLongitude() * n_Const::c_Convert::dDegreesToRadians(), taskOptionClass->m_altitude_m, 0.0);
         while (theta_rad < n_Const::c_Convert::dTwoPi())
         {
             double currentNorth_m = pCircle->getRadius() * sin(theta_rad);
@@ -392,7 +382,7 @@ bool CmasiAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Task
     {
         //ASSUME:: convex polygon
 
-        afrl::cmasi::Polygon* pPolygon = static_cast<afrl::cmasi::Polygon*> (m_areaSearchTask->getSearchArea());
+        auto pPolygon = static_cast<afrl::cmasi::Polygon*> (m_areaSearchTask->getSearchArea());
 
         // need the extents to find the center of the bounding box
         double northMax_m = (std::numeric_limits<double>::min)();
@@ -427,12 +417,12 @@ bool CmasiAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Task
         }
         double centerNorth_m = (northMax_m - northMin_m) / 2.0;
         double centerEast_m = (eastMax_m - eastMin_m) / 2.0;
-        centerPosition.reset(new n_FrameworkLib::CPosition(centerNorth_m, centerEast_m, taskOptionClass->m_altitude_m));
+        centerPosition = uxas::stduxas::make_unique<n_FrameworkLib::CPosition>(centerNorth_m, centerEast_m, taskOptionClass->m_altitude_m);
     }
     else if (afrl::cmasi::isRectangle(m_areaSearchTask->getSearchArea())) //if (afrl::cmasi::isCircle(m_areaSearchTask->getSearchArea()))
     {
         //case afrl::cmasi::CMASIEnum::RECTANGLE:
-        afrl::cmasi::Rectangle* pRectangle = static_cast<afrl::cmasi::Rectangle*> (m_areaSearchTask->getSearchArea());
+        auto pRectangle = static_cast<afrl::cmasi::Rectangle*> (m_areaSearchTask->getSearchArea());
 
         double centerNorth_m(0.0);
         double centerEast_m(0.0);
@@ -440,7 +430,7 @@ bool CmasiAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Task
         unitConversions.ConvertLatLong_degToNorthEast_m(pRectangle->getCenterPoint()->getLatitude(),
                                                         pRectangle->getCenterPoint()->getLongitude(),
                                                         centerNorth_m, centerEast_m);
-        centerPosition.reset(new n_FrameworkLib::CPosition(centerNorth_m, centerEast_m, taskOptionClass->m_altitude_m));
+        centerPosition = uxas::stduxas::make_unique<n_FrameworkLib::CPosition>(centerNorth_m, centerEast_m, taskOptionClass->m_altitude_m);
         double northMax_m = centerNorth_m + pRectangle->getHeight() / 2.0;
         double northMin_m = centerNorth_m - pRectangle->getHeight() / 2.0;
         double eastMax_m = centerEast_m + pRectangle->getWidth() / 2.0;
@@ -510,7 +500,7 @@ bool CmasiAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Task
             double segmentHeadingDown_deg = n_Const::c_Convert::dNormalizeAngleDeg((segmentHeadingUp_deg + 180.0), 0.0);
             double currentSegmentHeading_deg(segmentHeadingUp_deg);
 
-            afrl::cmasi::Location3D * lastEndLocation(nullptr);
+            std::unique_ptr<afrl::cmasi::Location3D> lastEndLocation = nullptr;
             double lastSegmentHeading_deg(segmentHeadingUp_deg);
 
             northMin_m -= 100000; // need to go beyond border of search area
@@ -564,7 +554,7 @@ bool CmasiAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Task
                     endPosition.ReTransformPoint2D(*centerPosition, localsearchAxisHeading_rad);
 
                     // locations
-                    auto startLocation = new afrl::cmasi::Location3D();
+                    auto startLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
                     double startLatitude_deg(0.0);
                     double startLongitude_deg(0.0);
                     unitConversions.ConvertNorthEast_mToLatLong_deg(startPosition.m_north_m,
@@ -574,7 +564,7 @@ bool CmasiAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Task
                     startLocation->setLongitude(startLongitude_deg);
                     startLocation->setAltitude(taskOptionClass->m_altitude_m);
 
-                    auto endLocation = new afrl::cmasi::Location3D();
+                    auto endLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
                     double endLatitude_deg(0.0);
                     double endLongitude_deg(0.0);
                     unitConversions.ConvertNorthEast_mToLatLong_deg(endPosition.m_north_m,
@@ -585,36 +575,31 @@ bool CmasiAreaSearchTaskService::isCalculateRasterScanRoute(std::shared_ptr<Task
                     endLocation->setAltitude(taskOptionClass->m_altitude_m);
 
                     // add a transition path (if required)
-                    if (lastEndLocation != nullptr)
+                    if (lastEndLocation)
                     {
                         // add the transition to next search lane path
-                        auto routeConstraints = new uxas::messages::route::RouteConstraints;
+                        auto routeConstraints = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
                         routeConstraints->setRouteID(routeId);
-                        routeConstraints->setStartLocation(lastEndLocation);
-                        lastEndLocation = nullptr;
+                        routeConstraints->setStartLocation(lastEndLocation.release());
                         routeConstraints->setStartHeading(lastSegmentHeading_deg);
                         routeConstraints->setEndLocation(startLocation->clone());
                         routeConstraints->setEndHeading(currentSegmentHeading_deg);
-                        routePlanRequest->getRouteRequests().push_back(routeConstraints);
-                        routeConstraints = nullptr; //just gave up ownership                                
+                        routePlanRequest->getRouteRequests().push_back(routeConstraints.release());
                         taskOptionClass->m_pendingRouteIds.insert(routeId);
                         routeId++;
                     }
 
-                    lastEndLocation = endLocation->clone();
+                    lastEndLocation.reset(endLocation->clone());
                     lastSegmentHeading_deg = currentSegmentHeading_deg;
 
                     // add the vertical path
-                    auto routeConstraints = new uxas::messages::route::RouteConstraints;
+                    auto routeConstraints = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
                     routeConstraints->setRouteID(routeId);
-                    routeConstraints->setStartLocation(startLocation);
-                    startLocation = nullptr;
+                    routeConstraints->setStartLocation(startLocation.release());
                     routeConstraints->setStartHeading(currentSegmentHeading_deg);
-                    routeConstraints->setEndLocation(endLocation);
-                    endLocation = nullptr;
+                    routeConstraints->setEndLocation(endLocation.release());
                     routeConstraints->setEndHeading(currentSegmentHeading_deg);
-                    routePlanRequest->getRouteRequests().push_back(routeConstraints);
-                    routeConstraints = nullptr; //just gave up ownership
+                    routePlanRequest->getRouteRequests().push_back(routeConstraints.release());
                     taskOptionClass->m_pendingRouteIds.insert(routeId);
                     routeId++;
 
@@ -664,33 +649,29 @@ void CmasiAreaSearchTaskService::activeEntityState(const std::shared_ptr<afrl::c
     auto vehicleActionCommand = std::make_shared<afrl::cmasi::VehicleActionCommand>();
     vehicleActionCommand->setVehicleID(entityState->getID());
 
-    auto pGimbalAngleAction = new afrl::cmasi::GimbalAngleAction();
+    auto pGimbalAngleAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalAngleAction>();
     pGimbalAngleAction->setPayloadID(gimbalPayloadId);
     pGimbalAngleAction->getAssociatedTaskList().push_back(m_task->getTaskID());
     pGimbalAngleAction->setElevation(-90.0);
 
-    vehicleActionCommand->getVehicleActionList().push_back(pGimbalAngleAction);
-    pGimbalAngleAction = nullptr;
+    vehicleActionCommand->getVehicleActionList().push_back(pGimbalAngleAction.release());
 
 #ifdef CONFIGURE_THE_SENSOR
     //configure the sensor
-    afrl::cmasi::CameraAction* pCameraAction = new afrl::cmasi::CameraAction();
+    auto pCameraAction = uxas::stduxas::make_unique<afrl::cmasi::CameraAction>();
     pCameraAction->setPayloadID(pVehicle->gsdGetSettings().iGetPayloadID_Sensor());
     pCameraAction->setHorizontalFieldOfView(static_cast<float> (pVehicle->gsdGetSettings().dGetHorizantalFOV_rad() * _RAD_TO_DEG));
     pCameraAction->getAssociatedTaskList().push_back(iGetID());
-    vehicleActionCommand->getVehicleActionList().push_back(pCameraAction);
-    pCameraAction = 0; //don't own it
+    vehicleActionCommand->getVehicleActionList().push_back(pCameraAction.release());
 #endif  //CONFIGURE_THE_SENSOR
 
     // send out the response
-    auto newMessage_Action = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Action);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
 
     //send the record video command to the axis box
     auto VideoRecord = std::make_shared<uxas::messages::uxnative::VideoRecord>();
     VideoRecord->setRecord(true);
-    auto newMessage_Record = std::static_pointer_cast<avtas::lmcp::Object>(VideoRecord);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage_Record);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(VideoRecord);
 }
 
 

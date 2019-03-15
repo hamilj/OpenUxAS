@@ -83,9 +83,9 @@ RendezvousTask::configureTask(const pugi::xml_node& ndComponent)
     
 bool RendezvousTask::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
 {
-    auto vstate = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
-    if(vstate)
+    if(afrl::cmasi::isEntityState(receivedLmcpObject))
     {
+        auto vstate = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
         // update 'remaining distance' list
         m_distanceRemaining[vstate->getID()] = std::make_pair(vstate->getTime(), ArrivalDistance(vstate));
     }
@@ -356,8 +356,8 @@ bool RendezvousTask::isProcessTaskImplementationRouteResponse(std::shared_ptr<ux
     if(avstate == m_entityStates.end()) return false;
     auto entconfig = m_entityConfigurations.find(taskImplementationResponse->getVehicleID());
     std::shared_ptr<afrl::cmasi::AirVehicleConfiguration> avconfig;
-    if(entconfig != m_entityConfigurations.end())
-        avconfig = std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(entconfig->second);
+    if ((entconfig != m_entityConfigurations.end()) && afrl::cmasi::isAirVehicleConfiguration(entconfig->second.get()))
+        avconfig = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(entconfig->second);
 
     // speed at which the maneuver should be planned
     double V = avstate->second->getGroundspeed();
@@ -367,13 +367,13 @@ bool RendezvousTask::isProcessTaskImplementationRouteResponse(std::shared_ptr<ux
 
     if(taskImplementationResponse->getTaskWaypoints().empty())
     {
-        auto endwp = new afrl::cmasi::Waypoint;
+        auto endwp = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
         endwp->setLatitude(taskOptionClass->m_taskOption->getEndLocation()->getLatitude());
         endwp->setLongitude(taskOptionClass->m_taskOption->getEndLocation()->getLongitude());
         endwp->setNumber(waypointId);
         endwp->setNextWaypoint(waypointId);
         endwp->getAssociatedTasks().push_back(m_task->getTaskID());
-        taskImplementationResponse->getTaskWaypoints().push_back(endwp);
+        taskImplementationResponse->getTaskWaypoints().push_back(endwp.release());
     }
 
     // ensure speed and altitudes match request
@@ -537,15 +537,24 @@ void RendezvousTask::activeEntityState(const std::shared_ptr<afrl::cmasi::Entity
 {
     auto entconfig = m_entityConfigurations.find(entityState->getID());
     if(entconfig == m_entityConfigurations.end()) return;
-    auto avconfig = std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(entconfig->second);
-    if(!avconfig) return;
+
+    if (!afrl::cmasi::isAirVehicleConfiguration(entconfig->second.get()))
+    {
+        return;
+    }
+
+    auto avconfig = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(entconfig->second);
 
     double speedNom_mps = avconfig->getNominalSpeed();
     if(speedNom_mps < 1e-4)
     {
         speedNom_mps = entityState->getGroundspeed();
-        auto avstate = std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(entityState);
-        if(avstate) speedNom_mps = avstate->getAirspeed();
+
+        if (afrl::cmasi::isAirVehicleState(entityState.get()))
+        {
+            auto avstate = std::static_pointer_cast<afrl::cmasi::AirVehicleState>(entityState);
+            if(avstate) speedNom_mps = avstate->getAirspeed();
+        }
     }
     if(speedNom_mps < 1e-4) return;
     auto speedInterval = SpeedClip(avconfig, speedNom_mps);
@@ -570,7 +579,13 @@ void RendezvousTask::activeEntityState(const std::shared_ptr<afrl::cmasi::Entity
         // find speed window for neighbor
         auto nconfig = m_entityConfigurations.find(neighbor.first);
         if(entconfig == m_entityConfigurations.end()) continue;
-        auto navconfig = std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(nconfig->second);
+        std::shared_ptr<afrl::cmasi::AirVehicleConfiguration> navconfig(nullptr);
+
+        if (afrl::cmasi::isAirVehicleConfiguration(nconfig->second.get()))
+        {
+            navconfig = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(nconfig->second);
+        }
+
         double nspeedNom = speedNom_mps;
         auto neighborInterval = SpeedClip(navconfig, nspeedNom);
         
@@ -645,11 +660,11 @@ void RendezvousTask::activeEntityState(const std::shared_ptr<afrl::cmasi::Entity
     
     auto vehicleActionCommand = std::make_shared<afrl::cmasi::VehicleActionCommand>();
     vehicleActionCommand->setVehicleID(entityState->getID());
-    auto s = new uxas::messages::uxnative::SpeedOverrideAction;
+    auto s = uxas::stduxas::make_unique<uxas::messages::uxnative::SpeedOverrideAction>();
     s->setVehicleID(entityState->getID());
     s->setSpeed(desired_speed);
     s->getAssociatedTaskList().push_back(m_task->getTaskID());
-    vehicleActionCommand->getVehicleActionList().push_back(s);
+    vehicleActionCommand->getVehicleActionList().push_back(s.release());
     m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
 }
     

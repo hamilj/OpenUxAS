@@ -51,6 +51,8 @@ using std::complex;
 
 #include <memory>       //std::shared_ptr
 
+#include "stdUniquePtr.h"
+
 namespace n_FrameworkLib
 {
 
@@ -119,10 +121,8 @@ namespace n_FrameworkLib
 
     public: //constructors/destructors
         CVisibilityGraph();
-        ~CVisibilityGraph(void);
 
         CVisibilityGraph(const CVisibilityGraph& rhs) {
-            pedglstvecGetGraph() = 0;
             operator=(rhs);
         };
 
@@ -132,10 +132,7 @@ namespace n_FrameworkLib
             veGetEdgesVisibleBase() = rhs.veGetEdgesVisibleBase();
             vviGetVertexDistancesBase() = rhs.vviGetVertexDistancesBase();
             vvvtxGetVertexParentBase() = rhs.vvvtxGetVertexParentBase();
-            if (pedglstvecGetGraph()) {
-                delete pedglstvecGetGraph();
-            }
-            pedglstvecGetGraph() = new GRAPH_LIST_VEC_t();
+            pedglstvecGetGraph() = uxas::stduxas::make_unique<GRAPH_LIST_VEC_t>();
             edglstvecGetGraph() = edglstvecGetGraph();
             ptypeGetType() = rhs.ptypeGetType();
             iGetLengthSegmentMinimum() = rhs.iGetLengthSegmentMinimum();
@@ -710,7 +707,7 @@ namespace n_FrameworkLib
             return (*m_pedglstvecGraph);
         };
 
-        GRAPH_LIST_VEC_t*& pedglstvecGetGraph() {
+        std::unique_ptr<GRAPH_LIST_VEC_t>& pedglstvecGetGraph() {
             return (m_pedglstvecGraph);
         };
 
@@ -740,7 +737,7 @@ namespace n_FrameworkLib
         V_EDGE_t m_veEdgesVisibleBase;
         std::vector<std::vector<int32_t>> m_vviVertexDistancesBase; //m_viVertexDistances[u][v] => shortest distance from u to v
         V_V_VERTEX_DESCRIPTOR_t m_vvvtxVertexParentBase; //m_viVertexParent[u][v] => index of the parent vertex of v on route to the shortest path ro u
-        GRAPH_LIST_VEC_t* m_pedglstvecGraph;
+        std::unique_ptr<GRAPH_LIST_VEC_t> m_pedglstvecGraph;
 
         // storage for generating waypoint paths
         CPathInformation::enPathType m_ptypeType;

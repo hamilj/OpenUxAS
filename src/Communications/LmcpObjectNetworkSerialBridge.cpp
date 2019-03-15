@@ -207,7 +207,7 @@ LmcpObjectNetworkSerialBridge::executeSerialReceiveProcessing()
                     while (!recvdSerialDataSegment.empty())
                     {
                         UXAS_LOG_DEBUGGING(s_typeName(), "::executeSerialReceiveProcessing [", m_entityIdNetworkIdUnicastString, "] processing complete object string segment retrieved from serial buffer");
-                        std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> recvdAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
+                        auto recvdAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
                         if (recvdAddAttMsg->setAddressAttributesAndPayloadFromDelimitedString(std::move(recvdSerialDataSegment)))
                         {
                             if (m_nonImportForwardAddresses.find(recvdAddAttMsg->getAddress()) == m_nonImportForwardAddresses.end())

@@ -17,9 +17,7 @@
 #include "afrl/cmasi/MissionCommand.h"
 #include "afrl/cmasi/ServiceStatus.h"
 
-#include "../../common/log/Log.h"
-
-#include "../../stduxas/stdUniquePtr.h"
+#include "stdUniquePtr.h"
 
 namespace uxas
 {
@@ -67,14 +65,12 @@ public:
         
         errorMessage = serviceType + ": Error on serial port " 
                 + ttyDevice + " during " + actionString + " operation";
-        std::unique_ptr<afrl::cmasi::ServiceStatus> serviceStatus = uxas::stduxas::make_unique<afrl::cmasi::ServiceStatus>();
-        std::unique_ptr<afrl::cmasi::KeyValuePair> keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
+        auto serviceStatus = uxas::stduxas::make_unique<afrl::cmasi::ServiceStatus>();
+        auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
         keyValuePair->setKey(std::string("EXCEPTION " + serviceType));
         keyValuePair->setValue(errorMessage);
-        serviceStatus->getInfo().push_back(keyValuePair.get());
-        std::unique_ptr<avtas::lmcp::Object> lmcpObject;
-        lmcpObject.reset(static_cast<avtas::lmcp::Object*> (serviceStatus.get()));
-        return (lmcpObject);
+        serviceStatus->getInfo().push_back(keyValuePair.release());
+        return serviceStatus;
     };
     
 private:

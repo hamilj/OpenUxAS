@@ -104,9 +104,9 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
-        return new PlanBuilderService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<PlanBuilderService>(pLmcpObjectNetworkClient);
     };
 
     explicit PlanBuilderService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);
@@ -141,13 +141,10 @@ private:
     /*! \brief  nested class for tracking projected state of an entity during the plan building process */
     class ProjectedState {
     public:
-        ProjectedState() {};
-        ~ProjectedState() { if(state) delete state; };
         void setState(uxas::messages::task::PlanningState* newState) {
-            if(state) delete state;
-            state = newState;
+            state.reset(newState);
         };
-        uxas::messages::task::PlanningState* state{nullptr};
+        std::unique_ptr<uxas::messages::task::PlanningState> state;
         int64_t finalWaypointID{0};
         int64_t time{0}; // ms since 1 Jan 1970
     };

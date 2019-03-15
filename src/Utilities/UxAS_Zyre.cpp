@@ -9,6 +9,8 @@
 
 #include "UxAS_Zyre.h"
 
+#include <memory>
+
 namespace n_ZMQ
 {
 
@@ -17,12 +19,10 @@ void zmsgPopstr(zmsg_t *self, std::string& strMessage)
     assert(self);
     strMessage = "";
     uint32_t ui32Length(zframe_size(zmsg_first(self)));
-    char* pString  = zmsg_popstr(self);
+    std::unique_ptr<char> pString(zmsg_popstr(self));
     if (pString)
     {
-        strMessage = std::string(pString, ui32Length);
-        delete pString;
-        pString = 0;
+        strMessage = std::string(pString.get(), ui32Length);
     }
 }
 
@@ -41,39 +41,22 @@ int s_SendString(void *socket, bool more, const std::string& strString)
 
 void ZhashLookup(zhash_t *headers, const std::string& strKey, std::string& strValue)
 {
-    std::string strReturn;
-    char * cstrKey = new char [strKey.length()+1];
-    std::strcpy(cstrKey, strKey.c_str());
     strValue = "";
-    const char* pcValue = static_cast<const char*>(zhash_lookup(headers, cstrKey));
+    const char* pcValue = static_cast<const char*>(zhash_lookup(headers, strKey.c_str()));
     if (pcValue)
     {
         strValue = pcValue;
     }
-    delete[] cstrKey;
-    cstrKey = 0;
 }
 
 void zyreSetHeaderEntry(zyre_t* pZyreNode, const std::string& strKey, const std::string& strValue)
 {
-    char * cstrKey = new char [strKey.length()+1];
-    std::strcpy(cstrKey, strKey.c_str());
-    char * cstrValue = new char [strValue.length()+1];
-    std::strcpy(cstrValue, strValue.c_str());
-    zyre_set_header(pZyreNode, cstrKey, "%s", cstrValue);
-    delete[] cstrKey;
-    cstrKey = 0;
-    delete[] cstrValue;
-    cstrValue = 0;
+    zyre_set_header(pZyreNode, strKey.c_str(), "%s", strValue.c_str());
 }
 
 void zyreJoin(zyre_t* pZyreNode, const std::string& strZyreGroup)
 {
-    char * cstrZyreGroup = new char [strZyreGroup.length()+1];
-    std::strcpy(cstrZyreGroup, strZyreGroup.c_str());
-    zyre_join(pZyreNode, cstrZyreGroup);
-    delete[] cstrZyreGroup;
-    cstrZyreGroup = 0;
+    zyre_join(pZyreNode, strZyreGroup.c_str());
 }
 
 int zyreWhisper(zyre_t* pZyreNode, const std::string& strPeer, const std::string& strMessage)
@@ -83,7 +66,7 @@ int zyreWhisper(zyre_t* pZyreNode, const std::string& strPeer, const std::string
 
     zmsg_t *msg = zmsg_new();
     zmsg_addmem(msg, strMessage.data(), strMessage.length());
-    zyre_whisper(pZyreNode, const_cast<char*>(strPeer.c_str()), &msg);
+    zyre_whisper(pZyreNode, strPeer.c_str(), &msg);
 
     return 0;
 }
@@ -95,7 +78,7 @@ int zyreWhisper2(zyre_t* pZyreNode, const std::string& strPeer, const std::strin
 
     zmsg_t *msg = zmsg_new();
     zmsg_addmem(msg,strMessage.data(), strMessage.length());
-    zyre_whisper(pZyreNode, const_cast<char*>(strPeer.c_str()), &msg);
+    zyre_whisper(pZyreNode, strPeer.c_str(), &msg);
 
     return 0;
 }
@@ -107,7 +90,7 @@ int zyreShout(zyre_t* pZyreNode, const std::string& strGroup, const std::string&
 
     zmsg_t *msg = zmsg_new();
     zmsg_addmem(msg, strMessage.data(), strMessage.length());
-    zyre_shout(pZyreNode, const_cast<char*>(strGroup.c_str()), &msg);
+    zyre_shout(pZyreNode, strGroup.c_str(), &msg);
 
     return 0;
 }

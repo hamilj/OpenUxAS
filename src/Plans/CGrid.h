@@ -65,29 +65,18 @@ private:
         CPosition VertexB;
     };    //Only create if needed...
     
-    typedef vector<CellData> VData;
-    typedef vector<CellData>::iterator VDataIterator;
-    
-    VDataIterator DIndex;
-    VDataIterator DUpperBound;
-    
     struct Cell{ 
-        Cell():gc_flags(0),tot_edges(0),Data(0){};
+        Cell() : gc_flags(0), tot_edges(0) { }
         unsigned short gc_flags;        
         short tot_edges;
-        VData *Data ;                            // make pointer because doesn't always exist
+        vector<CellData> Data;
     };    // always create 
     
-    typedef vector<Cell> VCell;
-    typedef vector<Cell>::iterator VCellIterator;
-    
-    VCell VGrid;
-    VCellIterator    Index;
-    VCellIterator    UpperBound;
+    vector<Cell> VGrid;
     
 //    CPolygon::VPoints Polygon_Points;
     
-    double *glx, *gly;                                        // change to vector - grid x & y coordinates
+    vector<double> glx, gly;                                        // grid x & y coordinates
     double xdelta, ydelta, inv_xdelta, inv_ydelta;
     int XGridResolution, YGridResolution, TotalCells;        // grid size
     
@@ -145,8 +134,6 @@ public:
     CGrid(std::vector<int32_t>& viVerticies,V_POSITION_t& vposVertexContainer, int x_grid_resolution, 
         int y_grid_resolution, CPosition &min, CPosition &max,
         stringstream &sstrErrorMessage );
-    
-    ~CGrid();                                                //Destructor
     
     bool InPolygon(double x, double y, const CPosition &min, stringstream &sstrErrorMessage);
     

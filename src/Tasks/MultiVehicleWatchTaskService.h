@@ -152,9 +152,9 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
-        return new MultiVehicleWatchTaskService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<MultiVehicleWatchTaskService>(pLmcpObjectNetworkClient);
     };
 
     explicit MultiVehicleWatchTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

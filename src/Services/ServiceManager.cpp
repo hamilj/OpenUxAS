@@ -62,7 +62,7 @@ ServiceManager&
 ServiceManager::getInstance()
 {
     // first time/one time creation
-    if (ServiceManager::s_instance == nullptr)
+    if (!ServiceManager::s_instance)
     {
         UXAS_LOG_INFORM(s_typeName(), "::getInstance static ServiceBase subclass initialization started");
         // force initialization of classes and their static class members
@@ -424,7 +424,7 @@ bool
 ServiceManager::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
     bool isTerminateOnReturn{false};
-    if (uxas::messages::uxnative::isCreateNewService(receivedLmcpMessage->m_object.get()))
+    if (uxas::messages::uxnative::isCreateNewService(receivedLmcpMessage->m_object))
     {
         auto createNewService = std::static_pointer_cast<uxas::messages::uxnative::CreateNewService>(receivedLmcpMessage->m_object);
         std::string xmlConfig = createNewService->getXmlConfiguration() + "\n";
@@ -476,7 +476,7 @@ ServiceManager::processReceivedLmcpMessage(std::unique_ptr<uxas::communications:
             UXAS_LOG_ERROR(s_typeName(), "::processReceivedLmcpMessage failed to create service request via messaging");
         }
     }
-    else if (uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::uxnative::isKillService(receivedLmcpMessage->m_object))
     {
         auto killService = std::static_pointer_cast<uxas::messages::uxnative::KillService>(receivedLmcpMessage->m_object);
 

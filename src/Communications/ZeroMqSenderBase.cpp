@@ -55,7 +55,7 @@ ZeroMqSenderBase::initialize(const std::string& sourceGroup, uint32_t entityId, 
     catch (std::exception& ex)
     {
         UXAS_LOG_ERROR("ZeroMqSenderBase::initialize create socket EXCEPTION: ", ex.what());
-        m_zmqSocket = nullptr;
+        m_zmqSocket.reset(nullptr);
     }
 };
 

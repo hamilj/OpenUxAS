@@ -68,8 +68,11 @@ CmasiPointSearchTaskService::configureTask(const pugi::xml_node& ndComponent)
 {
     (void)ndComponent; // -Wunused-parameter
 
-    m_pointSearchTask = std::dynamic_pointer_cast<afrl::cmasi::PointSearchTask>(m_task);
-    if (!m_pointSearchTask)
+    if (afrl::cmasi::isPointSearchTask(m_task.get()))
+    {
+        m_pointSearchTask = std::static_pointer_cast<afrl::cmasi::PointSearchTask>(m_task);
+    }
+    else
     {
         UXAS_LOG_ERROR("ERROR:: **CmasiPointSearchTaskService::bConfigure failed: taskObject[" + m_task->getFullLmcpTypeName() + "] is not a PointSearchTask.");
         return false;
@@ -153,8 +156,7 @@ void CmasiPointSearchTaskService::buildTaskPlanOptions()
     // send out the options
     if (isSuccessful)
     {
-        auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
     }
 };
 
@@ -165,7 +167,7 @@ bool CmasiPointSearchTaskService::isCalculateOption(const int64_t& taskId, int64
     uxas::common::utilities::CUnitConversions unitConversions;
     double standoffDistance = m_pointSearchTask->getStandoffDistance();
 
-    auto taskOption = new uxas::messages::task::TaskOption;
+    auto taskOption = std::make_shared<uxas::messages::task::TaskOption>();
     auto startEndHeading_deg = n_Const::c_Convert::dNormalizeAngleRad((wedgeHeading_rad + n_Const::c_Convert::dPi()), 0.0) * n_Const::c_Convert::dRadiansToDegrees(); // [0,2PI) 
     taskOption->setStartHeading(startEndHeading_deg);
     taskOption->setEndHeading(startEndHeading_deg);
@@ -181,9 +183,8 @@ bool CmasiPointSearchTaskService::isCalculateOption(const int64_t& taskId, int64
             for( auto id : itEligibleEntities.second )
                 taskOption->getEligibleEntities().push_back(id);
         taskOption->setCost(0);
-        auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(pTaskOption)));
-        m_taskPlanOptions->getOptions().push_back(taskOption);
+        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(taskOption)));
+        m_taskPlanOptions->getOptions().push_back(taskOption->clone());
         return true;
     }
 
@@ -200,66 +201,51 @@ bool CmasiPointSearchTaskService::isCalculateOption(const int64_t& taskId, int64
     double longitude_rad(0.0);
 
     unitConversions.ConvertNorthEast_mToLatLong_rad(newNorth_m, newEast_m, latitude_rad, longitude_rad);
-    auto startLocation = new afrl::cmasi::Location3D();
+    auto startLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
     startLocation->setLatitude(latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
     startLocation->setLongitude(longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
-    taskOption->setStartLocation(startLocation);
-    startLocation = nullptr; // just gave up ownership
+    taskOption->setStartLocation(startLocation.release());
     taskOption->setEndLocation(m_pointSearchTask->getSearchLocation()->clone());
 
     auto routePlan = std::make_shared<uxas::messages::route::RoutePlan>();
 
     int64_t waypointNumber = 1;
-    auto waypoint = new afrl::cmasi::Waypoint();
+    auto waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
     waypoint->setNumber(waypointNumber);
     waypoint->setLatitude(taskOption->getStartLocation()->getLatitude());
     waypoint->setLongitude(taskOption->getStartLocation()->getLongitude());
     waypoint->setAltitude(taskOption->getStartLocation()->getAltitude());
-    routePlan->getWaypoints().push_back(waypoint);
-    waypoint = nullptr; // gave up ownership
+    routePlan->getWaypoints().push_back(waypoint.release());
     
     waypointNumber++;
-    waypoint = new afrl::cmasi::Waypoint();
+    waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
     waypoint->setNumber(waypointNumber);
     waypoint->setLatitude(taskOption->getEndLocation()->getLatitude());
     waypoint->setLongitude(taskOption->getEndLocation()->getLongitude());
     waypoint->setAltitude(taskOption->getEndLocation()->getAltitude());
-    routePlan->getWaypoints().push_back(waypoint);
+    routePlan->getWaypoints().push_back(waypoint.release());
 
     routePlan->setRouteID(TaskOptionClass::m_firstImplementationRouteId);
 //        double costForward_ms = static_cast<int64_t> (((nominalSpeed_mps > 0.0) ? (standoffDistance / nominalSpeed_mps) : (0.0))*1000.0);
     int64_t costForward_ms = 0;
     routePlan->setRouteCost(costForward_ms);
 
-
-    auto taskOptionLocal = taskOption->clone();
-    taskOptionLocal->setOptionID(optionId);
     for (auto itEligibleEntites = m_speedAltitudeVsEligibleEntityIdsRequested.begin(); itEligibleEntites != m_speedAltitudeVsEligibleEntityIdsRequested.end(); itEligibleEntites++)
     {
+        std::unique_ptr<uxas::messages::task::TaskOption> taskOptionLocal(taskOption->clone());
+        taskOptionLocal->setOptionID(optionId);
         taskOptionLocal->getEligibleEntities() = itEligibleEntites->second;
         if (itEligibleEntites->first.first > 0)
         {
             taskOptionLocal->setCost(static_cast<int64_t>( standoffDistance / static_cast<double>(itEligibleEntites->first.first) * 1000.0));
         }
-        auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOptionLocal->clone());
+        std::shared_ptr<uxas::messages::task::TaskOption> pTaskOption(taskOptionLocal->clone());
         auto pTaskOptionClass = std::make_shared<TaskOptionClass>(pTaskOption);
         pTaskOptionClass->m_orderedRouteIdVsPlan[routePlan->getRouteID()] = routePlan;
         m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, pTaskOptionClass));
-        m_taskPlanOptions->getOptions().push_back(taskOptionLocal);
-        // start a new option
+        m_taskPlanOptions->getOptions().push_back(taskOptionLocal.release());
+
         optionId++;
-        taskOptionLocal = taskOption->clone();
-        taskOptionLocal->setOptionID(optionId);
-    } //for(auto itSpeedId=m_speedVsVehicleId.begin();itSpeedId!=m_speedVsVehicleId.end();itSpeedId++)
-    if (taskOptionLocal != nullptr)
-    {
-        delete taskOptionLocal;
-        taskOptionLocal = nullptr;
-    }
-    if (taskOption != nullptr)
-    {
-        delete taskOption;
-        taskOption = nullptr;
     }
 
     return (isSuccessful);
@@ -283,14 +269,12 @@ void CmasiPointSearchTaskService::activeEntityState(const std::shared_ptr<afrl::
     //vehicleActionCommand->setCommandID();
     vehicleActionCommand->setVehicleID(entityState->getID());
     //vehicleActionCommand->setStatus();
-    auto gimbalStareAction = new afrl::cmasi::GimbalStareAction;
+    auto gimbalStareAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalStareAction>();
     gimbalStareAction->setPayloadID(gimbalId);
     gimbalStareAction->setStarepoint(m_pointSearchTask->getSearchLocation()->clone());
-    vehicleActionCommand->getVehicleActionList().push_back(gimbalStareAction);
-    gimbalStareAction = nullptr; //gave up ownership
+    vehicleActionCommand->getVehicleActionList().push_back(gimbalStareAction.release());
     // send out the response
-    auto newMessage = std::static_pointer_cast<avtas::lmcp::Object>(vehicleActionCommand);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newMessage);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(vehicleActionCommand);
 }
 
 bool CmasiPointSearchTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse,

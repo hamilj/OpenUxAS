@@ -96,10 +96,10 @@ public:
     static const std::string&
     s_directoryName() { static std::string s_string(""); return (s_string); };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new LoiterLeash(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<LoiterLeash>(pLmcpObjectNetworkClient);
     };
 
     explicit LoiterLeash(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

@@ -127,7 +127,7 @@ void AssignmentCoordinatorTaskService::terminateTask()
 
 bool AssignmentCoordinatorTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
 {
-    if (std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpObject))
+    if (afrl::cmasi::isAirVehicleState(receivedLmcpObject))
     {
         auto airVehicleState = std::static_pointer_cast<afrl::cmasi::AirVehicleState> (receivedLmcpObject);
         if(airVehicleState->getID() == getEntityId())
@@ -195,7 +195,7 @@ bool AssignmentCoordinatorTaskService::processReceivedLmcpMessageTask(std::share
     {
         auto taskAutomationResponse = std::static_pointer_cast<uxas::messages::task::TaskAutomationResponse> (receivedLmcpObject);
         // send out an AutomationResponse (for the waypoint manager)
-        auto response = std::shared_ptr<afrl::cmasi::AutomationResponse>(taskAutomationResponse->getOriginalResponse()->clone());
+        std::shared_ptr<afrl::cmasi::AutomationResponse> response(taskAutomationResponse->getOriginalResponse()->clone());
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(response);
         
         std::lock_guard<std::mutex> lock(m_timerThreadLock);

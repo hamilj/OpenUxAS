@@ -131,9 +131,9 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
-        return new ImpactLineSearchTaskService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<ImpactLineSearchTaskService>(pLmcpObjectNetworkClient);
     };
 
     explicit ImpactLineSearchTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

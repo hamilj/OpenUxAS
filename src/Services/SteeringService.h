@@ -42,10 +42,10 @@ public:
 
     virtual ~SteeringService() { }
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new SteeringService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<SteeringService>(pLmcpObjectNetworkClient);
     };
 
     static const std::string& s_typeName()

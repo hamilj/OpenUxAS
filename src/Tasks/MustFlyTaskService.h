@@ -58,10 +58,10 @@ public:
 		return (s_string);
 	};
 
-	static ServiceBase*
-		create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
+	static std::unique_ptr<ServiceBase>
+	create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
 	{
-		return new MustFlyTaskService(pLmcpObjectNetworkClient);
+		return uxas::stduxas::make_unique<MustFlyTaskService>(pLmcpObjectNetworkClient);
 	};
 
 	explicit MustFlyTaskService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

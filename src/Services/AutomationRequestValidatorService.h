@@ -123,10 +123,10 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient)
     {
-        return new AutomationRequestValidatorService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<AutomationRequestValidatorService>(pLmcpObjectNetworkClient);
     };
 
     explicit AutomationRequestValidatorService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

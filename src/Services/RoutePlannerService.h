@@ -78,9 +78,9 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
-        return new RoutePlannerService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<RoutePlannerService>(pLmcpObjectNetworkClient);
     };
 
     explicit RoutePlannerService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

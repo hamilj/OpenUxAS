@@ -78,8 +78,7 @@ ZeroMqAddressedAttributedMessageReceiver::getNextMessage()
                         while (!recvdTcpDataSegment.empty())
                         {
                             UXAS_LOG_DEBUG_VERBOSE("ZeroMqAddressedAttributedMessageReceiver::getNextMessage processing complete object string segment");
-                            std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> recvdTcpAddAttMsg
-                                    = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
+                            auto recvdTcpAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
                             if (recvdTcpAddAttMsg->setAddressAttributesAndPayloadFromDelimitedString(std::move(recvdTcpDataSegment)))
                             {
                                 m_recvdMsgs.push_back( std::move(recvdTcpAddAttMsg) );
@@ -117,8 +116,7 @@ ZeroMqAddressedAttributedMessageReceiver::getNextMessage()
                     std::string payload = n_ZMQ::s_recv(*m_zmqSocket);
                     if (m_entityIdString != sourceEntityId || m_serviceIdString != sourceServiceId)
                     {
-                        std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> recvdMultipartAddAttMsg
-                                = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
+                        auto recvdMultipartAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
                         if (recvdMultipartAddAttMsg->setAddressAttributesAndPayload(std::move(address), std::move(contentType), std::move(descriptor), std::move(sourceGroup),
                                                                                     std::move(sourceEntityId), std::move(sourceServiceId), std::move(payload)))
                         {
@@ -136,8 +134,7 @@ ZeroMqAddressedAttributedMessageReceiver::getNextMessage()
                 }
                 else
                 {
-                    std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> recvdSinglepartAddAttMsg
-                            = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
+                    auto recvdSinglepartAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
                     if (recvdSinglepartAddAttMsg->setAddressAttributesAndPayloadFromDelimitedString(n_ZMQ::s_recv(*m_zmqSocket)))
                     {
                         if (m_entityIdString != recvdSinglepartAddAttMsg->getMessageAttributesReference()->getSourceEntityId()

@@ -61,9 +61,12 @@ AutomationRequestValidatorService::AutomationRequestValidatorService(std::shared
 : ServiceBase(AutomationRequestValidatorService::s_typeName(), AutomationRequestValidatorService::s_directoryName(), pLmcpObjectNetworkClient)
 {
     // make sure error collection is non-null
-    m_errorResponse.reset(new uxas::messages::task::UniqueAutomationResponse);
-    if(!m_errorResponse->getOriginalResponse())
-        m_errorResponse->setOriginalResponse(new afrl::cmasi::AutomationResponse);
+    m_errorResponse = std::make_shared<uxas::messages::task::UniqueAutomationResponse>();
+    if (!m_errorResponse->getOriginalResponse())
+    {
+        auto pResponse = uxas::stduxas::make_unique<afrl::cmasi::AutomationResponse>();
+        m_errorResponse->setOriginalResponse(pResponse.release());
+    }
 }
 
 AutomationRequestValidatorService::~AutomationRequestValidatorService()
@@ -151,23 +154,23 @@ AutomationRequestValidatorService::configure(const pugi::xml_node & ndComponent)
 bool
 AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
-    auto entityConfig = std::dynamic_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-    auto task = std::dynamic_pointer_cast<afrl::cmasi::Task>(receivedLmcpMessage->m_object);
-    if ( entityConfig )
+    if (afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
+        auto entityConfig = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         m_availableConfigurationEntityIds.insert(entityConfig->getID());
     }
-    else if ( entityState )
+    else if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_availableStateEntityIds.insert(entityState->getID());
     }
-    else if ( task )
+    else if (afrl::cmasi::isTask(receivedLmcpMessage->m_object))
     {
+        auto task = std::static_pointer_cast<afrl::cmasi::Task>(receivedLmcpMessage->m_object);
         m_availableInitializedTasks.erase(task->getTaskID());
         m_availableTasks[task->getTaskID()] = task;
     }
-    else if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object))
     {
         // log any error messages in the assignment pipeline
         auto sstatus = std::static_pointer_cast<afrl::cmasi::ServiceStatus>(receivedLmcpMessage->m_object);
@@ -175,7 +178,7 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
             for(auto kvp : sstatus->getInfo())
                 m_errorResponse->getOriginalResponse()->getInfo().push_back(kvp->clone());
     }
-    else if (afrl::cmasi::isRemoveTasks(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isRemoveTasks(receivedLmcpMessage->m_object))
     {
         auto removeTasks = std::static_pointer_cast<afrl::cmasi::RemoveTasks>(receivedLmcpMessage->m_object);
         for (auto& taskId : removeTasks->getTaskList())
@@ -184,38 +187,38 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
             m_availableInitializedTasks.erase(taskId);
         }
     }
-    else if (uxas::messages::task::isTaskInitialized(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isTaskInitialized(receivedLmcpMessage->m_object))
     {
         auto taskInitialized = std::static_pointer_cast<uxas::messages::task::TaskInitialized>(receivedLmcpMessage->m_object);
         m_availableInitializedTasks.insert(taskInitialized->getTaskID());
         checkTasksInitialized();
     }
-    else if (afrl::impact::isAreaOfInterest(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isAreaOfInterest(receivedLmcpMessage->m_object))
     {
         auto areaOfInterest = std::static_pointer_cast<afrl::impact::AreaOfInterest>(receivedLmcpMessage->m_object);
         m_availableAreaOfInterestIds.insert(areaOfInterest->getAreaID());
     }
-    else if (afrl::impact::isLineOfInterest(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isLineOfInterest(receivedLmcpMessage->m_object))
     {
         auto lineOfInterest = std::static_pointer_cast<afrl::impact::LineOfInterest>(receivedLmcpMessage->m_object);
         m_availableLineOfInterestIds.insert(lineOfInterest->getLineID());
     }
-    else if (afrl::impact::isPointOfInterest(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isPointOfInterest(receivedLmcpMessage->m_object))
     {
         auto pointOfInterest = std::static_pointer_cast<afrl::impact::PointOfInterest>(receivedLmcpMessage->m_object);
         m_availablePointOfInterestIds.insert(pointOfInterest->getPointID());
     }
-    else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object))
     {
         auto keepInZone = std::static_pointer_cast<afrl::cmasi::KeepInZone>(receivedLmcpMessage->m_object);
         m_availableKeepInZoneIds.insert(keepInZone->getZoneID());
     }
-    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object))
     {
         auto keepOutZone = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(receivedLmcpMessage->m_object);
         m_availableKeepOutZoneIds.insert(keepOutZone->getZoneID());
     }
-    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object))
     {
         auto operatingRegion = std::static_pointer_cast<afrl::cmasi::OperatingRegion>(receivedLmcpMessage->m_object);
         m_availableOperatingRegions[operatingRegion->getID()] = operatingRegion;
@@ -226,7 +229,7 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
     {
         HandleAutomationRequest(receivedLmcpMessage->m_object);
     }
-    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object))
     {
         HandleAutomationResponse(receivedLmcpMessage->m_object);
     }
@@ -236,7 +239,7 @@ AutomationRequestValidatorService::processReceivedLmcpMessage(std::unique_ptr<ux
 
 void AutomationRequestValidatorService::HandleAutomationRequest(std::shared_ptr<avtas::lmcp::Object>& autoRequest)
 {
-    auto uniqueAutomationRequest = std::shared_ptr<uxas::messages::task::UniqueAutomationRequest> (new uxas::messages::task::UniqueAutomationRequest);
+    auto uniqueAutomationRequest = std::make_shared<uxas::messages::task::UniqueAutomationRequest>();
     uniqueAutomationRequest->setRequestID(uxas::communications::getUniqueEntitySendMessageId());
 
     if (afrl::impact::isImpactAutomationRequest(autoRequest))
@@ -254,7 +257,7 @@ void AutomationRequestValidatorService::HandleAutomationRequest(std::shared_ptr<
         auto taskAutomationRequest = std::static_pointer_cast<uxas::messages::task::TaskAutomationRequest>(autoRequest);
         uniqueAutomationRequest->setRequestID(taskAutomationRequest->getRequestID());
 
-        uniqueAutomationRequest->setOriginalRequest((afrl::cmasi::AutomationRequest*) taskAutomationRequest->getOriginalRequest()->clone());
+        uniqueAutomationRequest->setOriginalRequest(static_cast<afrl::cmasi::AutomationRequest*>(taskAutomationRequest->getOriginalRequest()->clone()));
         uniqueAutomationRequest->setSandBoxRequest(taskAutomationRequest->getSandBoxRequest());
         for(auto& planningState : taskAutomationRequest->getPlanningStates())
         {
@@ -265,7 +268,7 @@ void AutomationRequestValidatorService::HandleAutomationRequest(std::shared_ptr<
     }
     else
     {
-        uniqueAutomationRequest->setOriginalRequest((afrl::cmasi::AutomationRequest*) autoRequest->clone());
+        uniqueAutomationRequest->setOriginalRequest(static_cast<afrl::cmasi::AutomationRequest*>(autoRequest->clone()));
         m_sandboxMap[uniqueAutomationRequest->getRequestID()].requestType = AUTOMATION_REQUEST;
     }
 
@@ -297,7 +300,7 @@ void AutomationRequestValidatorService::SendResponse(std::shared_ptr<uxas::messa
     if(m_sandboxMap.find(resp->getResponseID()) == m_sandboxMap.end())
     {
         // can't find a corresponding type, so just send out a normal one
-        auto cleanResponse = std::shared_ptr<afrl::cmasi::AutomationResponse>(resp->getOriginalResponse()->clone());
+        std::shared_ptr<afrl::cmasi::AutomationResponse> cleanResponse(resp->getOriginalResponse()->clone());
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(cleanResponse);
         return;
     }
@@ -315,13 +318,13 @@ void AutomationRequestValidatorService::SendResponse(std::shared_ptr<uxas::messa
     }
     else if (m_sandboxMap[resp->getResponseID()].requestType == AUTOMATION_REQUEST)
     {
-        auto cleanResponse = std::shared_ptr<afrl::cmasi::AutomationResponse>(resp->getOriginalResponse()->clone());
+        std::shared_ptr<afrl::cmasi::AutomationResponse> cleanResponse(resp->getOriginalResponse()->clone());
         m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(cleanResponse);
     }
     else
     {
         // look up play and solution IDs
-        auto sandResponse = std::shared_ptr<afrl::impact::ImpactAutomationResponse> (new afrl::impact::ImpactAutomationResponse);
+        auto sandResponse = std::make_shared<afrl::impact::ImpactAutomationResponse>();
         sandResponse->setPlayID(m_sandboxMap[resp->getResponseID()].playId);
         sandResponse->setSolutionID(m_sandboxMap[resp->getResponseID()].solnId);
         sandResponse->setTrialResponse(resp->getOriginalResponse()->clone());
@@ -341,10 +344,10 @@ void AutomationRequestValidatorService::OnResponseTimeout()
         std::stringstream reasonForFailure;
         reasonForFailure << "- automation request ID[" << timedOut->getRequestID() << "] was not ready in time and was not sent." << std::endl;
         UXAS_LOG_WARN(reasonForFailure.str());
-        auto keyValuePair = new afrl::cmasi::KeyValuePair;
+        auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
         keyValuePair->setKey(std::string("RequestValidator"));
         keyValuePair->setValue(reasonForFailure.str());
-        m_errorResponse->getOriginalResponse()->getInfo().push_back(keyValuePair);
+        m_errorResponse->getOriginalResponse()->getInfo().push_back(keyValuePair.release());
         SendResponse(m_errorResponse);
         m_sandboxMap.erase(m_errorResponse->getResponseID());
     }
@@ -362,10 +365,10 @@ void AutomationRequestValidatorService::OnTasksReadyTimeout()
         std::stringstream reasonForFailure;
         reasonForFailure << "- automation request ID[" << timedOut->getRequestID() << "] was not able to properly initialize all requested tasks" << std::endl;
         UXAS_LOG_WARN(reasonForFailure.str());
-        auto keyValuePair = new afrl::cmasi::KeyValuePair;
+        auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
         keyValuePair->setKey(std::string("RequestValidator"));
         keyValuePair->setValue(reasonForFailure.str());
-        m_errorResponse->getOriginalResponse()->getInfo().push_back(keyValuePair);
+        m_errorResponse->getOriginalResponse()->getInfo().push_back(keyValuePair.release());
         SendResponse(m_errorResponse);
         m_sandboxMap.erase(m_errorResponse->getResponseID());
     }
@@ -385,7 +388,8 @@ void AutomationRequestValidatorService::sendNextRequest()
     auto uniqueAutomationRequest = m_pendingRequests.front();
     
     // sending a new request, so clear out the old errors
-    m_errorResponse->setOriginalResponse(new afrl::cmasi::AutomationResponse);
+    auto pResponse = uxas::stduxas::make_unique<afrl::cmasi::AutomationResponse>();
+    m_errorResponse->setOriginalResponse(pResponse.release());
     m_errorResponse->setResponseID(uniqueAutomationRequest->getRequestID());
     
     // send next request
@@ -394,11 +398,11 @@ void AutomationRequestValidatorService::sendNextRequest()
     // report start of assignment pipeline
     auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
     serviceStatus->setStatusType(afrl::cmasi::ServiceStatusType::Information);
-    auto keyValuePair = new afrl::cmasi::KeyValuePair;
+    auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
     std::string message = "UniqueAutomationRequest[" + std::to_string(uniqueAutomationRequest->getRequestID()) + "] - sent";
     keyValuePair->setKey(message);
-    serviceStatus->getInfo().push_back(keyValuePair);
-    keyValuePair = nullptr;
+    serviceStatus->getInfo().push_back(keyValuePair.release());
+
     m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
     
     // reset the timer
@@ -646,16 +650,17 @@ bool AutomationRequestValidatorService::isCheckAutomationRequestRequirements(con
     if (!isReady)
     {
         UXAS_LOG_WARN(reasonForFailure.str());
-        auto keyValuePair = new afrl::cmasi::KeyValuePair;
+        auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
         keyValuePair->setKey(std::string("RequestValidator"));
         keyValuePair->setValue(reasonForFailure.str());
-        std::shared_ptr<uxas::messages::task::UniqueAutomationResponse> errResponse 
-            = std::shared_ptr<uxas::messages::task::UniqueAutomationResponse>
-            (new uxas::messages::task::UniqueAutomationResponse);
-        if(!errResponse->getOriginalResponse())
-            errResponse->setOriginalResponse(new afrl::cmasi::AutomationResponse);
+        auto errResponse = std::make_shared<uxas::messages::task::UniqueAutomationResponse>();
+        if (!errResponse->getOriginalResponse())
+        {
+            auto pResponse = uxas::stduxas::make_unique<afrl::cmasi::AutomationResponse>();
+            errResponse->setOriginalResponse(pResponse.release());
+        }
         errResponse->setResponseID(uniqueAutomationRequest->getRequestID());
-        errResponse->getOriginalResponse()->getInfo().push_back(keyValuePair);
+        errResponse->getOriginalResponse()->getInfo().push_back(keyValuePair.release());
         SendResponse(errResponse);
         m_sandboxMap.erase(errResponse->getResponseID());
     }

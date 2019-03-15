@@ -247,11 +247,10 @@ OsmPlannerService::initialize()
 
 bool
 OsmPlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
     if (uxas::messages::route::isRoutePlanRequest(receivedLmcpMessage->m_object))
     {
-        std::shared_ptr<uxas::messages::route::RoutePlanRequest> request = std::static_pointer_cast<uxas::messages::route::RoutePlanRequest>(receivedLmcpMessage->m_object);
+        auto request = std::static_pointer_cast<uxas::messages::route::RoutePlanRequest>(receivedLmcpMessage->m_object);
         //assumes only ground vehicles
         if (m_entityConfigurations.find(request->getVehicleID()) != m_entityConfigurations.end())
         {
@@ -259,20 +258,18 @@ OsmPlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicatio
             auto routePlanResponse = std::make_shared<uxas::messages::route::RoutePlanResponse>();
             routePlanResponse->setResponseID(request->getRequestID());
             bProcessRoutePlanRequest(request, routePlanResponse);
-            auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(routePlanResponse);
             m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(
                                                    uxas::communications::getNetworkClientUnicastAddress(
                                                                                   receivedLmcpMessage->m_attributes->getSourceEntityId(),
                                                                                   receivedLmcpMessage->m_attributes->getSourceServiceId()
                                                                                   ),
-                                                   newResponse);
+                                                   routePlanResponse);
 
         }
     }
     else if (uxas::messages::route::isRoadPointsRequest(receivedLmcpMessage->m_object))
     {
-        std::shared_ptr<uxas::messages::route::RoadPointsRequest> request =
-                std::static_pointer_cast<uxas::messages::route::RoadPointsRequest>(receivedLmcpMessage->m_object);
+        auto request = std::static_pointer_cast<uxas::messages::route::RoadPointsRequest>(receivedLmcpMessage->m_object);
         auto roadPointsResponse = std::make_shared<uxas::messages::route::RoadPointsResponse>();
         if (isProcessRoadPointsRequest(request, roadPointsResponse))
         {
@@ -289,17 +286,15 @@ OsmPlannerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communicatio
         auto egressResponse = std::make_shared<uxas::messages::route::EgressRouteResponse>();
         if (bProcessEgressRequest(std::static_pointer_cast<uxas::messages::route::EgressRouteRequest>(receivedLmcpMessage->m_object), egressResponse))
         {
-            auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(egressResponse);
             m_pLmcpObjectNetworkClient->sendSharedLmcpObjectLimitedCastMessage(
                                                    uxas::communications::getNetworkClientUnicastAddress(
                                                                                   receivedLmcpMessage->m_attributes->getSourceEntityId(),
                                                                                   receivedLmcpMessage->m_attributes->getSourceServiceId()
                                                                                   ),
-                                                   newResponse);
+                                                   egressResponse);
         }
     }
-
-    else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object.get()))
+    else if (afrl::vehicles::isGroundVehicleConfiguration(receivedLmcpMessage->m_object))
     {
         auto config = std::static_pointer_cast<afrl::vehicles::GroundVehicleConfiguration>(receivedLmcpMessage->m_object);
         m_entityConfigurations[config->getID()] = config;
@@ -337,12 +332,12 @@ bool OsmPlannerService::bProcessEgressRequest(const std::shared_ptr<uxas::messag
         // TODO: figure out headings
         egressResponse->getHeadings().push_back(0.0f);
 
-        afrl::cmasi::Location3D* loc = new afrl::cmasi::Location3D;
+        auto loc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
         loc->setLatitude(i.m_latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
         loc->setLongitude(i.m_longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
         loc->setAltitude(i.m_altitude_m);
 
-        egressResponse->getNodeLocations().push_back(loc);
+        egressResponse->getNodeLocations().push_back(loc.release());
     }
     egressResponse->setResponseID(egressRequest->getRequestID());
 
@@ -374,7 +369,7 @@ bool OsmPlannerService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::mes
             itRequest != routePlanRequest->getRouteRequests().end();
             itRequest++)
     {
-        auto routePlan = new uxas::messages::route::RoutePlan;
+        auto routePlan = uxas::stduxas::make_unique<uxas::messages::route::RoutePlan>();
         routePlan->setRouteID((*itRequest)->getRouteID());
         routePlan->setRouteCost(-1);
 
@@ -418,7 +413,7 @@ bool OsmPlannerService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::mes
 
                         // add start point
                         waypointNumber++;
-                        auto waypoint = new afrl::cmasi::Waypoint();
+                        auto waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                         waypoint->setNumber(waypointNumber);
                         // nextWaypoint set when following waypoint is added
                         waypoint->setSpeed(speed);
@@ -426,8 +421,7 @@ bool OsmPlannerService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::mes
                         waypoint->setLatitude(positionStart.m_latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                         waypoint->setLongitude(positionStart.m_longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                         waypoint->setAltitude(positionStart.m_altitude_m);
-                        routePlan->getWaypoints().push_back(waypoint);
-                        waypoint = nullptr; // gave up ownership
+                        routePlan->getWaypoints().push_back(waypoint.release());
 
 
                         //add rest of points
@@ -458,15 +452,14 @@ bool OsmPlannerService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::mes
                                             //NOTE:: only setting Latitude, Longitude, Altitude  :)
                                             waypointNumber++;
                                             routePlan->getWaypoints().back()->setNextWaypoint(waypointNumber);
-                                            waypoint = new afrl::cmasi::Waypoint();
+                                            waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                                             waypoint->setNumber(waypointNumber);
                                             waypoint->setSpeed(speed);
                                             waypoint->setTurnType(afrl::cmasi::TurnType::FlyOver);
                                             waypoint->setLatitude(itNewNode->second->m_latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                                             waypoint->setLongitude(itNewNode->second->m_longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                                             waypoint->setAltitude(itNewNode->second->m_altitude_m);
-                                            routePlan->getWaypoints().push_back(waypoint);
-                                            waypoint = nullptr; // gave up ownership
+                                            routePlan->getWaypoints().push_back(waypoint.release());
 
                                             waypointNodeIds.push_back(*itNodeId);
                                         }
@@ -495,15 +488,14 @@ bool OsmPlannerService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::mes
                                     //NOTE:: only setting Latitude, Longitude, Altitude, Number, NextWaypoint, Speed, TurnType  :)
                                     waypointNumber++;
                                     routePlan->getWaypoints().back()->setNextWaypoint(waypointNumber);
-                                    waypoint = new afrl::cmasi::Waypoint();
+                                    waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                                     waypoint->setNumber(waypointNumber);
                                     waypoint->setSpeed(speed);
                                     waypoint->setTurnType(afrl::cmasi::TurnType::FlyOver);
                                     waypoint->setLatitude(itNewNode->second->m_latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                                     waypoint->setLongitude(itNewNode->second->m_longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                                     waypoint->setAltitude(itNewNode->second->m_altitude_m);
-                                    routePlan->getWaypoints().push_back(waypoint);
-                                    waypoint = nullptr; // gave up ownership
+                                    routePlan->getWaypoints().push_back(waypoint.release());
 
                                     waypointNodeIds.push_back(*itPathNodeId);
                                 }
@@ -522,7 +514,7 @@ bool OsmPlannerService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::mes
                         // add end point
                         waypointNumber++;
                         routePlan->getWaypoints().back()->setNextWaypoint(waypointNumber);
-                        waypoint = new afrl::cmasi::Waypoint();
+                        waypoint = uxas::stduxas::make_unique<afrl::cmasi::Waypoint>();
                         waypoint->setNumber(waypointNumber);
                         waypoint->setNextWaypoint(waypointNumber);
                         waypoint->setSpeed(speed);
@@ -530,8 +522,7 @@ bool OsmPlannerService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::mes
                         waypoint->setLatitude(positionEnd.m_latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                         waypoint->setLongitude(positionEnd.m_longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                         waypoint->setAltitude(positionEnd.m_altitude_m);
-                        routePlan->getWaypoints().push_back(waypoint);
-                        waypoint = nullptr; // gave up ownership
+                        routePlan->getWaypoints().push_back(waypoint.release());
                     }
                     numberWaypoints = routePlan->getWaypoints().size();
                 }
@@ -607,8 +598,7 @@ bool OsmPlannerService::bProcessRoutePlanRequest(const std::shared_ptr<uxas::mes
                 isSuccess = false;
             } //if(isFindClosestIndices(positionStart,positionEnd,indexIdStart,index  ...
         } //if(m_graph && m_planningIndexVsNodeId && m_idVsNode)
-        routePlanResponse->getRouteResponses().push_back(routePlan);
-        routePlan = nullptr; //gave it up
+        routePlanResponse->getRouteResponses().push_back(routePlan.release());
     } //for (auto itRequest = routePlanRequest->getRouteRequests()
 
     return (isSuccess);
@@ -699,20 +689,19 @@ bool OsmPlannerService::isProcessRoadPointsRequest(const std::shared_ptr<uxas::m
                         if (!fullPathNodeIds.empty())
                         {
                             // build the lineofinterest
-                            afrl::impact::LineOfInterest * lineOfInterest(new afrl::impact::LineOfInterest);
+                            auto lineOfInterest = uxas::stduxas::make_unique<afrl::impact::LineOfInterest>();
                             lineOfInterest->setLineID((*itRequest)->getRoadPointsID());
                             for (auto roadNodeId : fullPathNodeIds)
                             {
                                 auto itNewNode = m_idVsNode->find(roadNodeId);
                                 if (itNewNode != m_idVsNode->end())
                                 {
-                                    afrl::cmasi::Location3D* loc = new afrl::cmasi::Location3D;
+                                    auto loc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
                                     loc->setLatitude(itNewNode->second->m_latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                                     loc->setLongitude(itNewNode->second->m_longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                                     loc->setAltitude(itNewNode->second->m_altitude_m);
                                     loc->setAltitudeType(afrl::cmasi::AltitudeType::AGL);
-                                    lineOfInterest->getLine().push_back(loc);
-                                    loc = nullptr;
+                                    lineOfInterest->getLine().push_back(loc.release());
                                 }
                                 else
                                 {
@@ -723,13 +712,7 @@ bool OsmPlannerService::isProcessRoadPointsRequest(const std::shared_ptr<uxas::m
                             }
                             if (isSuccess)
                             {
-                                roadPointsResponse->getRoadPointsResponses().push_back(lineOfInterest);
-                                lineOfInterest = nullptr;
-                            }
-                            else
-                            {
-                                delete lineOfInterest;
-                                lineOfInterest = nullptr;
+                                roadPointsResponse->getRoadPointsResponses().push_back(lineOfInterest.release());
                             }
                         }
                     }
@@ -887,20 +870,19 @@ bool OsmPlannerService::isProcessRoadPointsRequest(const std::shared_ptr<uxas::m
                                 }
 
                                 // 10) build the lineofinterest
-                                afrl::impact::LineOfInterest * lineOfInterest(new afrl::impact::LineOfInterest);
+                                auto lineOfInterest = uxas::stduxas::make_unique<afrl::impact::LineOfInterest>();
                                 lineOfInterest->setLineID((*itRequest)->getRoadPointsID());
                                 for (auto roadNodeId : fullPathNodeIds)
                                 {
                                     auto itNewNode = m_idVsNode->find(roadNodeId);
                                     if (itNewNode != m_idVsNode->end())
                                     {
-                                        afrl::cmasi::Location3D* loc = new afrl::cmasi::Location3D;
+                                        auto loc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
                                         loc->setLatitude(itNewNode->second->m_latitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                                         loc->setLongitude(itNewNode->second->m_longitude_rad * n_Const::c_Convert::dRadiansToDegrees());
                                         loc->setAltitude(itNewNode->second->m_altitude_m);
                                         loc->setAltitudeType(afrl::cmasi::AltitudeType::AGL);
-                                        lineOfInterest->getLine().push_back(loc);
-                                        loc = nullptr;
+                                        lineOfInterest->getLine().push_back(loc.release());
                                     }
                                     else
                                     {
@@ -911,13 +893,7 @@ bool OsmPlannerService::isProcessRoadPointsRequest(const std::shared_ptr<uxas::m
                                 }
                                 if (isSuccess)
                                 {
-                                    roadPointsResponse->getRoadPointsResponses().push_back(lineOfInterest);
-                                    lineOfInterest = nullptr;
-                                }
-                                else
-                                {
-                                    delete lineOfInterest;
-                                    lineOfInterest = nullptr;
+                                    roadPointsResponse->getRoadPointsResponses().push_back(lineOfInterest.release());
                                 }
                             }
                             else
@@ -1178,7 +1154,7 @@ bool OsmPlannerService::isBuildRoadGraphWithOsm(const string & osmFile)
                                 if (!ndCurrent.attribute("lon").empty())
                                 {
                                     double lon = ndCurrent.attribute("lon").as_double() * n_Const::c_Convert::dDegreesToRadians();
-                                    auto newNode = std::unique_ptr<n_FrameworkLib::CPosition>(new n_FrameworkLib::CPosition(lat, lon, 0.0, m_flatEarth));
+                                    auto newNode = uxas::stduxas::make_unique<n_FrameworkLib::CPosition>(lat, lon, 0.0, m_flatEarth);
                                     northMax_m = (newNode->m_north_m > northMax_m) ? (newNode->m_north_m) : (northMax_m);
                                     northMin_m = (newNode->m_north_m < northMin_m) ? (newNode->m_north_m) : (northMin_m);
                                     eastMax_m = (newNode->m_east_m > eastMax_m) ? (newNode->m_east_m) : (eastMax_m);
@@ -1281,9 +1257,9 @@ bool OsmPlannerService::isProcessHighwayNodes(const std::unordered_map<int64_t, 
     {
         // the begin node for the 'planning' edge
         auto itEdgeFirst = m_wayIdVsNodeId.end();
-        auto edgeIdsForward = std::unique_ptr<s_EdgeIds>(new s_EdgeIds);
+        auto edgeIdsForward = uxas::stduxas::make_unique<s_EdgeIds>();
         edgeIdsForward->m_highwayId = *itHighway;
-        auto edgeIdsReverse = std::unique_ptr<s_EdgeIds>(new s_EdgeIds);
+        auto edgeIdsReverse = uxas::stduxas::make_unique<s_EdgeIds>();
         edgeIdsReverse->m_highwayId = *itHighway;
 
         auto itHighwayNodes = m_wayIdVsNodeId.equal_range(*itHighway);
@@ -1339,9 +1315,9 @@ bool OsmPlannerService::isProcessHighwayNodes(const std::unordered_map<int64_t, 
                         }
 
                         // reset starting node
-                        edgeIdsForward = std::unique_ptr<s_EdgeIds>(new s_EdgeIds);
+                        edgeIdsForward = uxas::stduxas::make_unique<s_EdgeIds>();
                         edgeIdsForward->m_highwayId = *itHighway;
-                        edgeIdsReverse = std::unique_ptr<s_EdgeIds>(new s_EdgeIds);
+                        edgeIdsReverse = uxas::stduxas::make_unique<s_EdgeIds>();
                         edgeIdsReverse->m_highwayId = *itHighway;
 
                         itEdgeFirst = itHighwayNode;

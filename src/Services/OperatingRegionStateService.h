@@ -72,9 +72,9 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
-        return new OperatingRegionStateService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<OperatingRegionStateService>(pLmcpObjectNetworkClient);
     };
 
     explicit OperatingRegionStateService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

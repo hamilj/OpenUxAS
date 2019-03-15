@@ -110,9 +110,9 @@ bool
 MultiVehicleWatchTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::Object>& receivedLmcpObject)
 //example: if (afrl::cmasi::isServiceStatus(receivedLmcpObject))
 {
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpObject))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpObject);
         if (entityState->getID() == m_MultiVehicleWatchTask->getWatchedEntityID())
         {
             m_watchedEntityStateLast = entityState;
@@ -168,8 +168,7 @@ void MultiVehicleWatchTaskService::buildTaskPlanOptions()
     // send out the options
     if (isSuccessful)
     {
-        auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
     }
 };
 
@@ -179,7 +178,7 @@ bool MultiVehicleWatchTaskService::isCalculateOption(const int64_t& taskId, int6
 
     if (m_watchedEntityStateLast)
     {
-        auto taskOption = new uxas::messages::task::TaskOption;
+        auto taskOption = std::make_shared<uxas::messages::task::TaskOption>();
         taskOption->getEligibleEntities().push_back(optionId); // note: this task enforces optionId == entityId
         taskOption->setTaskID(taskId);
         taskOption->setOptionID(optionId);
@@ -187,10 +186,8 @@ bool MultiVehicleWatchTaskService::isCalculateOption(const int64_t& taskId, int6
         taskOption->setStartHeading(m_watchedEntityStateLast->getHeading());
         taskOption->setEndLocation(m_watchedEntityStateLast->getLocation()->clone());
         taskOption->setEndHeading(m_watchedEntityStateLast->getHeading());
-        auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(pTaskOption)));
-        m_taskPlanOptions->getOptions().push_back(taskOption);
-        taskOption = nullptr; //just gave up ownership
+        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(taskOption)));
+        m_taskPlanOptions->getOptions().push_back(taskOption->clone());
     }
     else
     {
@@ -215,9 +212,7 @@ void MultiVehicleWatchTaskService::activeEntityState(const std::shared_ptr<afrl:
         // at this point, all neighbors have valid positions and are considered cooperating on task
         auto actionCommand = CalculateGimbalActions(entityState, m_watchedEntityStateLast->getLocation()->getLatitude(), m_watchedEntityStateLast->getLocation()->getLongitude());
 
-        //auto pResponse = std::static_pointer_cast<avtas::lmcp::Object>(actionCommand);
-        auto pResponse = std::shared_ptr<avtas::lmcp::Object>(actionCommand);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pResponse);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(actionCommand);
     }
     else
     {
@@ -227,7 +222,7 @@ void MultiVehicleWatchTaskService::activeEntityState(const std::shared_ptr<afrl:
 
 std::shared_ptr<afrl::cmasi::VehicleActionCommand> MultiVehicleWatchTaskService::CalculateGimbalActions(const std::shared_ptr<afrl::cmasi::EntityState>& entityState, double lat, double lon)
 {
-    std::shared_ptr<afrl::cmasi::VehicleActionCommand> caction(new afrl::cmasi::VehicleActionCommand);
+    auto caction = std::make_shared<afrl::cmasi::VehicleActionCommand>();
     caction->setVehicleID(entityState->getID());
     double surveyRadius = 300.0; // default 300 meters, circular
     double surveySpeed = entityState->getGroundspeed();
@@ -269,8 +264,9 @@ std::shared_ptr<afrl::cmasi::VehicleActionCommand> MultiVehicleWatchTaskService:
         }
     }
 
-    afrl::cmasi::LoiterAction* surveyAction = new afrl::cmasi::LoiterAction;
-    surveyAction->setLocation(new afrl::cmasi::Location3D());
+    auto surveyAction = uxas::stduxas::make_unique<afrl::cmasi::LoiterAction>();
+    auto loc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
+    surveyAction->setLocation(loc.release());
     surveyAction->getLocation()->setLatitude(lat);
     surveyAction->getLocation()->setLongitude(lon);
     surveyAction->getLocation()->setAltitude(entityState->getLocation()->getAltitude());
@@ -281,17 +277,17 @@ std::shared_ptr<afrl::cmasi::VehicleActionCommand> MultiVehicleWatchTaskService:
     surveyAction->setDuration(-1);
     surveyAction->setLoiterType(surveyType);
     surveyAction->getAssociatedTaskList().push_back(m_task->getTaskID());
-    caction->getVehicleActionList().push_back(surveyAction);
+    caction->getVehicleActionList().push_back(surveyAction.release());
 
     // steer all gimbals
     for (size_t g = 0; g < gimbalId.size(); g++)
     {
-        afrl::cmasi::GimbalStareAction* gimbalAction = new afrl::cmasi::GimbalStareAction;
+        auto gimbalAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalStareAction>();
         gimbalAction->setDuration(-1);
         gimbalAction->setPayloadID(gimbalId.at(g));
         gimbalAction->setStarepoint(m_watchedEntityStateLast->getLocation()->clone());
         gimbalAction->getAssociatedTaskList().push_back(m_task->getTaskID());
-        caction->getVehicleActionList().push_back(gimbalAction->clone());
+        caction->getVehicleActionList().push_back(gimbalAction.release());
     }
 
     return caction;

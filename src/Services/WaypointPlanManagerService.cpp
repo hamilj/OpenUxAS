@@ -179,11 +179,10 @@ bool
 WaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
     //COUT_FILE_LINE_MSG("getLmcpTypeName()" << receivedLmcpMessage->m_object->getLmcpTypeName() << "]")
-    std::shared_ptr<avtas::lmcp::Object> pMissionCommand_Out; // if a new mission command is generate it is saved in this variable
 
-    auto airVehicleState = std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object);
-    if (airVehicleState)
+    if (afrl::cmasi::isAirVehicleState(receivedLmcpMessage->m_object))
     {
+        auto airVehicleState = std::static_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object);
         if (airVehicleState->getID() == m_vehicleID)
         {
             if (m_isMoveToNextWaypoint)
@@ -204,7 +203,7 @@ WaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::com
             }
         }
     }
-    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object))
     {
         auto automationResponse = std::static_pointer_cast<afrl::cmasi::AutomationResponse> (receivedLmcpMessage->m_object);
         for (auto mission : automationResponse->getMissionCommandList())
@@ -225,7 +224,7 @@ WaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::com
     }
     else if (afrl::cmasi::isMissionCommand(receivedLmcpMessage->m_object))
     {
-        auto ptr_MissionCommand = std::shared_ptr<afrl::cmasi::MissionCommand>((afrl::cmasi::MissionCommand*)receivedLmcpMessage->m_object->clone());
+        std::shared_ptr<afrl::cmasi::MissionCommand> ptr_MissionCommand(static_cast<afrl::cmasi::MissionCommand*>(receivedLmcpMessage->m_object->clone()));
         if (ptr_MissionCommand->getVehicleID() == m_vehicleID)
         {
             //TODO:: initialize plan should intialize and get an std::string(n_Const::c_Constant_Strings::strGetPrepend_lmcp() + ":UXNATIVE:IncrementWaypoint")intial plan
@@ -252,10 +251,7 @@ WaypointPlanManagerService::processReceivedLmcpMessage(std::unique_ptr<uxas::com
     {
         //CERR_FILE_LINE_MSG("WARNING:: Unknown message encountered: [" << receivedLmcpMessage->m_object->getLmcpTypeName() << "]")
     }
-    if (pMissionCommand_Out)
-    {
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pMissionCommand_Out);
-    }
+
     return (false); // always false implies never terminating service from here
 };
 
@@ -275,7 +271,7 @@ bool WaypointPlanManagerService::isInitializePlan(std::shared_ptr<afrl::cmasi::M
             setTurnType(_turnType, ptr_MissionCommand);
 
             // setup a template for the mission commands
-            std::shared_ptr<afrl::cmasi::MissionCommand> missionCommandTemp(new afrl::cmasi::MissionCommand);
+            auto missionCommandTemp = std::make_shared<afrl::cmasi::MissionCommand>();
             missionCommandTemp->setVehicleID(m_vehicleID);
             missionCommandTemp->setStatus(afrl::cmasi::CommandStatusType::Approved);
             //missionCommandTemp->setStatus(afrl::cmasi::CommandStatusType::InProcess);
@@ -319,19 +315,16 @@ bool WaypointPlanManagerService::isInitializePlan(std::shared_ptr<afrl::cmasi::M
                         if (m_isAddLoiterToEndOfSegments)
                         {
                             afrl::cmasi::Waypoint* waypointCurrent = missionSegment_01->getWaypointList().back();
-                            afrl::cmasi::LoiterAction * pLoiterAction(new afrl::cmasi::LoiterAction());
+                            auto pLoiterAction = uxas::stduxas::make_unique<afrl::cmasi::LoiterAction>();
                             pLoiterAction->setRadius(m_loiterRadiusDefault_m);
                             pLoiterAction->setDuration(-1);
                             pLoiterAction->setAirspeed(waypointCurrent->getSpeed());
-                            afrl::cmasi::Location3D* pLocation3D = new afrl::cmasi::Location3D();
+                            auto pLocation3D = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
                             pLocation3D->setLatitude(waypointCurrent->getLatitude());
                             pLocation3D->setLongitude(waypointCurrent->getLongitude());
                             pLocation3D->setAltitude(waypointCurrent->getAltitude());
-                            pLoiterAction->setLocation(pLocation3D);
-                            pLocation3D = 0; //don't own
-                            waypointCurrent->getVehicleActionList().push_back(pLoiterAction);
-                            pLoiterAction = 0; //don't own it
-                            waypointCurrent = 0; //don't own it
+                            pLoiterAction->setLocation(pLocation3D.release());
+                            waypointCurrent->getVehicleActionList().push_back(pLoiterAction.release());
                         }
                         m_missionSegments.push_back(missionSegment_01);
                         missionSegment_01 = missionSegment_02;
@@ -357,7 +350,7 @@ bool WaypointPlanManagerService::isInitializePlan(std::shared_ptr<afrl::cmasi::M
 
                 if (m_isAddLoiterToEndOfMission)
                 {
-                    afrl::cmasi::LoiterAction * pLoiterAction(new afrl::cmasi::LoiterAction());
+                    auto pLoiterAction = uxas::stduxas::make_unique<afrl::cmasi::LoiterAction>();
                     pLoiterAction->setRadius(m_loiterRadiusDefault_m);
                     pLoiterAction->setDuration(-1);
                     if (m_isSetLastWaypointSpeedTo0)
@@ -367,24 +360,21 @@ bool WaypointPlanManagerService::isInitializePlan(std::shared_ptr<afrl::cmasi::M
                     {
                         pLoiterAction->setAirspeed(waypointLast->getSpeed());
                     }
-                    afrl::cmasi::Location3D* pLocation3D = new afrl::cmasi::Location3D();
+                    auto pLocation3D = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
                     pLocation3D->setLatitude(waypointLast->getLatitude());
                     pLocation3D->setLongitude(waypointLast->getLongitude());
                     pLocation3D->setAltitude(waypointLast->getAltitude());
-                    pLoiterAction->setLocation(pLocation3D);
-                    pLocation3D = 0; //don't own
-                    waypointLast->getVehicleActionList().push_back(pLoiterAction);
-                    pLoiterAction = 0; //don't own it
+                    pLoiterAction->setLocation(pLocation3D.release());
+                    waypointLast->getVehicleActionList().push_back(pLoiterAction.release());
                 }
 
                 if (m_gimbalPayloadId > 0)
                 {
                     // point the camera out in front of the vehicle
-                    auto pGimbalAngleAction = new afrl::cmasi::GimbalAngleAction();
+                    auto pGimbalAngleAction = uxas::stduxas::make_unique<afrl::cmasi::GimbalAngleAction>();
                     pGimbalAngleAction->setPayloadID(m_gimbalPayloadId);
                     pGimbalAngleAction->setElevation(-60.0);
-                    waypointLast->getVehicleActionList().push_back(pGimbalAngleAction);
-                    pGimbalAngleAction = nullptr;
+                    waypointLast->getVehicleActionList().push_back(pGimbalAngleAction.release());
                 }
 
                 if (m_isSetLastWaypointSpeedTo0)
@@ -397,7 +387,7 @@ bool WaypointPlanManagerService::isInitializePlan(std::shared_ptr<afrl::cmasi::M
                     waypointLast->setNextWaypoint(m_missionSegments.front()->getWaypointList().front()->getNumber());
                 }
 
-                waypointLast = 0; //don't own it
+                waypointLast = nullptr; //don't own it
             }
             else
             {
@@ -448,7 +438,7 @@ bool WaypointPlanManagerService::isGetCurrentSegment(const int64_t& waypointIdCu
     {
         COUT_INFO("New Segment: m_idMissionSegmentNew[" << segmentTemp->getCommandID() << "] m_idMissionSegmentOld[" << m_idMissionSegmentCurrent << "] waypointIdCurrent[" << waypointIdCurrent << "] First Segment Waypoint[" << segmentTemp->getWaypointList().front()->getNumber() << "] Last[" << segmentTemp->getWaypointList().back()->getNumber() << "]")
         m_idMissionSegmentCurrent = segmentTemp->getCommandID();
-        afrl::cmasi::MissionCommand* segmentCurrentLocal = {segmentTemp->clone()};
+        std::unique_ptr<afrl::cmasi::MissionCommand> segmentCurrentLocal(segmentTemp->clone());
         idMissionSegmentCurrent = segmentCurrentLocal->getCommandID();
 
         // don't "goto" the first waypoint in the segment as the first waypoint to go to
@@ -457,8 +447,7 @@ bool WaypointPlanManagerService::isGetCurrentSegment(const int64_t& waypointIdCu
         {
             segmentCurrentLocal->setFirstWaypoint(waypointIdCurrent);
         }
-        segmentCurrent.reset(segmentCurrentLocal);
-        segmentCurrentLocal = nullptr;
+        segmentCurrent.reset(segmentCurrentLocal.release());
         isSucceeded = true;
     }
 

@@ -186,7 +186,7 @@ namespace n_FrameworkLib
                         if (itWaypoint->dGetSegmentLength() > 0.0) {
                             dTotalDistance_m += itWaypoint->dGetSegmentLength();
                         } else if (itWaypoint != vwayGetWaypoints().begin()) {
-                            dTotalDistance_m += const_cast<CWaypoint*> (&*itWaypoint)->relativeDistance2D_m(static_cast<CPosition> (*itWaypointLast));
+                            dTotalDistance_m += itWaypoint->relativeDistance2D_m(static_cast<CPosition> (*itWaypointLast));
                         }
                         if (itWaypoint != vwayGetWaypoints().begin()) {
                             itWaypointLast++;

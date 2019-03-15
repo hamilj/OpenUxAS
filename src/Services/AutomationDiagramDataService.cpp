@@ -133,105 +133,60 @@ AutomationDiagramDataService::initialize()
 
 bool
 AutomationDiagramDataService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
-    std::stringstream sstrError;
-    bool isMessageProcessed(false);
-
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_idVsLastEntityState[entityState->getID()] = entityState;
-        isMessageProcessed = true;
     }
-    if (!isMessageProcessed)
+    else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object))
     {
-        auto uniqueAutomationRequest = std::dynamic_pointer_cast<uxas::messages::task::UniqueAutomationRequest>(receivedLmcpMessage->m_object);
-        if (uniqueAutomationRequest)
+        auto uniqueAutomationRequest = std::static_pointer_cast<uxas::messages::task::UniqueAutomationRequest>(receivedLmcpMessage->m_object);
+        m_idVsAutomationRequest[uniqueAutomationRequest->getRequestID()] = uniqueAutomationRequest;
+        m_idVsTimeAutomationRequest_ms[uniqueAutomationRequest->getRequestID()] = uxas::common::utilities::c_TimeUtilities::getTimeNow_ms(true);
+    }
+    else if (afrl::cmasi::isAbstractZone(receivedLmcpMessage->m_object))
+    {
+        auto abstractZone = std::static_pointer_cast<afrl::cmasi::AbstractZone>(receivedLmcpMessage->m_object);
+        m_idVsZone[abstractZone->getZoneID()] = abstractZone;
+    }
+    else  if (afrl::cmasi::isTask(receivedLmcpMessage->m_object))
+    {
+        auto task = std::static_pointer_cast<afrl::cmasi::Task>(receivedLmcpMessage->m_object);
+        m_idVsTask[task->getTaskID()] = task;
+    }
+    else if (afrl::cmasi::isOperatingRegion(receivedLmcpMessage->m_object))
+    {
+        auto operatingRegion = std::static_pointer_cast<afrl::cmasi::OperatingRegion>(receivedLmcpMessage->m_object);
+        m_idVsOperatingRegion[operatingRegion->getID()] = operatingRegion;
+    }
+    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object))
+    {
+        auto uniqueAutomationResponse = std::static_pointer_cast<uxas::messages::task::UniqueAutomationResponse>(receivedLmcpMessage->m_object);
+        auto itassigmentTime_ms = m_idVsTimeAutomationRequest_ms.find(uniqueAutomationResponse->getResponseID());
+        if (itassigmentTime_ms != m_idVsTimeAutomationRequest_ms.end())
         {
-            m_idVsAutomationRequest[uniqueAutomationRequest->getRequestID()] = uniqueAutomationRequest;
-            m_idVsTimeAutomationRequest_ms[uniqueAutomationRequest->getRequestID()] = uxas::common::utilities::c_TimeUtilities::getTimeNow_ms(true);
-            isMessageProcessed = true;
+            auto assigmentTime_ms = uxas::common::utilities::c_TimeUtilities::getTimeNow_ms(true) - itassigmentTime_ms->second;
+            COUT_INFO_MSG("INFO::Total ASSIGNMENT TIME [" << double(assigmentTime_ms) / 1000.0 << "]")
         }
+        ProcessUniqueAutomationResponse(uniqueAutomationResponse);
     }
-    if (!isMessageProcessed)
+    else if (afrl::impact::isAreaOfInterest(receivedLmcpMessage->m_object))
     {
-        auto abstractZone = std::dynamic_pointer_cast<afrl::cmasi::AbstractZone>(receivedLmcpMessage->m_object);
-        if (abstractZone)
-        {
-            m_idVsZone[abstractZone->getZoneID()] = abstractZone;
-            isMessageProcessed = true;
-        }
+        auto areaOfInterest = std::static_pointer_cast<afrl::impact::AreaOfInterest>(receivedLmcpMessage->m_object);
+        m_idVsAreaOfInterest[areaOfInterest->getAreaID()] = areaOfInterest;
     }
-    if (!isMessageProcessed)
+    else  if (afrl::impact::isLineOfInterest(receivedLmcpMessage->m_object))
     {
-        auto task = std::dynamic_pointer_cast<afrl::cmasi::Task>(receivedLmcpMessage->m_object);
-        if (task)
-        {
-            m_idVsTask[task->getTaskID()] = task;
-            isMessageProcessed = true;
-        }
+        auto lineOfInterest = std::static_pointer_cast<afrl::impact::LineOfInterest>(receivedLmcpMessage->m_object);
+        m_idVsLineOfInterest[lineOfInterest->getLineID()] = lineOfInterest;
     }
-    if (!isMessageProcessed)
+    else if (afrl::impact::isPointOfInterest(receivedLmcpMessage->m_object))
     {
-        auto operatingRegion = std::dynamic_pointer_cast<afrl::cmasi::OperatingRegion>(receivedLmcpMessage->m_object);
-        if (operatingRegion)
-        {
-            m_idVsOperatingRegion[operatingRegion->getID()] = operatingRegion;
-            isMessageProcessed = true;
-        }
+        auto pointOfInterest = std::static_pointer_cast<afrl::impact::PointOfInterest>(receivedLmcpMessage->m_object);
+        m_idVsPointOfInterest[pointOfInterest->getPointID()] = pointOfInterest;
     }
-    if (!isMessageProcessed)
-    {
-        auto uniqueAutomationResponse = std::dynamic_pointer_cast<uxas::messages::task::UniqueAutomationResponse>(receivedLmcpMessage->m_object);
-        if (uniqueAutomationResponse)
-        {
-            auto itassigmentTime_ms = m_idVsTimeAutomationRequest_ms.find(uniqueAutomationResponse->getResponseID());
-            if (itassigmentTime_ms != m_idVsTimeAutomationRequest_ms.end())
-            {
-                auto assigmentTime_ms = uxas::common::utilities::c_TimeUtilities::getTimeNow_ms(true) - itassigmentTime_ms->second;
-                COUT_INFO_MSG("INFO::Total ASSIGNMENT TIME [" << double(assigmentTime_ms) / 1000.0 << "]")
-            }
-            ProcessUniqueAutomationResponse(uniqueAutomationResponse);
-            isMessageProcessed = true;
-        }
-    }
-    if (!isMessageProcessed)
-    {
-        auto areaOfInterest = std::dynamic_pointer_cast<afrl::impact::AreaOfInterest>(receivedLmcpMessage->m_object);
-        if (areaOfInterest)
-        {
-            m_idVsAreaOfInterest[areaOfInterest->getAreaID()] = areaOfInterest;
-            isMessageProcessed = true;
-        }
-    }
-    if (!isMessageProcessed)
-    {
-        auto lineOfInterest = std::dynamic_pointer_cast<afrl::impact::LineOfInterest>(receivedLmcpMessage->m_object);
-        if (lineOfInterest)
-        {
-            m_idVsLineOfInterest[lineOfInterest->getLineID()] = lineOfInterest;
-            isMessageProcessed = true;
-        }
-    }
-    if (!isMessageProcessed)
-    {
-        auto pointOfInterest = std::dynamic_pointer_cast<afrl::impact::PointOfInterest>(receivedLmcpMessage->m_object);
-        if (pointOfInterest)
-        {
-            m_idVsPointOfInterest[pointOfInterest->getPointID()] = pointOfInterest;
-            isMessageProcessed = true;
-        }
-    }
-    if (!isMessageProcessed)
-    {
-        //        UXAS_LOG_WARN("WARNING::AutomationDiagramDataService::ProcessMessage: MessageType [" 
-        //                , receivedLmcpMessage->m_object->getFullLmcpTypeName() 
-        //                , "] serviceId[" , m_serviceId
-        //                , "] SourceEntityId[" , receivedLmcpMessage->m_attributes->getSourceEntityId()
-        //                , "] SourceServiceId[" , receivedLmcpMessage->m_attributes->getSourceServiceId() 
-        //                , "] not processed.");
-    }
+
     return (false); // always false implies never terminating service from here
 };
 
@@ -272,17 +227,16 @@ void AutomationDiagramDataService::ProcessUniqueAutomationResponse(std::shared_p
                     {
                         isFoundEntityState = true;
 
-                        auto entityState = new afrl::cmasi::EntityState;
-                        entityState->setID(entityId);
-                        entityState->setLocation(planningState->getPlanningPosition()->clone());
-                        entityState->setHeading(planningState->getPlanningHeading());
+                        afrl::cmasi::EntityState entityState;
+                        entityState.setID(entityId);
+                        entityState.setLocation(planningState->getPlanningPosition()->clone());
+                        entityState.setHeading(planningState->getPlanningHeading());
 
                         std::string fileName = savePath + "EntityState_Id_" + std::to_string(entityId) + ".xml";
                         std::ofstream file(fileName);
-                        file << entityState->toXML();
+                        file << entityState.toXML();
                         file.close();
 
-                        delete entityState;
                         break;
                     }
                 }

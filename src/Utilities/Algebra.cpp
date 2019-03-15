@@ -9,6 +9,10 @@
 
 #include "Algebra.h"
 
+#include "stdUniquePtr.h"
+
+#include <memory>
+
 
 
 #define COUT_INFO_MSG(MESSAGE) std::cout << "<>Algebra:" << MESSAGE << std::endl;std::cout.flush();
@@ -51,7 +55,7 @@ void parseTreeNode::deleteTree(void)
 parseTreeNode* parseTreeNode::searchAction(action_t actionIDIn)
 {
     (void)actionIDIn; // -Wunused-parameter
-    return NULL;
+    return nullptr;
 }
 
 int parseTreeNode::randomlyShuffleChildren(double shuffleProb)
@@ -111,9 +115,9 @@ void actionNode::deleteTree(void)
 parseTreeNode* actionNode::searchAction(action_t actionIDIn)
 {
     if (actionIDIn == this->actionNo)
-        return (parseTreeNode *)this;
+        return static_cast<parseTreeNode*>(this);
     else
-        return NULL;
+        return nullptr;
 }
 
 int actionNode::randomlyShuffleChildren(double shuffleProb)
@@ -156,7 +160,7 @@ parseTreeNode* operatorNode::getNodePointer(int nodeNo)
             || (nodeNo < 0)
             || (nodeNo > (signed int) this->nodePointers.size()))
     {
-        return NULL;
+        return nullptr;
     }
 
     return this->nodePointers[nodeNo];
@@ -284,10 +288,10 @@ parseTreeNode* operatorNode::searchAction(action_t actionIDIn)
     for (unsigned int i = 0; i < this->nodePointers.size(); i++)
     {
         parseTreeNode * resultNode = this->nodePointers[i]->searchAction(actionIDIn);
-        if (resultNode != NULL)
+        if (resultNode)
             return resultNode;
     }
-    return NULL;
+    return nullptr;
 
 }
 
@@ -345,7 +349,7 @@ bool CAlgebraBase::checkFormulaSyntax(const std::string testString)
 parseTreeNode *CAlgebraBase::parseFormula(const std::string formulaIn)
 {
 
-    parseTreeNode *parseTreeRoot;
+    std::unique_ptr<parseTreeNode> parseTreeRoot = nullptr;
 
     operatorType_t operatorType = OP_UNDEFINED;
     std::string formula = formulaIn;
@@ -415,11 +419,10 @@ parseTreeNode *CAlgebraBase::parseFormula(const std::string formulaIn)
         if (IDfound == false)
         {
             std::cout << "Algebra ERROR: Objective [" << actionID << "] ID NOT FOUND" << std::endl;
-            return NULL;
+            return nullptr;
         }
 
-        actionNode *actionNodeTmp = new actionNode(actionID);
-        parseTreeRoot = (parseTreeNode *) actionNodeTmp;
+        parseTreeRoot = uxas::stduxas::make_unique<actionNode>(actionID);
 #ifdef PRINT_ALGEBRA_FULL
         COUT_FILE_LINE_MSG("actionNodeTmp: [" << actionNodeTmp << " - " << formula.c_str() << "]");
 #endif        //#ifdef PRINT_ALGEBRA_FULL
@@ -428,7 +431,7 @@ parseTreeNode *CAlgebraBase::parseFormula(const std::string formulaIn)
     {
         // Handle the case when the subformula is a binding operator
 
-        operatorNode *operatorNodeTmp = new operatorNode;
+        auto operatorNodeTmp = uxas::stduxas::make_unique<operatorNode>();
 
         operatorNodeTmp->setOperatorType(operatorType);
 
@@ -488,15 +491,14 @@ parseTreeNode *CAlgebraBase::parseFormula(const std::string formulaIn)
         for (int i = 0; i < operatorNodeTmp->getNumNodes(); i++)
         {
             parseTreeNode *childrenNode = operatorNodeTmp->getNodePointer(i);
-            childrenNode->parent = operatorNodeTmp;
+            childrenNode->parent = operatorNodeTmp.get();
         }
 
         // Return the address of this node
-        parseTreeRoot = (parseTreeNode *) operatorNodeTmp;
-
+        parseTreeRoot = std::move(operatorNodeTmp);
     }
 
-    return parseTreeRoot;
+    return parseTreeRoot.release();
 }
 
 void CAlgebraBase::initPredsRec(parseTreeNode *ptRoot)
@@ -506,7 +508,7 @@ void CAlgebraBase::initPredsRec(parseTreeNode *ptRoot)
     {
         // Get all the children actions of all the children nodes and store in the data structure below
         std::vector <v_action_t> childrenActionsChildren;
-        operatorNode *ptRootOpr = (operatorNode *) ptRoot;
+        auto ptRootOpr = static_cast<operatorNode *>(ptRoot);
         if (ptRootOpr->getOperatorType() == OP_SEQUENTIAL)
         {
             for (int i = 0; i < ptRootOpr->getNumNodes(); i++)
@@ -581,7 +583,7 @@ int CAlgebraBase::randomlyShuffleTree(double shuffleProb)
 
 CAlgebra::CAlgebra(void)
 {
-    parseTreeRoot = NULL;
+    parseTreeRoot = nullptr;
     return;
 }
 
@@ -594,7 +596,7 @@ bool CAlgebra::initAtomicObjectives(const v_action_t &atomicObjectiveIDs)
     this->preds.clear();
     if (this->parseTreeRoot)
         this->parseTreeRoot->deleteTree();
-    this->parseTreeRoot = NULL;
+    this->parseTreeRoot = nullptr;
 
     // Initialize the atomic objectives
     if (atomicObjectiveIDs.size() == 0)
@@ -614,9 +616,9 @@ bool CAlgebra::initAlgebraString(const std::string stringIn)
 
     // Parse the algebra std::string
     this->parseTreeRoot = parseFormula(stringIn);
-    if (this->parseTreeRoot == NULL)
+    if (!this->parseTreeRoot)
         return false;
-    this->parseTreeRoot->parent = NULL;
+    this->parseTreeRoot->parent = nullptr;
 
 
     // Initialize the predecessors 

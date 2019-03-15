@@ -97,9 +97,9 @@ public:
         return (s_string);
     };
 
-    static ServiceBase*
+    static std::unique_ptr<ServiceBase>
     create(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient) {
-        return new TaskManagerService(pLmcpObjectNetworkClient);
+        return uxas::stduxas::make_unique<TaskManagerService>(pLmcpObjectNetworkClient);
     };
 
     explicit TaskManagerService(std::shared_ptr<uxas::communications::LmcpObjectNetworkClient> pLmcpObjectNetworkClient);

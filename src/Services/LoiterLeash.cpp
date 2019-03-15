@@ -88,28 +88,26 @@ bool LoiterLeash::configure(const pugi::xml_node& ndComponent)
 
 bool LoiterLeash::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
-    std::shared_ptr<avtas::lmcp::Object> messageObject = receivedLmcpMessage->m_object;
-    auto entityConfiguration = std::dynamic_pointer_cast<afrl::cmasi::EntityConfiguration>(messageObject);
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(messageObject);
-
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         if (entityState->getID() == m_vehicleID)
         {
             m_lastEntityState = entityState;
         }
     }
-    else if (entityConfiguration)
+    else if (afrl::cmasi::isEntityConfiguration(receivedLmcpMessage->m_object))
     {
+        auto entityConfiguration = std::static_pointer_cast<afrl::cmasi::EntityConfiguration>(receivedLmcpMessage->m_object);
         if (entityConfiguration->getID() == m_vehicleID)
         {
             // add turn rate constraints ????
             m_entityConfiguration = entityConfiguration;
         }
     }
-    else if (uxas::messages::route::isRoutePlanResponse(messageObject))
+    else if (uxas::messages::route::isRoutePlanResponse(receivedLmcpMessage->m_object))
     {
-        auto routePlanResponse = std::static_pointer_cast<uxas::messages::route::RoutePlanResponse>(messageObject);
+        auto routePlanResponse = std::static_pointer_cast<uxas::messages::route::RoutePlanResponse>(receivedLmcpMessage->m_object);
         if(m_nextVehicleActionCommand && (routePlanResponse->getResponseID() == m_currentRouteId) && (!routePlanResponse->getRouteResponses().empty()))
         {
             //COUT_FILE_LINE_MSG("routePlanResponse->getRouteResponses().front()->getWaypoints().size()[" << routePlanResponse->getRouteResponses().front()->getWaypoints().size() << "]")
@@ -121,9 +119,9 @@ bool LoiterLeash::processReceivedLmcpMessage(std::unique_ptr<uxas::communication
         }
         
     }
-    else if (uxas::messages::uxnative::isSafeHeadingAction(messageObject))
+    else if (uxas::messages::uxnative::isSafeHeadingAction(receivedLmcpMessage->m_object))
     {
-        auto safeHeadingAction = std::static_pointer_cast<uxas::messages::uxnative::SafeHeadingAction>(messageObject);
+        auto safeHeadingAction = std::static_pointer_cast<uxas::messages::uxnative::SafeHeadingAction>(receivedLmcpMessage->m_object);
         if ((safeHeadingAction->getVehicleID() == m_vehicleID) && (m_lastEntityState) && (m_entityConfiguration))
         {
             // convert vehicle position to linear coordinates
@@ -155,8 +153,8 @@ bool LoiterLeash::processReceivedLmcpMessage(std::unique_ptr<uxas::communication
                 cUnitConversions.ConvertNorthEast_mToLatLong_deg(loiterCenterNorth_m, loiterCenterEast_m, loiterCenterLatitude_deg, loiterCenterLongitude_deg);
             }
 
-            afrl::cmasi::LoiterAction* pLoiterAction = new afrl::cmasi::LoiterAction();
-            afrl::cmasi::Location3D* loiterLoc = new afrl::cmasi::Location3D();
+            auto pLoiterAction = uxas::stduxas::make_unique<afrl::cmasi::LoiterAction>();
+            auto loiterLoc = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
             float commandedAltitude_m{m_entityConfiguration->getNominalAltitude()};
             if(safeHeadingAction->getUseAltitude())
             {
@@ -171,8 +169,7 @@ bool LoiterLeash::processReceivedLmcpMessage(std::unique_ptr<uxas::communication
             }
             loiterLoc->setLatitude(loiterCenterLatitude_deg);
             loiterLoc->setLongitude(loiterCenterLongitude_deg);
-            pLoiterAction->setLocation(loiterLoc);
-            loiterLoc = 0; // gave up ownership
+            pLoiterAction->setLocation(loiterLoc.release());
             
             if(safeHeadingAction->getUseSpeed())
             {
@@ -192,8 +189,7 @@ bool LoiterLeash::processReceivedLmcpMessage(std::unique_ptr<uxas::communication
 
             auto vehicleActionCommand = std::make_shared<afrl::cmasi::VehicleActionCommand>();
             vehicleActionCommand->setVehicleID(m_lastEntityState->getID());
-            vehicleActionCommand->getVehicleActionList().push_back(pLoiterAction);
-            pLoiterAction = 0;
+            vehicleActionCommand->getVehicleActionList().push_back(pLoiterAction.release());
             
             m_nextVehicleActionCommand = vehicleActionCommand;
             
@@ -216,20 +212,18 @@ bool LoiterLeash::processReceivedLmcpMessage(std::unique_ptr<uxas::communication
             routePlanRequest->setIsCostOnlyRequest(false);
             routePlanRequest->setOperatingRegion(safeHeadingAction->getOperatingRegion());
             routePlanRequest->setVehicleID(m_lastEntityState->getID());
-            auto routeConstraints = new uxas::messages::route::RouteConstraints;
+            auto routeConstraints = uxas::stduxas::make_unique<uxas::messages::route::RouteConstraints>();
             routeConstraints->setRouteID(m_currentRouteId);
             routeConstraints->setStartLocation(m_lastEntityState->getLocation()->clone());
             routeConstraints->setUseStartHeading(false);
             
-            auto endLocation = new afrl::cmasi::Location3D;
+            auto endLocation = uxas::stduxas::make_unique<afrl::cmasi::Location3D>();
             endLocation->setLatitude(safePointLatitude_deg);
             endLocation->setLongitude(safePointLongitude_deg);
             endLocation->setAltitude(commandedAltitude_m);
-            routeConstraints->setEndLocation(endLocation);
-            endLocation = nullptr;   //just gave up ownership   
+            routeConstraints->setEndLocation(endLocation.release());
             routeConstraints->setUseEndHeading(false);
-            routePlanRequest->getRouteRequests().push_back(routeConstraints);
-            routeConstraints = nullptr; //just gave up ownership                                
+            routePlanRequest->getRouteRequests().push_back(routeConstraints.release());
             
             
             m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(routePlanRequest);

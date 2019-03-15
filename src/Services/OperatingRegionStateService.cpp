@@ -50,7 +50,7 @@ OperatingRegionStateService::configure(const pugi::xml_node& serviceXmlNode)
     m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::cmasi::RemoveZones::Subscription);
     m_pLmcpObjectNetworkClient->addSubscriptionAddress(afrl::impact::WaterZone::Subscription);
 
-    m_region.reset(new afrl::cmasi::OperatingRegion);
+    m_region = std::make_shared<afrl::cmasi::OperatingRegion>();
     m_region->setID(0); // YEAR2: simply match all requests from agent
 
     return true;
@@ -61,7 +61,7 @@ OperatingRegionStateService::processReceivedLmcpMessage(std::unique_ptr<uxas::co
 {
     bool addZone = false;
     bool removeZone = false;
-    if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object.get()))
+    if (afrl::cmasi::isKeepInZone(receivedLmcpMessage->m_object))
     {
         auto kzone = std::static_pointer_cast<afrl::cmasi::KeepInZone>(receivedLmcpMessage->m_object);
 
@@ -96,7 +96,7 @@ OperatingRegionStateService::processReceivedLmcpMessage(std::unique_ptr<uxas::co
 
         }
     }
-    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isKeepOutZone(receivedLmcpMessage->m_object))
     {
         auto kzone = std::static_pointer_cast<afrl::cmasi::KeepOutZone>(receivedLmcpMessage->m_object);
 
@@ -132,12 +132,12 @@ OperatingRegionStateService::processReceivedLmcpMessage(std::unique_ptr<uxas::co
             IMPACT_INFORM("Removed Keep In Zone ", kzone->getZoneID(), " ", kzone->getLabel());
         }
     }
-    else if (afrl::impact::isWaterZone(receivedLmcpMessage->m_object.get()))
+    else if (afrl::impact::isWaterZone(receivedLmcpMessage->m_object))
     {
         auto wzone = std::static_pointer_cast<afrl::impact::WaterZone>(receivedLmcpMessage->m_object);
         IMPACT_INFORM("Recieved Water Zone ", wzone->getZoneID(), " ", wzone->getLabel());
     }
-    else if (afrl::cmasi::isRemoveZones(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isRemoveZones(receivedLmcpMessage->m_object))
     {
         auto rzones = std::static_pointer_cast<afrl::cmasi::RemoveZones>(receivedLmcpMessage->m_object);
         removeZone = true; //assume
@@ -163,8 +163,7 @@ OperatingRegionStateService::processReceivedLmcpMessage(std::unique_ptr<uxas::co
     }
 
     if (addZone || removeZone) {
-        auto sendMsg = std::static_pointer_cast<avtas::lmcp::Object>(m_region);
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(sendMsg);
+        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_region);
         IMPACT_INFORM("Working Operating Region KIZs ", m_region->getKeepInAreas().size(), " KOZs ", m_region->getKeepOutAreas().size());
     }
 

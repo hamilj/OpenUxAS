@@ -76,7 +76,7 @@ void LoiterTaskService::buildTaskPlanOptions() {
 
 
 
-    auto taskOption = new uxas::messages::task::TaskOption;
+    auto taskOption = std::make_shared<uxas::messages::task::TaskOption>();
     taskOption->setTaskID(m_loiterTask->getTaskID());
     taskOption->setOptionID(optionId);
     taskOption->getEligibleEntities() = m_loiterTask->getEligibleEntities();
@@ -84,10 +84,8 @@ void LoiterTaskService::buildTaskPlanOptions() {
     //taskOption->setStartHeading(m_watchedEntityStateLast->getHeading());
     taskOption->setEndLocation(m_loiterTask->getDesiredAction()->getLocation()->clone());
     //taskOption->setEndHeading(m_watchedEntityStateLast->getHeading());
-    auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-    m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(pTaskOption)));
-    m_taskPlanOptions->getOptions().push_back(taskOption);
-    taskOption = nullptr; //just gave up ownership
+    m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(taskOption)));
+    m_taskPlanOptions->getOptions().push_back(taskOption->clone());
 
     std::string compositionString("+(");
 
@@ -101,8 +99,7 @@ void LoiterTaskService::buildTaskPlanOptions() {
 
     m_taskPlanOptions->setComposition(compositionString);
 
-    auto newResponse = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(newResponse);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
 };
 
 bool LoiterTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr<uxas::messages::task::TaskImplementationResponse>& taskImplementationResponse,
@@ -113,12 +110,12 @@ bool LoiterTaskService::isProcessTaskImplementationRouteResponse(std::shared_ptr
     (void)route; // -Wunused-parameter
 
     if (m_loiterTask->getDesiredAction()) {
-        auto loiterAction = m_loiterTask->getDesiredAction()->clone();
+        std::unique_ptr<afrl::cmasi::LoiterAction> loiterAction(m_loiterTask->getDesiredAction()->clone());
         if (m_entityStates.find(taskImplementationResponse.get()->getVehicleID()) != m_entityStates.end()) {
             auto state = m_entityStates.find(taskImplementationResponse.get()->getVehicleID())->second;
 
             loiterAction->getLocation()->setAltitude(state->getLocation()->getAltitude());
-            taskImplementationResponse.get()->getTaskWaypoints().back()->getVehicleActionList().push_back(loiterAction);
+            taskImplementationResponse.get()->getTaskWaypoints().back()->getVehicleActionList().push_back(loiterAction.release());
         }
     }
 

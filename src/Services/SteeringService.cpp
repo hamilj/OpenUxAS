@@ -115,7 +115,7 @@ afrl::cmasi::Waypoint* getWaypoint(const std::unique_ptr<afrl::cmasi::MissionCom
 
 bool isOrbitType(afrl::cmasi::Waypoint* pWaypoint)
 {
-    assert(pWaypoint != nullptr);
+    assert(pWaypoint);
 
     std::vector<afrl::cmasi::VehicleAction*>& actions = pWaypoint->getVehicleActionList();
 
@@ -128,7 +128,7 @@ bool isOrbitType(afrl::cmasi::Waypoint* pWaypoint)
 
 afrl::cmasi::LoiterAction* getAssociatedLoiter(afrl::cmasi::Waypoint* pWaypoint)
 {
-    assert(pWaypoint != nullptr);
+    assert(pWaypoint);
 
     // NOTE: returns first loiter action if more than one exist in the vehicle action list
     std::vector<afrl::cmasi::VehicleAction*>& actions = pWaypoint->getVehicleActionList();
@@ -146,7 +146,7 @@ afrl::cmasi::LoiterAction* getAssociatedLoiter(afrl::cmasi::Waypoint* pWaypoint)
 
 VisiLibity::Point convertLocation3DToNorthEast_m(const afrl::cmasi::Location3D* pLocation, uxas::common::utilities::FlatEarth& flatEarth)
 {
-    assert(pLocation != nullptr);
+    assert(pLocation);
 
     double north_m, east_m;
     flatEarth.ConvertLatLong_degToNorthEast_m(pLocation->getLatitude(), pLocation->getLongitude(), north_m, east_m);
@@ -156,16 +156,16 @@ VisiLibity::Point convertLocation3DToNorthEast_m(const afrl::cmasi::Location3D* 
 
 VisiLibity::Point getNorthEast_m(afrl::cmasi::Waypoint* pWaypoint, uxas::common::utilities::FlatEarth& flatEarth)
 {
-    assert(pWaypoint != nullptr);
+    assert(pWaypoint);
 
     if (isOrbitType(pWaypoint))
     {
         afrl::cmasi::LoiterAction* pLoiterAction = getAssociatedLoiter(pWaypoint);
-        assert(pLoiterAction != nullptr);
+        assert(pLoiterAction);
 
         const afrl::cmasi::Location3D* pLocation = pLoiterAction->getLocation();
 
-        if (pLocation != nullptr) // shouldn't ever happen; fallback to waypoint's location
+        if (pLocation) // shouldn't ever happen; fallback to waypoint's location
         {
             return convertLocation3DToNorthEast_m(pLocation, flatEarth);
         }
@@ -181,10 +181,10 @@ bool CheckLineAcceptance(VisiLibity::Point position, VisiLibity::Point previous,
 
 bool CheckOrbitAcceptance(afrl::cmasi::Waypoint* pWaypoint, int64_t startTimestamp_ms)
 {
-    assert(pWaypoint != nullptr);
+    assert(pWaypoint);
 
     const afrl::cmasi::LoiterAction* pLoiterAction = getAssociatedLoiter(pWaypoint);
-    assert(pLoiterAction != nullptr);
+    assert(pLoiterAction);
 
     const int64_t loiterDuration_ms = pLoiterAction->getDuration();
 
@@ -286,25 +286,28 @@ bool SteeringService::configure(const pugi::xml_node& ndComponent)
 
 bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
-    auto avconfig = std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(receivedLmcpMessage->m_object);
-    auto pState = std::dynamic_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object);
-    if(avconfig && avconfig->getID() == m_vehicleID)
+    if(afrl::cmasi::isAirVehicleConfiguration(receivedLmcpMessage->m_object))
     {
-        // update loiter radius and lead-ahead distance based on configuration
-        double g = n_Const::c_Convert::dGravity_mps2();
-        double V = avconfig->getNominalSpeed();
-        double phi = fabs(avconfig->getNominalFlightProfile()->getMaxBankAngle());
-        if(phi < 1.0) phi = 1.0; // bounded away from 0
-        double Rmin = V*V/g/tan(phi*n_Const::c_Convert::dDegreesToRadians());
-        m_loiterRadius_m = 1.2*Rmin; // 20% bigger than min-turn radius
-        m_leadAheadDistance_m = 3.0*m_loiterRadius_m;
-        
-        if(m_acceptanceTimeToArrive_ms > 0)
+        auto avconfig = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(receivedLmcpMessage->m_object);
+
+        if (avconfig->getID() == m_vehicleID)
         {
-            m_acceptanceDistance = m_acceptanceTimeToArrive_ms/1000.0*V;
+            // update loiter radius and lead-ahead distance based on configuration
+            double g = n_Const::c_Convert::dGravity_mps2();
+            double V = avconfig->getNominalSpeed();
+            double phi = fabs(avconfig->getNominalFlightProfile()->getMaxBankAngle());
+            if(phi < 1.0) phi = 1.0; // bounded away from 0
+            double Rmin = V*V/g/tan(phi*n_Const::c_Convert::dDegreesToRadians());
+            m_loiterRadius_m = 1.2*Rmin; // 20% bigger than min-turn radius
+            m_leadAheadDistance_m = 3.0*m_loiterRadius_m;
+
+            if(m_acceptanceTimeToArrive_ms > 0)
+            {
+                m_acceptanceDistance = m_acceptanceTimeToArrive_ms/1000.0*V;
+            }
         }
     }
-    else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isUniqueAutomationRequest(receivedLmcpMessage->m_object))
     {
         const auto req = std::static_pointer_cast<uxas::messages::task::UniqueAutomationRequest>(receivedLmcpMessage->m_object);
         if(!req->getSandBoxRequest() && req->getOriginalRequest())
@@ -316,7 +319,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             m_requestToRegionMap.erase(req->getRequestID());
         }
     }
-    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::task::isUniqueAutomationResponse(receivedLmcpMessage->m_object))
     {
         const auto resp = std::static_pointer_cast<uxas::messages::task::UniqueAutomationResponse>(receivedLmcpMessage->m_object);
         if(resp->getOriginalResponse())
@@ -337,7 +340,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
                     m_operatingRegion = regionid->second;
                 }
             }
-            
+
             // clear out map
             if(regionid != m_requestToRegionMap.cend())
             {
@@ -345,7 +348,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             }
         }
     }
-    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object))
     {
         const auto pResponse = std::static_pointer_cast<afrl::cmasi::AutomationResponse>(receivedLmcpMessage->m_object);
         const std::vector<afrl::cmasi::MissionCommand*> missionCommands = pResponse->getMissionCommandList();
@@ -360,7 +363,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             reset(*it_mission);
         }
     }
-    else if (afrl::cmasi::isMissionCommand(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isMissionCommand(receivedLmcpMessage->m_object))
     {
         const auto pMission = std::static_pointer_cast<afrl::cmasi::MissionCommand>(receivedLmcpMessage->m_object);
 
@@ -371,7 +374,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             reset(pMission.get());
         }
     }
-    else if (uxas::messages::uxnative::isSpeedOverrideAction(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::uxnative::isSpeedOverrideAction(receivedLmcpMessage->m_object))
     {
         auto speed_override = std::static_pointer_cast<uxas::messages::uxnative::SpeedOverrideAction>(receivedLmcpMessage->m_object);
         if(speed_override->getVehicleID() == m_vehicleID)
@@ -380,205 +383,210 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
             m_overrideSpeed = speed_override->getSpeed();
         }
     }
-    else if (afrl::cmasi::isVehicleActionCommand(receivedLmcpMessage->m_object.get()))
+    else if (afrl::cmasi::isVehicleActionCommand(receivedLmcpMessage->m_object))
     {
         auto vehicleActionCommand = std::static_pointer_cast<afrl::cmasi::VehicleActionCommand>(receivedLmcpMessage->m_object);
         if(vehicleActionCommand->getVehicleID() == m_vehicleID)
         {
             for(auto action : vehicleActionCommand->getVehicleActionList())
             {
-                auto hsa_action = dynamic_cast<afrl::cmasi::FlightDirectorAction*>(action);
-                if(hsa_action)
+                if (afrl::cmasi::isFlightDirectorAction(action))
                 {
                     m_isHeadingControlledByTask = true;
+                    break;
                 }
             }
         }
     }
-    else if (pState && pState->getID() == m_vehicleID) // aliased version of AirVehicleState
-    {   
-        afrl::cmasi::Waypoint* pCurrentWp = getWaypoint(m_pMissionCmd, m_currentWpID);
+    else if (afrl::cmasi::isAirVehicleState(receivedLmcpMessage->m_object)) // aliased version of AirVehicleState
+    {
+        auto pState = std::static_pointer_cast<afrl::cmasi::AirVehicleState>(receivedLmcpMessage->m_object);
 
-        if (pCurrentWp != nullptr)
+        if (pState->getID() == m_vehicleID)
         {
-            const afrl::cmasi::Location3D* pLocation = pState->getLocation();
-            uxas::common::utilities::FlatEarth flatEarth;
+            afrl::cmasi::Waypoint* pCurrentWp = getWaypoint(m_pMissionCmd, m_currentWpID);
 
-            // TODO: don't need to calculate at linearization point and can remove identity operations from subsequent calculations
-            VisiLibity::Point position_m = convertLocation3DToNorthEast_m(pLocation, flatEarth);
-            VisiLibity::Point current_m = getNorthEast_m(pCurrentWp, flatEarth);
-            VisiLibity::Point previous_m = position_m;
-            if (m_previousLocation)
-                previous_m = convertLocation3DToNorthEast_m(m_previousLocation.get(), flatEarth);
-
-            int64_t nextWpID = pCurrentWp->getNextWaypoint();
-            afrl::cmasi::Waypoint* pNextWp = getWaypoint(m_pMissionCmd, nextWpID);
-    
-            // waypoint acceptance check
-            std::unordered_set<int64_t> acceptedWaypoints;
-            while (!m_isLastWaypoint &&
-                   ((!isOrbitType(pCurrentWp) && (CheckLineAcceptance(position_m, previous_m, current_m) || withinDistance(current_m, previous_m, DISTANCE_TRESHOLD_M) || CheckProximity(position_m, current_m, pCurrentWp))) ||
-                    (isOrbitType(pCurrentWp) && CheckOrbitAcceptance(pCurrentWp, m_currentStartTimestamp_ms))))
+            if (pCurrentWp)
             {
-                UXAS_LOG_DEBUGGING(s_typeName(), "::processReceivedLmcpMessage - Vehicle Id [", m_vehicleID, "] accepted Waypoint ", m_currentWpID);
+                const afrl::cmasi::Location3D* pLocation = pState->getLocation();
+                uxas::common::utilities::FlatEarth flatEarth;
 
-                // don't allow persisent cycling through loop of waypoints that are clustered together
-                // if the newly accepted waypoint has already been accepted during this check, then
-                // a cycle has been detected and there's nothing more to be accomplished
-                if (acceptedWaypoints.find(m_currentWpID) != acceptedWaypoints.end())
+                // TODO: don't need to calculate at linearization point and can remove identity operations from subsequent calculations
+                VisiLibity::Point position_m = convertLocation3DToNorthEast_m(pLocation, flatEarth);
+                VisiLibity::Point current_m = getNorthEast_m(pCurrentWp, flatEarth);
+                VisiLibity::Point previous_m = position_m;
+                if (m_previousLocation)
+                    previous_m = convertLocation3DToNorthEast_m(m_previousLocation.get(), flatEarth);
+
+                int64_t nextWpID = pCurrentWp->getNextWaypoint();
+                afrl::cmasi::Waypoint* pNextWp = getWaypoint(m_pMissionCmd, nextWpID);
+
+                // waypoint acceptance check
+                std::unordered_set<int64_t> acceptedWaypoints;
+                while (!m_isLastWaypoint &&
+                    ((!isOrbitType(pCurrentWp) && (CheckLineAcceptance(position_m, previous_m, current_m) || withinDistance(current_m, previous_m, DISTANCE_TRESHOLD_M) || CheckProximity(position_m, current_m, pCurrentWp))) ||
+                        (isOrbitType(pCurrentWp) && CheckOrbitAcceptance(pCurrentWp, m_currentStartTimestamp_ms))))
                 {
-                    m_isLastWaypoint = true;
-                    break;
+                    UXAS_LOG_DEBUGGING(s_typeName(), "::processReceivedLmcpMessage - Vehicle Id [", m_vehicleID, "] accepted Waypoint ", m_currentWpID);
+
+                    // don't allow persisent cycling through loop of waypoints that are clustered together
+                    // if the newly accepted waypoint has already been accepted during this check, then
+                    // a cycle has been detected and there's nothing more to be accomplished
+                    if (acceptedWaypoints.find(m_currentWpID) != acceptedWaypoints.end())
+                    {
+                        m_isLastWaypoint = true;
+                        break;
+                    }
+                    acceptedWaypoints.insert(m_currentWpID);
+
+                    m_previousLocation.reset(pCurrentWp->clone());
+                    previous_m = current_m;
+
+                    if (pNextWp && (nextWpID != m_currentWpID))
+                    {
+                        m_currentWpID = nextWpID;
+                        pCurrentWp = pNextWp;
+                        m_currentStartTimestamp_ms = uxas::common::Time::getInstance().getUtcTimeSinceEpoch_ms();
+
+                        current_m = getNorthEast_m(pCurrentWp, flatEarth);
+
+                        nextWpID = pCurrentWp->getNextWaypoint();
+                        pNextWp = getWaypoint(m_pMissionCmd, nextWpID);
+                    }
+                    else
+                    {
+                        m_isLastWaypoint = true;
+                    }
                 }
-                acceptedWaypoints.insert(m_currentWpID);
 
-                m_previousLocation.reset(pCurrentWp->clone());
-                previous_m = current_m;
+                // const double course_rad = n_Const::c_Convert::toRadians(static_cast<double>(pState->getCourse()));
+                // const double groundSpeed_mps = static_cast<double>(pState->getGroundspeed());
 
-                if ((pNextWp != nullptr) && (nextWpID != m_currentWpID))
+                double desiredHeading_deg;
+                float speed_mps;
+                afrl::cmasi::SpeedType::SpeedType speedType;
+
+                if (isOrbitType(pCurrentWp))
                 {
-                    m_currentWpID = nextWpID;
-                    pCurrentWp = pNextWp;
-                    m_currentStartTimestamp_ms = uxas::common::Time::getInstance().getUtcTimeSinceEpoch_ms();
+                    afrl::cmasi::LoiterAction* pLoiterAction = getAssociatedLoiter(pCurrentWp);
+                    assert(pLoiterAction);
 
-                    current_m = getNorthEast_m(pCurrentWp, flatEarth);
+                    const VisiLibity::Point orbitRelativePosition_m = position_m - current_m;
+                    const double gamma_rad = atan2(orbitRelativePosition_m.y(), orbitRelativePosition_m.x()); // angular position of uav
 
-                    nextWpID = pCurrentWp->getNextWaypoint();
-                    pNextWp = getWaypoint(m_pMissionCmd, nextWpID);
+                    const double d_m = mag(orbitRelativePosition_m); // radial distance of uav
+
+                    const double r_m = pLoiterAction->getRadius();
+                    // const double beta = m_kOrbit / (r_m * (1 + pow(m_kOrbit * (d_m - r_m) / r_m, 2.0)));
+
+                    double desiredCourse_rad;
+                    // const double commandedCourse_deg;
+
+                    if (pLoiterAction->getDirection() == afrl::cmasi::LoiterDirection::Clockwise)
+                    {
+                        desiredCourse_rad = gamma_rad + n_Const::c_Convert::dPiO2() + atan(m_kOrbit * (d_m - r_m) / r_m); // Nelson et al., Eq. 17 in clockwise
+                    }
+                    else // CounterClockwise
+                    {
+                        // TODO: handle VehicleDefault, for now treating as CounterClockwise
+                        desiredCourse_rad = gamma_rad - n_Const::c_Convert::dPiO2() - atan(m_kOrbit * (d_m - r_m) / r_m); // Nelson et al., Eq. 17
+
+                        // TODO: discretized version of Eq. 23, for now using Eq. 17 and assuming autopilot can achieve
+                        // commandedCourse_deg = n_Const::c_Convert::toDegrees( course_rad
+                        //     + (groundspeed_mps * sin(course_rad - gamma_rad) / (m_alpha * d_m))
+                        //     - (beta * groundspeed_mps * cos(course_rad - gamma_rad) / m_alpha)
+                        //     - (m_kappaOrbit * sat((course_rad - desiredCourse_rad) / m_epsilonOrbit) / m_alpha)); // Nelson et al., Eq. 23
+                    }
+
+                    desiredHeading_deg = n_Const::c_Convert::dNormalizeAngleDeg(n_Const::c_Convert::toDegrees(desiredCourse_rad));
+                    speed_mps = pLoiterAction->getAirspeed();
+                    speedType = afrl::cmasi::SpeedType::Airspeed;
                 }
-                else
+                else // line type
                 {
-                    m_isLastWaypoint = true;
+                    // handle last waypoint (self-looping or invalid next waypoint) by always considering self on path
+                    if (m_isLastWaypoint)
+                    {
+                        previous_m = position_m;
+                    }
+
+                    const VisiLibity::Point path_m = current_m - previous_m;
+                    const double pathAngle_rad = atan2(path_m.y(), path_m.x());
+                    // const double pathRelativeCourse_rad = n_Const::c_Convert::dNormalizeAngleRad(course_rad - pathAngle_rad);
+
+                    // path's normal is in clockwise direction (matches local frame's handedness)
+                    // NOTE: rotation sign opposite as our point is in NE frame (XY)
+                    const VisiLibity::Point pathNormal_m = VisiLibity::Point::rotate(VisiLibity::Point::normalize(path_m), n_Const::c_Convert::dPiO2());
+
+                    // NOTE: positive distance corresponds to normal's side (clockwise)
+                    const double y_m = dot(pathNormal_m, position_m - previous_m);
+                    const double desiredCourse_rad = -2.0 * m_courseInf_rad / n_Const::c_Convert::dPi() * atan(m_kLine * y_m); // Nelson et al., Eq. 8
+
+                    // TODO: discretized version of Eq. 12, for now using Eq. 8 and assuming autopilot can achieve
+                    // const double commandedCourse_deg = n_Const::c_Convert::toDegrees( pathRelativeCourse_rad
+                    //     - ((m_courseInf_rad * 2.0 * m_kLine * groundSpeed_mps * sin(pathRelativeCourse_rad)) / (m_alpha * n_Const::c_Convert::dPi() * (1.0 + pow(m_kLine * y_m, 2.0))))
+                    //     - (m_kappaLine * sat((pathRelativeCourse_rad - desiredCourse_rad) / m_epsilonLine) / m_alpha) ); // Nelson et al., Eq. 12
+
+                    // Calculations are relative to path so need to add back in to commanded
+                    desiredHeading_deg = n_Const::c_Convert::dNormalizeAngleDeg(n_Const::c_Convert::toDegrees(desiredCourse_rad + pathAngle_rad));
+                    speed_mps = pCurrentWp->getSpeed();
+                    speedType = pCurrentWp->getSpeedType();
+                }
+
+                if(m_isSpeedOverridden)
+                {
+                    speed_mps = m_overrideSpeed;
+                }
+
+                if(m_useSafeHeadingAction && !m_isHeadingControlledByTask)
+                {
+                    auto safeHeadingAction = uxas::stduxas::make_unique<uxas::messages::uxnative::SafeHeadingAction>();
+                    safeHeadingAction->setVehicleID(pState->getID());
+                    safeHeadingAction->setOperatingRegion(m_operatingRegion);
+                    safeHeadingAction->setLeadAheadDistance(m_leadAheadDistance_m);
+                    safeHeadingAction->setLoiterRadius(m_loiterRadius_m);
+                    safeHeadingAction->setDesiredHeading(static_cast<float>(desiredHeading_deg));
+                    safeHeadingAction->setDesiredHeadingRate(0.0);
+                    safeHeadingAction->setUseHeadingRate(false);
+                    safeHeadingAction->setAltitude(pCurrentWp->getAltitude());
+                    safeHeadingAction->setAltitudeType(pCurrentWp->getAltitudeType());
+                    safeHeadingAction->setUseAltitude(true);
+                    safeHeadingAction->setSpeed(speed_mps);
+                    safeHeadingAction->setUseSpeed(true);
+                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(std::move(safeHeadingAction));
+                }
+                else if(!m_isHeadingControlledByTask)
+                {
+                    auto pAction = uxas::stduxas::make_unique<afrl::cmasi::FlightDirectorAction>();
+                    pAction->setSpeed(speed_mps);
+                    pAction->setSpeedType(speedType);
+                    pAction->setHeading(static_cast<float>(desiredHeading_deg)); // true heading in degrees
+                    pAction->setAltitude(pCurrentWp->getAltitude());
+                    pAction->setAltitudeType(pCurrentWp->getAltitudeType());
+                    pAction->setClimbRate(pCurrentWp->getClimbRate());
+
+                    auto pCommand = uxas::stduxas::make_unique<afrl::cmasi::VehicleActionCommand>();
+                    pCommand->setCommandID(uxas::communications::getUniqueEntitySendMessageId());
+                    pCommand->setVehicleID(m_vehicleID);
+                    pCommand->getVehicleActionList().push_back(pAction.release());
+                    pCommand->setStatus(afrl::cmasi::CommandStatusType::Approved);
+
+                    m_pLmcpObjectNetworkClient->sendLmcpObjectBroadcastMessage(std::move(pCommand));
                 }
             }
 
-            // const double course_rad = n_Const::c_Convert::toRadians(static_cast<double>(pState->getCourse()));
-            // const double groundSpeed_mps = static_cast<double>(pState->getGroundspeed());
+            // Always send out the corresponding AirVehicleState with its waypoint number and associated task list correctly populated
+            pState->setCurrentWaypoint(m_currentWpID);
+            pState->getAssociatedTasks().clear();
 
-            double desiredHeading_deg;
-            float speed_mps;
-            afrl::cmasi::SpeedType::SpeedType speedType;
-
-            if (isOrbitType(pCurrentWp))
+            if (pCurrentWp)
             {
-                afrl::cmasi::LoiterAction* pLoiterAction = getAssociatedLoiter(pCurrentWp);
-                assert(pLoiterAction != nullptr);
-
-                const VisiLibity::Point orbitRelativePosition_m = position_m - current_m;
-                const double gamma_rad = atan2(orbitRelativePosition_m.y(), orbitRelativePosition_m.x()); // angular position of uav
-
-                const double d_m = mag(orbitRelativePosition_m); // radial distance of uav
-
-                const double r_m = pLoiterAction->getRadius();
-                // const double beta = m_kOrbit / (r_m * (1 + pow(m_kOrbit * (d_m - r_m) / r_m, 2.0)));
-
-                double desiredCourse_rad;
-                // const double commandedCourse_deg;
-
-                if (pLoiterAction->getDirection() == afrl::cmasi::LoiterDirection::Clockwise)
-                {
-                    desiredCourse_rad = gamma_rad + n_Const::c_Convert::dPiO2() + atan(m_kOrbit * (d_m - r_m) / r_m); // Nelson et al., Eq. 17 in clockwise
-                }
-                else // CounterClockwise
-                {
-                    // TODO: handle VehicleDefault, for now treating as CounterClockwise
-                    desiredCourse_rad = gamma_rad - n_Const::c_Convert::dPiO2() - atan(m_kOrbit * (d_m - r_m) / r_m); // Nelson et al., Eq. 17
-
-                    // TODO: discretized version of Eq. 23, for now using Eq. 17 and assuming autopilot can achieve
-                    // commandedCourse_deg = n_Const::c_Convert::toDegrees( course_rad
-                    //     + (groundspeed_mps * sin(course_rad - gamma_rad) / (m_alpha * d_m))
-                    //     - (beta * groundspeed_mps * cos(course_rad - gamma_rad) / m_alpha)
-                    //     - (m_kappaOrbit * sat((course_rad - desiredCourse_rad) / m_epsilonOrbit) / m_alpha)); // Nelson et al., Eq. 23
-                }
-
-                desiredHeading_deg = n_Const::c_Convert::dNormalizeAngleDeg(n_Const::c_Convert::toDegrees(desiredCourse_rad));
-                speed_mps = pLoiterAction->getAirspeed();
-                speedType = afrl::cmasi::SpeedType::Airspeed;
-            }
-            else // line type
-            {
-                // handle last waypoint (self-looping or invalid next waypoint) by always considering self on path
-                if (m_isLastWaypoint)
-                {
-                    previous_m = position_m;
-                }
-
-                const VisiLibity::Point path_m = current_m - previous_m;
-                const double pathAngle_rad = atan2(path_m.y(), path_m.x());
-                // const double pathRelativeCourse_rad = n_Const::c_Convert::dNormalizeAngleRad(course_rad - pathAngle_rad);
-
-                // path's normal is in clockwise direction (matches local frame's handedness)
-                // NOTE: rotation sign opposite as our point is in NE frame (XY)
-                const VisiLibity::Point pathNormal_m = VisiLibity::Point::rotate(VisiLibity::Point::normalize(path_m), n_Const::c_Convert::dPiO2());
-
-                // NOTE: positive distance corresponds to normal's side (clockwise)
-                const double y_m = dot(pathNormal_m, position_m - previous_m);
-                const double desiredCourse_rad = -2.0 * m_courseInf_rad / n_Const::c_Convert::dPi() * atan(m_kLine * y_m); // Nelson et al., Eq. 8
-
-                // TODO: discretized version of Eq. 12, for now using Eq. 8 and assuming autopilot can achieve
-                // const double commandedCourse_deg = n_Const::c_Convert::toDegrees( pathRelativeCourse_rad
-                //     - ((m_courseInf_rad * 2.0 * m_kLine * groundSpeed_mps * sin(pathRelativeCourse_rad)) / (m_alpha * n_Const::c_Convert::dPi() * (1.0 + pow(m_kLine * y_m, 2.0))))
-                //     - (m_kappaLine * sat((pathRelativeCourse_rad - desiredCourse_rad) / m_epsilonLine) / m_alpha) ); // Nelson et al., Eq. 12
-
-                // Calculations are relative to path so need to add back in to commanded
-                desiredHeading_deg = n_Const::c_Convert::dNormalizeAngleDeg(n_Const::c_Convert::toDegrees(desiredCourse_rad + pathAngle_rad));
-                speed_mps = pCurrentWp->getSpeed();
-                speedType = pCurrentWp->getSpeedType();
-            }
-            
-            if(m_isSpeedOverridden)
-            {
-                speed_mps = m_overrideSpeed;
+                // Note: only waypoint associated tasks are included, not those from other actions
+                pState->getAssociatedTasks().assign(pCurrentWp->getAssociatedTasks().begin(), pCurrentWp->getAssociatedTasks().end());
             }
 
-            if(m_useSafeHeadingAction && !m_isHeadingControlledByTask)
-            {
-                auto safeHeadingAction = uxas::stduxas::make_unique<uxas::messages::uxnative::SafeHeadingAction>();
-                safeHeadingAction->setVehicleID(pState->getID());
-                safeHeadingAction->setOperatingRegion(m_operatingRegion);
-                safeHeadingAction->setLeadAheadDistance(m_leadAheadDistance_m);
-                safeHeadingAction->setLoiterRadius(m_loiterRadius_m);
-                safeHeadingAction->setDesiredHeading(static_cast<float>(desiredHeading_deg));
-                safeHeadingAction->setDesiredHeadingRate(0.0);
-                safeHeadingAction->setUseHeadingRate(false);
-                safeHeadingAction->setAltitude(pCurrentWp->getAltitude());
-                safeHeadingAction->setAltitudeType(pCurrentWp->getAltitudeType());
-                safeHeadingAction->setUseAltitude(true);
-                safeHeadingAction->setSpeed(speed_mps);
-                safeHeadingAction->setUseSpeed(true);
-                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(std::move(safeHeadingAction));
-            }
-            else if(!m_isHeadingControlledByTask)
-            {
-                auto pAction = uxas::stduxas::make_unique<afrl::cmasi::FlightDirectorAction>();
-                pAction->setSpeed(speed_mps);
-                pAction->setSpeedType(speedType);
-                pAction->setHeading(static_cast<float>(desiredHeading_deg)); // true heading in degrees
-                pAction->setAltitude(pCurrentWp->getAltitude());
-                pAction->setAltitudeType(pCurrentWp->getAltitudeType());
-                pAction->setClimbRate(pCurrentWp->getClimbRate());
-
-                auto pCommand = uxas::stduxas::make_unique<afrl::cmasi::VehicleActionCommand>();
-                pCommand->setCommandID(uxas::communications::getUniqueEntitySendMessageId());
-                pCommand->setVehicleID(m_vehicleID);
-                pCommand->getVehicleActionList().push_back(pAction.release());
-                pCommand->setStatus(afrl::cmasi::CommandStatusType::Approved);
-
-                m_pLmcpObjectNetworkClient->sendLmcpObjectBroadcastMessage(std::move(pCommand));
-            }
+            m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pState);
         }
-
-        // Always send out the corresponding AirVehicleState with its waypoint number and associated task list correctly populated
-        pState->setCurrentWaypoint(m_currentWpID);
-        pState->getAssociatedTasks().clear();
-
-        if (pCurrentWp != nullptr)
-        {
-            // Note: only waypoint associated tasks are included, not those from other actions
-            pState->getAssociatedTasks().assign(pCurrentWp->getAssociatedTasks().begin(), pCurrentWp->getAssociatedTasks().end());
-        }
-
-        m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pState);
     }
 
     return false;
@@ -586,7 +594,7 @@ bool SteeringService::processReceivedLmcpMessage(std::unique_ptr<uxas::communica
 
 void SteeringService::reset(const afrl::cmasi::MissionCommand* pMissionCmd)
 {
-    assert(pMissionCmd != nullptr);
+    assert(pMissionCmd);
 
     m_pMissionCmd.reset(pMissionCmd->clone());
     m_currentWpID = m_pMissionCmd->getFirstWaypoint();

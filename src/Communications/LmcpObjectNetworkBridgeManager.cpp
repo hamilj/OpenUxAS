@@ -123,7 +123,7 @@ LmcpObjectNetworkBridgeManager&
 LmcpObjectNetworkBridgeManager::getInstance()
 {
     // first time/one time creation
-    if (LmcpObjectNetworkBridgeManager::s_instance == nullptr)
+    if (!LmcpObjectNetworkBridgeManager::s_instance)
     {
         s_instance.reset(new LmcpObjectNetworkBridgeManager);
     }

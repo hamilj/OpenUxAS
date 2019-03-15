@@ -148,7 +148,7 @@ ImpactSubscribePushBridge::initialize()
     catch (std::exception& ex)
     {
         UXAS_LOG_ERROR("ImpactSubscribePushBridge::initialize, create push socket EXCEPTION: ", ex.what());
-        sender = nullptr;
+        sender.reset(nullptr);
         return false;
     }
 
@@ -162,7 +162,7 @@ ImpactSubscribePushBridge::initialize()
     catch (std::exception& ex)
     {
         UXAS_LOG_ERROR("ImpactSubscribePushBridge::initialize, create subscribe socket EXCEPTION: ", ex.what());
-        subscriber = nullptr;
+        subscriber.reset(nullptr);
         return false;
     }
     
@@ -230,7 +230,7 @@ ImpactSubscribePushBridge::processReceivedSerializedLmcpMessage(
         }
 
         // check for air vehicle configuration throttling
-        if (m_throttleConfigurationForwarding && std::dynamic_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(ptr_Object))
+        if (m_throttleConfigurationForwarding && afrl::cmasi::isAirVehicleConfiguration(ptr_Object))
         {
             auto config = std::static_pointer_cast<afrl::cmasi::AirVehicleConfiguration>(ptr_Object);
             if (m_configs.find(config->getID()) != m_configs.end())
@@ -284,7 +284,7 @@ ImpactSubscribePushBridge::executeExternalSerializedLmcpObjectReceiveProcessing(
             if(ptr_Object)
             {
                 auto broadcast_address = ptr_Object->getFullLmcpTypeName();
-                std::unique_ptr<uxas::communications::data::AddressedAttributedMessage> recvdAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
+                auto recvdAddAttMsg = uxas::stduxas::make_unique<uxas::communications::data::AddressedAttributedMessage>();
 
                 // internal message addressing is formatted as 'broadcast' from 'fusion' group
                 // with entity ID set from configuration

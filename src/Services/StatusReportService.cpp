@@ -137,20 +137,24 @@ bool StatusReportService::processReceivedLmcpMessage(std::unique_ptr<uxas::commu
     // lock during report update
     std::unique_lock<std::mutex> lock(m_mutex);
     
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState> (receivedLmcpMessage->m_object);
-    if(entityState && m_vehicleId == entityState->getID())
+    if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
-        m_report.setVehicleTime(entityState->getTime());
-        m_report.getCurrentTaskList() = entityState->getAssociatedTasks();
-        m_report.setValidState(true);
-        
-        // reset timer to detect stale state (fresh now, timeout indicates stale)
-        uxas::common::TimerManager::getInstance().startSingleShotTimer(m_staleStateTimerId, m_staleStateTime_ms);
-        
-        if(!uxas::common::TimerManager::getInstance().isTimerActive(m_reportTimerId))
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
+
+        if (m_vehicleId == entityState->getID())
         {
-            // start periodic reporting timer
-            uxas::common::TimerManager::getInstance().startPeriodicTimer(m_reportTimerId, m_reportPeriod_ms, m_reportPeriod_ms);
+            m_report.setVehicleTime(entityState->getTime());
+            m_report.getCurrentTaskList() = entityState->getAssociatedTasks();
+            m_report.setValidState(true);
+
+            // reset timer to detect stale state (fresh now, timeout indicates stale)
+            uxas::common::TimerManager::getInstance().startSingleShotTimer(m_staleStateTimerId, m_staleStateTime_ms);
+
+            if(!uxas::common::TimerManager::getInstance().isTimerActive(m_reportTimerId))
+            {
+                // start periodic reporting timer
+                uxas::common::TimerManager::getInstance().startPeriodicTimer(m_reportTimerId, m_reportPeriod_ms, m_reportPeriod_ms);
+            }
         }
     }
     else if(uxas::messages::uxnative::isEntityJoin(receivedLmcpMessage->m_object))
@@ -167,7 +171,7 @@ bool StatusReportService::processReceivedLmcpMessage(std::unique_ptr<uxas::commu
         m_report.getConnectedEntities().clear();
         m_report.getConnectedEntities().insert(m_report.getConnectedEntities().end(), m_connections.begin(), m_connections.end());
     }
-    else if (uxas::messages::uxnative::isAutopilotKeepAlive(receivedLmcpMessage->m_object.get()))
+    else if (uxas::messages::uxnative::isAutopilotKeepAlive(receivedLmcpMessage->m_object))
     {
         auto keepAlive = std::static_pointer_cast<uxas::messages::uxnative::AutopilotKeepAlive>(receivedLmcpMessage->m_object);
         m_report.setValidAuthorization(keepAlive->getAutopilotEnabled());

@@ -78,72 +78,70 @@ TaskTrackerService::configure(const pugi::xml_node& serviceXmlNode)
 
 bool
 TaskTrackerService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
-//example: if (afrl::cmasi::isServiceStatus(receivedLmcpMessage->m_object.get()))
 {
-    std::shared_ptr<avtas::lmcp::Object> msg = receivedLmcpMessage->m_object;
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(msg);
-    if (entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_states[entityState->getID()] = entityState;
         HandleVehicleState(entityState);
     }
-    else if (afrl::cmasi::isAutomationResponse(msg.get()))
+    else if (afrl::cmasi::isAutomationResponse(receivedLmcpMessage->m_object))
     {
-        auto request = std::static_pointer_cast<afrl::cmasi::AutomationResponse>(msg);
+        auto request = std::static_pointer_cast<afrl::cmasi::AutomationResponse>(receivedLmcpMessage->m_object);
         for (size_t k = 0; k < request->getMissionCommandList().size(); k++)
         {
-            std::shared_ptr<afrl::cmasi::MissionCommand> mish(static_cast<afrl::cmasi::MissionCommand*> (request->getMissionCommandList().at(k)->clone()));
+            std::shared_ptr<afrl::cmasi::MissionCommand> mish(request->getMissionCommandList().at(k)->clone());
             HandleMissionCommand(mish);
         }
     }
-    else if (afrl::cmasi::isMissionCommand(msg.get()))
+    else if (afrl::cmasi::isMissionCommand(receivedLmcpMessage->m_object))
     {
-        std::shared_ptr<afrl::cmasi::MissionCommand> mish(static_cast<afrl::cmasi::MissionCommand*> (msg->clone()));
+        std::shared_ptr<afrl::cmasi::MissionCommand> mish(static_cast<afrl::cmasi::MissionCommand*>(receivedLmcpMessage->m_object->clone()));
         HandleMissionCommand(mish);
     }
-    else if (afrl::cmasi::isLoiterTask(msg.get()) ||
-            afrl::cmasi::isMustFlyTask(msg.get()) ||
-            afrl::cmasi::isAreaSearchTask(msg.get()) ||
-            afrl::cmasi::isLineSearchTask(msg.get()) ||
-            afrl::cmasi::isPointSearchTask(msg.get()) ||
-            afrl::impact::isImpactPointSearchTask(msg.get()) ||
-            afrl::impact::isImpactLineSearchTask(msg.get()) ||
-            afrl::impact::isPatternSearchTask(msg.get()) ||
-            afrl::impact::isAngledAreaSearchTask(msg.get()) ||
-            afrl::impact::isCommRelayTask(msg.get()) ||
-            afrl::impact::isBlockadeTask(msg.get()) ||
-            afrl::impact::isCordonTask(msg.get()) ||
-            afrl::impact::isEscortTask(msg.get()) ||
-            afrl::impact::isMultiVehicleWatchTask(msg.get()) ||
-            afrl::impact::isWatchTask(msg.get()))
+    else if (afrl::cmasi::isLoiterTask(receivedLmcpMessage->m_object) ||
+            afrl::cmasi::isMustFlyTask(receivedLmcpMessage->m_object) ||
+            afrl::cmasi::isAreaSearchTask(receivedLmcpMessage->m_object) ||
+            afrl::cmasi::isLineSearchTask(receivedLmcpMessage->m_object) ||
+            afrl::cmasi::isPointSearchTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isImpactPointSearchTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isImpactLineSearchTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isPatternSearchTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isAngledAreaSearchTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isCommRelayTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isBlockadeTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isCordonTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isEscortTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isMultiVehicleWatchTask(receivedLmcpMessage->m_object) ||
+            afrl::impact::isWatchTask(receivedLmcpMessage->m_object))
     {
-        auto task = std::static_pointer_cast<afrl::cmasi::Task>(msg);
+        auto task = std::static_pointer_cast<afrl::cmasi::Task>(receivedLmcpMessage->m_object);
         m_tasks.insert(task->getTaskID());
 
         // check for task complete eligibility
-        if (afrl::cmasi::isLoiterTask(msg.get()))
+        if (afrl::cmasi::isLoiterTask(receivedLmcpMessage->m_object))
         {
             // loiter only eligible if non-infinite duration
-            auto ltask = std::static_pointer_cast<afrl::cmasi::LoiterTask>(msg);
+            auto ltask = std::static_pointer_cast<afrl::cmasi::LoiterTask>(receivedLmcpMessage->m_object);
             if (ltask->getDesiredAction()->getDuration() > 0)
             {
                 isTaskEligible.insert(task->getTaskID());
             }
         }
-        else if (afrl::impact::isImpactPointSearchTask(msg.get()))
+        else if (afrl::impact::isImpactPointSearchTask(receivedLmcpMessage->m_object))
         {
             // loiter at point search location only eligible if non-infinite duration
-            auto ptask = std::static_pointer_cast<afrl::impact::ImpactPointSearchTask>(msg);
+            auto ptask = std::static_pointer_cast<afrl::impact::ImpactPointSearchTask>(receivedLmcpMessage->m_object);
             if (ptask->getDesiredAction() && ptask->getDesiredAction()->getDuration() > 0)
             {
                 isTaskEligible.insert(task->getTaskID());
             }
         }
-        else if (!afrl::impact::isWatchTask(msg.get()) &&
-                !afrl::impact::isBlockadeTask(msg.get()) &&
-                !afrl::impact::isCordonTask(msg.get()) &&
-                !afrl::impact::isMultiVehicleWatchTask(msg.get()) &&
-                !afrl::impact::isEscortTask(msg.get()))
+        else if (!afrl::impact::isWatchTask(receivedLmcpMessage->m_object) &&
+                !afrl::impact::isBlockadeTask(receivedLmcpMessage->m_object) &&
+                !afrl::impact::isCordonTask(receivedLmcpMessage->m_object) &&
+                !afrl::impact::isMultiVehicleWatchTask(receivedLmcpMessage->m_object) &&
+                !afrl::impact::isEscortTask(receivedLmcpMessage->m_object))
         {
             // infinite duration tasks are not eligible
             isTaskEligible.insert(task->getTaskID());
@@ -162,12 +160,10 @@ void TaskTrackerService::HandleVehicleState(std::shared_ptr<afrl::cmasi::EntityS
             if (isTaskEligible.find(m_override[state->getID()].first) != isTaskEligible.end())
             {
                 // send task complete message
-                uxas::messages::task::TaskComplete* pTaskComplete = new uxas::messages::task::TaskComplete;
+                auto pTaskComplete = std::make_shared<uxas::messages::task::TaskComplete>();
                 pTaskComplete->getEntitiesInvolved().push_back(state->getID());
                 pTaskComplete->setTaskID(m_override[state->getID()].first);
-                std::shared_ptr<avtas::lmcp::Object> ptr_objObject(pTaskComplete);
-                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(ptr_objObject);
-
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pTaskComplete);
             }
 
             // clear off so as not to spam
@@ -262,12 +258,10 @@ void TaskTrackerService::HandleVehicleState(std::shared_ptr<afrl::cmasi::EntityS
                 if (isTaskEligible.find(taskId) != isTaskEligible.end())
                 {
                     // send task complete messages (both impact and uxas)
-                    uxas::messages::task::TaskComplete* pTaskComplete = new uxas::messages::task::TaskComplete;
+                    auto pTaskComplete = std::make_shared<uxas::messages::task::TaskComplete>();
                     pTaskComplete->getEntitiesInvolved().push_back(state->getID());
                     pTaskComplete->setTaskID(taskId);
-                    std::shared_ptr<avtas::lmcp::Object> ptr_objObject(pTaskComplete);
-                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(ptr_objObject);
-
+                    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pTaskComplete);
                 }
 
                 // clear off working task

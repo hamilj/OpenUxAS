@@ -52,23 +52,13 @@ public:
     {
         std::unique_ptr<LoggerBase> logger;
         auto it = registry().find(loggerType);
-        LoggerBase* newLogger(it == registry().end() ? nullptr : (it->second)());
-        logger.reset(newLogger);
-        return (logger);
+        return (it == registry().end()) ? std::unique_ptr<LoggerBase>(nullptr) : (it->second)();
     };
 
 protected:
 
     /** \brief type representing a pointer to a logger creation function.  */
-    using loggerCreationFunctionPointer = LoggerBase* (*)();
-
-    /** \brief static logger creation function implemented by deriving classes.  */
-    static
-    LoggerBase*
-    create()
-    {
-        return (nullptr);
-    };
+    using loggerCreationFunctionPointer = std::unique_ptr<LoggerBase> (*)();
 
     /** \brief registers logger type and the create() function of a deriving class.  */
     static

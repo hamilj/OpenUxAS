@@ -142,8 +142,8 @@ public:
         }
 
         std::vector<uint8_t> binaryBytes(len, 0);
-        char* buffer = new char[len];
-        if (inFile.read(buffer, len))
+        std::unique_ptr<char[]> buffer(new char[len]);
+        if (inFile.read(buffer.get(), len))
         {
             UXAS_LOG_DEBUGGING(s_typeName(), "::readBinaryFile read input file [", inputFilePath, "]");
         }
@@ -153,9 +153,8 @@ public:
             return (failedReadZeroBytes);
         }
         
-        binaryBytes.assign(buffer, buffer + len);
+        binaryBytes.assign(buffer.get(), buffer.get() + len);
         inFile.close();
-        delete[] buffer;
         return (std::move(binaryBytes));
     };
 
@@ -173,7 +172,7 @@ public:
             return (false);
         }
 
-        if (outFile.write((char*)&bytes[0], bytes.size()))
+        if (outFile.write(static_cast<char*>(&bytes[0]), bytes.size()))
         {
             UXAS_LOG_DEBUGGING(s_typeName(), "::writeBinaryFile wrote output file [", outputFilePath, "]");
         }

@@ -95,9 +95,8 @@ LmcpObjectMessageSenderPipe::sendBroadcastMessage(std::unique_ptr<avtas::lmcp::O
 void
 LmcpObjectMessageSenderPipe::sendLimitedCastMessage(const std::string& castAddress, std::unique_ptr<avtas::lmcp::Object> lmcpObject)
 {
-    avtas::lmcp::ByteBuffer* lmcpByteBuffer = avtas::lmcp::Factory::packMessage(lmcpObject.get(), true);
+    std::unique_ptr<avtas::lmcp::ByteBuffer> lmcpByteBuffer(avtas::lmcp::Factory::packMessage(lmcpObject.get(), true));
     std::string serializedPayload = std::string(reinterpret_cast<char*>(lmcpByteBuffer->array()), lmcpByteBuffer->capacity());
-    delete lmcpByteBuffer;
     m_transportSender->sendMessage(castAddress, uxas::common::ContentType::lmcp(), lmcpObject->getFullLmcpTypeName(), std::move(serializedPayload));
 };
 
@@ -118,9 +117,8 @@ LmcpObjectMessageSenderPipe::sendSharedBroadcastMessage(const std::shared_ptr<av
 void
 LmcpObjectMessageSenderPipe::sendSharedLimitedCastMessage(const std::string& castAddress, const std::shared_ptr<avtas::lmcp::Object>& lmcpObject)
 {
-    avtas::lmcp::ByteBuffer* lmcpByteBuffer = avtas::lmcp::Factory::packMessage(lmcpObject.get(), true);
+    std::unique_ptr<avtas::lmcp::ByteBuffer> lmcpByteBuffer(avtas::lmcp::Factory::packMessage(lmcpObject.get(), true));
     std::string serializedPayload = std::string(reinterpret_cast<char*>(lmcpByteBuffer->array()), lmcpByteBuffer->capacity());
-    delete lmcpByteBuffer;
     m_transportSender->sendMessage(castAddress, uxas::common::ContentType::lmcp(), lmcpObject->getFullLmcpTypeName(), std::move(serializedPayload));
 };
 

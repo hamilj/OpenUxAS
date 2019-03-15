@@ -94,9 +94,9 @@ PlanBuilderService::configure(const pugi::xml_node& ndComponent)
 bool
 PlanBuilderService::processReceivedLmcpMessage(std::unique_ptr<uxas::communications::data::LmcpMessage> receivedLmcpMessage)
 {
-    auto entityState = std::dynamic_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
-    if(entityState)
+    if (afrl::cmasi::isEntityState(receivedLmcpMessage->m_object))
     {
+        auto entityState = std::static_pointer_cast<afrl::cmasi::EntityState>(receivedLmcpMessage->m_object);
         m_currentEntityStates[entityState->getID()] = entityState;
     }
     else if (afrl::impact::isImpactAutomationRequest(receivedLmcpMessage->m_object))
@@ -140,10 +140,10 @@ void PlanBuilderService::sendError(std::string& errMsg)
 {
     auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
     serviceStatus->setStatusType(afrl::cmasi::ServiceStatusType::Error);
-    auto keyValuePair = new afrl::cmasi::KeyValuePair;
+    auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
     keyValuePair->setKey(std::string("No UniqueAutomationResponse"));
     keyValuePair->setValue(errMsg);
-    serviceStatus->getInfo().push_back(keyValuePair);
+    serviceStatus->getInfo().push_back(keyValuePair.release());
     m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
 }
 
@@ -223,7 +223,7 @@ void PlanBuilderService::processTaskAssignmentSummary(const std::shared_ptr<uxas
         else
         {
             // add in the assignment start point lead distance
-            auto planState = new uxas::messages::task::PlanningState;
+            auto planState = uxas::stduxas::make_unique<uxas::messages::task::PlanningState>();
             planState->setEntityID(vID);
             planState->setPlanningPosition(entityState->getLocation()->clone());
             planState->setPlanningHeading(entityState->getHeading());
@@ -244,7 +244,7 @@ void PlanBuilderService::processTaskAssignmentSummary(const std::shared_ptr<uxas
             planState->getPlanningPosition()->setLatitude(latitude_deg);
             planState->getPlanningPosition()->setLongitude(longitude_deg);
             
-            projectedState->setState(planState);
+            projectedState->setState(planState.release());
         }
                                             
         m_projectedEntityStates[taskAssignmentSummary->getCorrespondingAutomationRequestID()].push_back(projectedState);
@@ -364,7 +364,7 @@ void PlanBuilderService::processTaskImplementationResponse(const std::shared_ptr
                         {
                             if (afrl::cmasi::isLoiterAction(action))
                             {
-                                auto loiter = dynamic_cast<afrl::cmasi::LoiterAction*>(action);
+                                auto loiter = static_cast<afrl::cmasi::LoiterAction*>(action);
                                 loiter->getLocation()->setAltitude(speedAltPair->getAltitude());
                             }
                         }
@@ -373,7 +373,7 @@ void PlanBuilderService::processTaskImplementationResponse(const std::shared_ptr
             }
         }
 
-        auto mish = new afrl::cmasi::MissionCommand;
+        auto mish = uxas::stduxas::make_unique<afrl::cmasi::MissionCommand>();
         mish->setCommandID(m_commandId++);
         mish->setVehicleID(taskImplementationResponse->getVehicleID());
         mish->setFirstWaypoint(taskImplementationResponse->getTaskWaypoints().front()->getNumber());
@@ -388,16 +388,16 @@ void PlanBuilderService::processTaskImplementationResponse(const std::shared_ptr
             {
                 if (afrl::cmasi::isGimbalState(payload))
                 {
-                    auto gaa = new afrl::cmasi::GimbalAngleAction();
+                    auto gaa = uxas::stduxas::make_unique<afrl::cmasi::GimbalAngleAction>();
                     gaa->getAssociatedTaskList().push_back(taskImplementationResponse->getTaskID());
                     gaa->setPayloadID(payload->getPayloadID());
                     gaa->setAzimuth(0.0);
                     gaa->setElevation(-60.0);
-                    mish->getVehicleActionList().push_back(gaa);
+                    mish->getVehicleActionList().push_back(gaa.release());
                 }
             }
         }
-        m_inProgressResponse[uniqueRequestID]->getOriginalResponse()->getMissionCommandList().push_back(mish);
+        m_inProgressResponse[uniqueRequestID]->getOriginalResponse()->getMissionCommandList().push_back(mish.release());
     }
     
     // update project state (m_projectedEntityStates)
@@ -454,10 +454,10 @@ void PlanBuilderService::checkNextTaskImplementationRequest(int64_t uniqueReques
 
             auto serviceStatus = std::make_shared<afrl::cmasi::ServiceStatus>();
             serviceStatus->setStatusType(afrl::cmasi::ServiceStatusType::Information);
-            auto keyValuePair = new afrl::cmasi::KeyValuePair;
+            auto keyValuePair = uxas::stduxas::make_unique<afrl::cmasi::KeyValuePair>();
             std::string message = "UniqueAutomationResponse[" + std::to_string(uniqueRequestID) + "] - sent";
             keyValuePair->setKey(message);
-            serviceStatus->getInfo().push_back(keyValuePair);
+            serviceStatus->getInfo().push_back(keyValuePair.release());
             m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(serviceStatus);
         }
         else
@@ -502,10 +502,10 @@ void PlanBuilderService::AddLoitersToMissionCommands(std::shared_ptr<uxas::messa
         return;
     }
     
-    auto la = new afrl::cmasi::LoiterAction();
+    auto la = uxas::stduxas::make_unique<afrl::cmasi::LoiterAction>();
     auto back = response->getOriginalResponse()->getMissionCommandList().back()->getWaypointList().back();
 
-    auto lmcpObject = std::shared_ptr<avtas::lmcp::Object>(state->second);
+    std::shared_ptr<avtas::lmcp::Object> lmcpObject(state->second);
     if (afrl::vehicles::isGroundVehicleState(lmcpObject) ||
         afrl::vehicles::isSurfaceVehicleState(lmcpObject))
     {
@@ -519,7 +519,7 @@ void PlanBuilderService::AddLoitersToMissionCommands(std::shared_ptr<uxas::messa
 
     la->setLocation(back->clone());
     la->setAirspeed(back->getSpeed());
-    back->getVehicleActionList().push_back(la);
+    back->getVehicleActionList().push_back(la.release());
 }
 
 }; //namespace service

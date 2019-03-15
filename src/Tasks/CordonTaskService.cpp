@@ -240,8 +240,7 @@ CordonTaskService::processReceivedLmcpMessageTask(std::shared_ptr<avtas::lmcp::O
                 // calculate composition string
                 std::string compositionString = calculateCompositionString(locationIds, currentAutomationRequest->getOriginalRequest()->getEntityList());
                 m_taskPlanOptions->setComposition(compositionString);
-                std::shared_ptr<avtas::lmcp::Object> pOptions = std::static_pointer_cast<avtas::lmcp::Object>(m_taskPlanOptions);
-                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pOptions);
+                m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(m_taskPlanOptions);
             }
         }
     }
@@ -273,12 +272,11 @@ std::string CordonTaskService::calculateCompositionString(std::vector<int64_t>& 
 void CordonTaskService::buildTaskPlanOptions()
 {
     // build an 'egress route request' from the ground planner (external)
-    auto egressRequest = std::shared_ptr<uxas::messages::route::EgressRouteRequest>(new uxas::messages::route::EgressRouteRequest);
+    auto egressRequest = std::make_shared<uxas::messages::route::EgressRouteRequest>();
     egressRequest->setRequestID(m_cordonTask->getTaskID());
     egressRequest->setStartLocation(m_cordonTask->getCordonLocation()->clone());
     egressRequest->setRadius(m_cordonTask->getStandoffDistance());
-    std::shared_ptr<avtas::lmcp::Object> pRequest = std::static_pointer_cast<avtas::lmcp::Object>(egressRequest);
-    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(pRequest);
+    m_pLmcpObjectNetworkClient->sendSharedLmcpObjectBroadcastMessage(egressRequest);
 };
 
 void CordonTaskService::calculateOption(const std::vector<int64_t>& eligibleEntities,
@@ -287,7 +285,7 @@ void CordonTaskService::calculateOption(const std::vector<int64_t>& eligibleEnti
     for (auto itEntity = eligibleEntities.begin(); itEntity != eligibleEntities.end(); itEntity++)
     {
         // One Entity per option
-        auto taskOption = new uxas::messages::task::TaskOption;
+        auto taskOption = std::make_shared<uxas::messages::task::TaskOption>();
         taskOption->setTaskID(m_task->getTaskID());
         taskOption->setOptionID(optionId);
         taskOption->getEligibleEntities().clear();
@@ -296,9 +294,8 @@ void CordonTaskService::calculateOption(const std::vector<int64_t>& eligibleEnti
         taskOption->setStartHeading(0.0); // TODO: use heading from egress route response
         taskOption->setEndLocation(location->clone());
         taskOption->setEndHeading(0.0);
-        auto pTaskOption = std::shared_ptr<uxas::messages::task::TaskOption>(taskOption->clone());
-        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(pTaskOption)));
-        m_taskPlanOptions->getOptions().push_back(taskOption);
+        m_optionIdVsTaskOptionClass.insert(std::make_pair(optionId, std::make_shared<TaskOptionClass>(taskOption)));
+        m_taskPlanOptions->getOptions().push_back(taskOption->clone());
 
         // update map of vehicle option id
         m_vehicleIdNodeIdVsOptionId.insert(std::make_pair(std::make_pair(*itEntity, locationId), optionId));
