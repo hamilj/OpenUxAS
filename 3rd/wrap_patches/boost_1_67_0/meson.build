@@ -5,13 +5,21 @@ if os == 'linux'
   add_project_arguments('-DLINUX', language: ['c', 'cpp'])
 endif
 
-# treat as system headers to disable all warnings when included
+incs_boost = include_directories(
+  '.'
+)
+
 cpp = meson.get_compiler('cpp')
 
-if cpp.get_id() == 'msvc'
-  incs_boost = include_directories('.')
-else
-  incs_boost = include_directories('.', is_system : true)
+cpp_args = [
+  '-std=c++11',
+  '-Wno-deprecated-declarations',
+]
+
+if cpp.get_id() == 'clang'
+  cpp_args += [
+    '-Wno-undefined-bool-conversion',
+  ]
 endif
 
 lib = static_library(
@@ -72,10 +80,7 @@ lib = static_library(
     'libs/timer/src/auto_timers_construction.cpp',
     'libs/timer/src/cpu_timer.cpp',
   ],
-  cpp_args: [
-    '-std=c++11',
-    '-Wno-undefined-bool-conversion',
-  ],
+  cpp_args: cpp_args,
   include_directories: incs_boost,
 )
 

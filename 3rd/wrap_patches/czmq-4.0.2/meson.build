@@ -94,6 +94,12 @@ c_args_zmq += [
   '-Wno-array-bounds',
 ]
 
+if c.get_id() == 'gcc'
+  c_args_zmq += [
+    '-Wno-format-truncation',
+  ]
+endif
+
 lib = static_library(
   'czmq',
   [

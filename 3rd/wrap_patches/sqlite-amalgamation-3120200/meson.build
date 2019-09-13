@@ -6,6 +6,7 @@ lib = static_library(
   c_args: [
     '-Wno-parentheses-equality',
     '-Wno-unused-value',
+    '-Wno-deprecated-declarations',
   ],
 )
 

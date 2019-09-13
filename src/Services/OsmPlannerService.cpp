@@ -32,7 +32,16 @@
 #include <sstream>  //stringstream
 #include <chrono>       // time functions
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+
 #include "boost/graph/astar_search.hpp"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 //TODO:: read in a open street map and calculate it's visibility graph
 

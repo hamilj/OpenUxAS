@@ -50,9 +50,24 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #include <cassert>       //assertions
 #include <iso646.h>      //aliases for boolean operators
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 #include "boost/geometry.hpp"
 #include "boost/geometry/algorithms/is_valid.hpp"
 #include "boost/geometry/algorithms/validity_failure_type.hpp"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 ///Hide helping functions in unnamed namespace (local to .C file).
 namespace
