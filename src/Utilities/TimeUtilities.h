@@ -22,17 +22,11 @@
 #include <chrono>       // time functions
 
 #include <memory>
+#include <mutex>
 
 #include "boost/date_time/gregorian/gregorian.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 namespace n_POSIX_TIME = boost::posix_time;
-
-namespace std
-{
-
-class mutex;
-
-} // namespace std
 
 namespace uxas
 {
