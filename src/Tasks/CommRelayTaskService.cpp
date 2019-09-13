@@ -197,24 +197,24 @@ void CommRelayTaskService::moveToHalfWayPoint(const std::shared_ptr<afrl::cmasi:
     if (!towerLocation) // don't care if not enabled, still attempt relay
         return;
 
-        // determine destination location
-        uxas::common::utilities::CUnitConversions flatEarth;
-        double north, east;
-        flatEarth.ConvertLatLong_degToNorthEast_m(towerLocation->getLatitude(), towerLocation->getLongitude(), north, east);
-        Dpss_Data_n::xyPoint tower(east, north);
-        flatEarth.ConvertLatLong_degToNorthEast_m(m_supportedEntityStateLast->getLatitude(), m_supportedEntityStateLast->getLongitude(), north, east);
-        Dpss_Data_n::xyPoint target(east, north);
+    // determine destination location
+    uxas::common::utilities::CUnitConversions flatEarth;
+    double north, east;
+    flatEarth.ConvertLatLong_degToNorthEast_m(towerLocation->getLatitude(), towerLocation->getLongitude(), north, east);
+    Dpss_Data_n::xyPoint tower(east, north);
+    flatEarth.ConvertLatLong_degToNorthEast_m(m_supportedEntityStateLast->getLatitude(), m_supportedEntityStateLast->getLongitude(), north, east);
+    Dpss_Data_n::xyPoint target(east, north);
 
-        // go halfway between 'targetLocation' and 'tower' TODO: make this more efficient?
-        target.x = (tower.x + target.x) / 2;
-        target.y = (tower.y + target.y) / 2;
+    // go halfway between 'targetLocation' and 'tower' TODO: make this more efficient?
+    target.x = (tower.x + target.x) / 2;
+    target.y = (tower.y + target.y) / 2;
 
-        // back to lat/lon
-        double lat, lon;
-        flatEarth.ConvertNorthEast_mToLatLong_deg(target.y, target.x, lat, lon);
+    // back to lat/lon
+    double lat, lon;
+    flatEarth.ConvertNorthEast_mToLatLong_deg(target.y, target.x, lat, lon);
 
-        supportedEntityStateLocation->setLatitude(lat);
-        supportedEntityStateLocation->setLongitude(lon);
+    supportedEntityStateLocation->setLatitude(lat);
+    supportedEntityStateLocation->setLongitude(lon);
 }
 
 }; //namespace task

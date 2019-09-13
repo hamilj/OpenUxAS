@@ -1596,13 +1596,14 @@ namespace VisiLibity
     if( vertices_.size() > 1 ){
       //Use cross product to count right turns.
       for(unsigned i=0; i<=n()-1; i++)
-    if( ((*this)[i+1].x()-(*this)[i].x())
-        *((*this)[i+2].y()-(*this)[i].y()) 
-        - ((*this)[i+1].y()-(*this)[i].y())
-        *((*this)[i+2].x()-(*this)[i].x()) < 0 )
-      r_count++;
+        if( ((*this)[i+1].x()-(*this)[i].x())
+            *((*this)[i+2].y()-(*this)[i].y())
+            - ((*this)[i+1].y()-(*this)[i].y())
+            *((*this)[i+2].x()-(*this)[i].x()) < 0 )
+          r_count++;
+
       if( area() < 0 ){ 
-    r_count = n() - r_count;
+        r_count = n() - r_count;
       }
     }
     return r_count;
@@ -1617,7 +1618,7 @@ namespace VisiLibity
 
     //Make sure adjacent edges only intersect at a single point.
     for(unsigned i=0; i<=n()-1; i++)
-      if(  intersection( Line_Segment((*this)[i],(*this)[i+1]) , 
+      if(  intersection( Line_Segment((*this)[i],(*this)[i+1]) ,
              Line_Segment((*this)[i+1],(*this)[i+2]) , 
              epsilon ).size() > 1  )
         return false;
@@ -1998,13 +1999,16 @@ namespace VisiLibity
       int index_of_smallest=0;
       int i; //counter.
       for(i=1; i<point_count; i++)
-    if(vertices_[i]<vertices_[index_of_smallest])
-      index_of_smallest=i;
+        if(vertices_[i]<vertices_[index_of_smallest])
+          index_of_smallest=i;
+
       //Fill vertices_temp starting with lex. smallest.
       for(i=index_of_smallest; i<point_count; i++)
-    vertices_temp.push_back(vertices_[i]);
+        vertices_temp.push_back(vertices_[i]);
+
       for(i=0; i<index_of_smallest; i++)
-    vertices_temp.push_back(vertices_[i]);
+        vertices_temp.push_back(vertices_[i]);
+
       vertices_=vertices_temp;
     }
   }
